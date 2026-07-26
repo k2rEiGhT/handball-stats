@@ -152,6 +152,12 @@ function updateRoster() {
   document.getElementById('displayTeamNameA').innerText = customTeamA;
   document.getElementById('displayTeamNameB').innerText = customTeamB;
   
+  // ★追加：タイムアウトボタンのチーム名も更新
+  const btnToA = document.getElementById('btnTimeoutA');
+  const btnToB = document.getElementById('btnTimeoutB');
+  if (btnToA) btnToA.innerText = customTeamA + ' T.O.';
+  if (btnToB) btnToB.innerText = customTeamB + ' T.O.';
+
   // ログテーブルのヘッダー更新（左右のチーム名）
   document.getElementById('thPlayerA').innerText = customTeamA;
   document.getElementById('thPlayerB').innerText = customTeamB;
@@ -285,6 +291,22 @@ function stopTimer() {
     document.getElementById('btnStop').disabled = true;
   }
 }
+
+// ★追加：前半終了ボタンの処理
+function halfTime() {
+  if (!confirm("前半を終了し、タイマーをリセットして後半に移りますか？")) return;
+  
+  stopTimer(); // タイマーを止める
+  
+  // ログに記録を残す（システムメッセージとして記録）
+  let recordTime = formatTime(elapsedSeconds);
+  addLog(recordTime, 'System', "", "前半終了／後半開始", 0);
+  
+  // タイマーを00:00に戻す
+  elapsedSeconds = 0;
+  document.getElementById('timer').innerText = formatTime(elapsedSeconds);
+}
+
 function endTimer() {
   stopTimer();
   isEnded = true;
@@ -363,10 +385,11 @@ function renderLogs() {
     let log = matchLogs[i];
     
     // チームAのアクションなら左側に、チームBなら右側にデータを配置
+    // System（前半終了など）の場合は両方のアクション列に表示して目立たせる
     let aPlayer = log.team === 'A' ? log.player : '';
-    let aAction = log.team === 'A' ? log.action : '';
+    let aAction = log.team === 'A' ? log.action : (log.team === 'System' ? log.action : '');
     let bPlayer = log.team === 'B' ? log.player : '';
-    let bAction = log.team === 'B' ? log.action : '';
+    let bAction = log.team === 'B' ? log.action : (log.team === 'System' ? log.action : '');
 
     tableHTML += `
     <tr>
@@ -662,4 +685,25 @@ function renderStats() {
   document.getElementById('statsTeamNameB').innerText = customTeamB;
   document.getElementById('statsBodyA').innerHTML = buildStatsHTML('A');
   document.getElementById('statsBodyB').innerHTML = buildStatsHTML('B');
+}
+
+// ================= タイムアウトの記録と処理 =================
+function recordTimeout(team) {
+  // 時間を取得（引数にtrueを渡して停止警告をスキップ）
+  const recordTime = getRecordTime("タイムアウト", true);
+  if (recordTime === null) return;
+
+  // ★タイマーを自動的にストップ
+  stopTimer();
+
+  // ログに追加（タイムアウトはチーム全体のアクションなので選手名は「-」）
+  addLog(recordTime, team, "-", "タイムアウト", 0);
+
+  // 選手が選択状態だった場合は解除してリセット
+  activeSelection.A.court = null;
+  activeSelection.A.bench = null;
+  activeSelection.B.court = null;
+  activeSelection.B.bench = null;
+  document.getElementById('manualTime').value = '';
+  renderButtons();
 }

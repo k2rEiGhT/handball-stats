@@ -265,6 +265,7 @@ button.player-btn {
 .timer-btn { font-size: 14px; padding: 8px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; }
 .timer-btn.start { background: #28a745; }
 .timer-btn.stop { background: #ffc107; color: black; }
+.timer-btn.halftime { background: #17a2b8; color: white; } /* ★これを追加 */
 .timer-btn.end { background: #6c757d; }
 .timer-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -452,6 +453,19 @@ button, .starter-label, select {
     min-width: 650px;
   }
 }
+/* ================= 画面表示の順番（Flexboxによる入れ替え） ================= */
+@media screen {
+  .print-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .log-container {
+    order: 1; /* スマホやPCの画面ではログを上に配置 */
+  }
+  .stats-container {
+    order: 2; /* 画面ではスタッツを下に配置 */
+  }
+}
 
 /* ================= 印刷（PDF出力）時の追加スタイル ================= */
 @media print {
@@ -463,8 +477,19 @@ button, .starter-label, select {
   .setup-section, .main-layout, .print-btn, .noprint { display: none; }
   body { padding: 0; }
 
-  /* 2. スタッツ表を必ず新しいページ（2ページ目）に押し出す設定 */
-  .stats-container {
+  /* 印刷時は画面の順序入れ替えを解除し、HTMLの記述順（スタッツA→B→ログ）に戻す */
+  .print-layout {
+    display: block;
+  }
+
+  /* 2. Team Bのスタッツを2ページ目に押し出す */
+  .stats-team-b {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* 3. ログを3ページ目以降に押し出す */
+  .log-container {
     page-break-before: always;
     break-before: page;
   }

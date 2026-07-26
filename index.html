@@ -53,7 +53,8 @@
                 <div class="timer-controls">
                     <button onclick="startTimer()" id="btnStart" class="timer-btn start">スタート</button>
                     <button onclick="stopTimer()" id="btnStop" class="timer-btn stop" disabled>ストップ</button>
-                    <button onclick="endTimer()" id="btnEnd" class="timer-btn end">終了</button>
+                    <button onclick="halfTime()" id="btnHalfTime" class="timer-btn halftime">前半終了</button>
+                    <button onclick="endTimer()" id="btnEnd" class="timer-btn end">試合終了</button>
                 </div>
             </div>
 
@@ -77,6 +78,11 @@
                     <div class="sub-button-group" style="display: flex; gap: 5px; width: 100%;">
                         <button class="sub-btn" style="flex: 1;" onclick="recordSubstitution()">交代</button>
                         <button class="sub-btn" style="flex: 1; background: #17a2b8; border-color: #117a8b; color: white;" onclick="toggleGkRole()">GK交代</button>
+                    </div>
+
+                    <div class="sub-button-group" style="display: flex; gap: 5px; width: 100%; margin-bottom: 5px;">
+                        <button class="sub-btn" style="flex: 1; background: #007bff; color: white; border-color: #004a99;" onclick="recordTimeout('A')" id="btnTimeoutA">Team A T.O.</button>
+                        <button class="sub-btn" style="flex: 1; background: #dc3545; color: white; border-color: #a71d2a;" onclick="recordTimeout('B')" id="btnTimeoutB">Team B T.O.</button>
                     </div>
 
                     <button onclick="recordAction('得点', 1)">得点</button>
@@ -133,76 +139,81 @@
     </div>
 
 
-    <button class="print-btn" onclick="window.print()">この記録をPDFで保存・印刷する</button>
+<button class="print-btn" onclick="window.print()">この記録をPDFで保存・印刷する</button>
 
- <!-- 1. 試合のログを上に配置 -->
- <div class="log-container">
-   <table>
-     <thead>
-       <tr>
-         <th id="thPlayerA" style="width: 15%;">Team A</th>
-         <th style="width: 20%;">アクション</th>
-         <th style="width: 8%;">得点</th>
-         <th style="width: 10%; background: #e9ecef;">時間</th>
-         <th style="width: 8%;">得点</th>
-         <th style="width: 20%;">アクション</th>
-         <th id="thPlayerB" style="width: 15%;">Team B</th>
-         <th class="noprint" style="width: 4%;">操作</th>
-       </tr>
-     </thead>
-     <tbody id="logTableBody">
-     </tbody>
-   </table>
- </div>
+    <!-- ★追加：印刷と画面の表示順をコントロールする枠 -->
+    <div class="print-layout">
+        
+        <!-- 試合スタッツ（印刷時は先に配置、画面ではCSSで下に移動） -->
+        <div class="stats-container" id="statsContainer" style="display: none;">
+            <h3 style="text-align: center; margin-top: 10px;">試合スタッツ</h3>
+            
+            <!-- Team Aのスタッツ（1ページ目に表示） -->
+            <div class="stats-team-a" style="margin-bottom: 20px;">
+                <h4 id="statsTeamNameA" style="margin-bottom: 5px;">Team A</h4>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>選手</th>
+                            <th>総得点(内7m)</th>
+                            <th>シュート数</th>
+                            <th>シュート率</th>
+                            <th>7mシュート数</th>
+                            <th>7mシュート率</th>
+                            <th>GKセーブ数</th>
+                            <th>セーブ率</th>
+                            <th>7mセーブ数</th>
+                            <th>7mセーブ率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsBodyA"></tbody>
+                </table>
+            </div>
+            
+            <!-- Team Bのスタッツ（印刷時はここで改ページして2ページ目へ） -->
+            <div class="stats-team-b">
+                <h4 id="statsTeamNameB" style="margin-bottom: 5px;">Team B</h4>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>選手</th>
+                            <th>総得点(内7m)</th>
+                            <th>シュート数</th>
+                            <th>シュート率</th>
+                            <th>7mシュート数</th>
+                            <th>7mシュート率</th>
+                            <th>GKセーブ数</th>
+                            <th>セーブ率</th>
+                            <th>7mセーブ数</th>
+                            <th>7mセーブ率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsBodyB"></tbody>
+                </table>
+            </div>
+        </div>
 
+        <!-- 試合のログ（印刷時はここで改ページして3ページ目へ、画面ではCSSで上に移動） -->
+        <div class="log-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th id="thPlayerA" style="width: 15%;">Team A</th>
+                        <th style="width: 20%;">アクション</th>
+                        <th style="width: 8%;">得点</th>
+                        <th style="width: 10%; background: #e9ecef;">時間</th>
+                        <th style="width: 8%;">得点</th>
+                        <th style="width: 20%;">アクション</th>
+                        <th id="thPlayerB" style="width: 15%;">Team B</th>
+                        <th class="noprint" style="width: 4%;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="logTableBody">
+                </tbody>
+            </table>
+        </div>
 
- <div class="stats-container" id="statsContainer" style="display: none;">
-   <h3 style="text-align: center; margin-top: 10px;">試合スタッツ</h3>
-   
-   <!-- Team Aのスタッツ -->
-   <div style="margin-bottom: 20px;">
-     <h4 id="statsTeamNameA" style="margin-bottom: 5px;">Team A</h4>
-     <table class="stats-table">
-       <thead>
-        <tr>
-         <th>選手</th>
-           <th>総得点(内7m)</th>
-           <th>シュート数</th>
-           <th>シュート率</th>
-           <th>7mシュート数</th>
-           <th>7mシュート率</th>
-           <th>GKセーブ数</th>
-           <th>セーブ率</th>
-           <th>7mセーブ数</th>
-           <th>7mセーブ率</th>
-         </tr>
-       </thead>
-       <tbody id="statsBodyA"></tbody>
-     </table>
-   </div>
-   
-   <!-- Team Bのスタッツ -->
-   <div>
-     <h4 id="statsTeamNameB" style="margin-bottom: 5px;">Team B</h4>
-     <table class="stats-table">
-       <thead>
-        <tr>
-         <th>選手</th>
-           <th>総得点(内7m)</th>
-           <th>シュート数</th>
-           <th>シュート率</th>
-           <th>7mシュート数</th>
-           <th>7mシュート率</th>
-           <th>GKセーブ数</th>
-           <th>セーブ率</th>
-           <th>7mセーブ数</th>
-           <th>7mセーブ率</th>
-         </tr>
-       </thead>
-       <tbody id="statsBodyB"></tbody>
-     </table>
-   </div>
- </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
