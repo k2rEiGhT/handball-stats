@@ -41,7 +41,7 @@ function updateGkDropdown(team) {
   const checkedCheckboxes = document.querySelectorAll(`.starter-check-${team}:checked`);
   
   if (checkedCheckboxes.length === 0) {
-    gkSelect.innerHTML = '<option value="">コート選手をチェックしてください</option>';
+    gkSelect.innerHTML = '<option value="">選択してください</option>';
     return;
   }
 
