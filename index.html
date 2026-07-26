@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6人制車椅子ハンドボール 記録</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <details class="setup-section" open>
+        <summary>チーム名・選手名入力</summary>
+        <div class="setup-container">
+            <div class="team-setup">
+                <h3><input type="text" id="teamNameA" placeholder="チーム名"></h3>
+                <button type="button" class="load-team-btn" onclick="loadMyTeam()">すわろ〜ずを自動入力</button>
+                <div id="setupA" class="player-inputs"></div>
+                <div class="gk-setup-row">
+                    <label for="gkSelectA"><strong>GK：</strong></label>
+                    <select id="gkSelectA"><option value="">選択してください</option></select>
+                </div>
+            </div>
+            <div class="team-setup">
+                <h3><input type="text" id="teamNameB" placeholder="チーム名"></h3>
+                <div id="setupB" class="player-inputs"></div>
+                <div class="gk-setup-row">
+                    <label for="gkSelectB"><strong>GK：</strong></label>
+                    <select id="gkSelectB"><option value="">選択してください</option></select>
+                </div>
+            </div>
+        </div>
+        <button class="update-btn" onclick="updateRoster()">チーム名・選手を登録して記録画面へ</button>
+    </details>
+
+    <div class="main-layout">
+        
+        <div class="team-column left-team">
+            <h2 id="displayTeamNameA">Team A</h2>
+            <div class="score" id="scoreA">0</div>
+            
+            <h4 class="area-title">コート上</h4>
+            <div id="teamA-court-buttons" class="player-grid">
+                <p class="placeholder-text">※登録後に表示されます</p>
+            </div>
+
+            <h4 class="area-title bench-title">ベンチ</h4>
+            <div id="teamA-bench-buttons" class="player-grid bench-grid"></div>
+        </div>
+
+        <div class="center-column">
+            <div class="timer-container">
+                <div id="timer">00:00</div>
+                <div class="timer-controls">
+                    <button onclick="startTimer()" id="btnStart" class="timer-btn start">スタート</button>
+                    <button onclick="stopTimer()" id="btnStop" class="timer-btn stop" disabled>ストップ</button>
+                    <button onclick="endTimer()" id="btnEnd" class="timer-btn end">終了</button>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="action-section">
+
+                <div class="manual-time-container">
+                    <label for="manualTime">過去の時間を追加：</label>
+                    <input type="text" id="manualTime" placeholder="例: 04:30">
+                </div>
+
+                <div class="assist-container">
+                    <label for="assistSelect">アシスト(任意)：</label>
+                    <select id="assistSelect">
+                        <option value="">-- なし --</option>
+                    </select>
+                </div>
+
+                <div class="action-buttons">
+                    <div class="sub-button-group" style="display: flex; gap: 5px; width: 100%;">
+                        <button class="sub-btn" style="flex: 1;" onclick="recordSubstitution()">交代</button>
+                        <button class="sub-btn" style="flex: 1; background: #17a2b8; border-color: #117a8b; color: white;" onclick="toggleGkRole()">GK交代</button>
+                    </div>
+
+                    <button onclick="recordAction('得点', 1)">得点</button>
+                    
+                    
+                    <button class="yellow-btn" onclick="recordAction('シュートミス', 0)">シュートミス</button>
+                    <button class="yellow-btn" onclick="recordAction('パスミス', 0)">パスミス</button>
+                    <button class="yellow-btn" onclick="recordAction('キャッチミス', 0)">キャッチミス</button>
+
+                    <button class="neutral-btn" onclick="recordAction('パスカット', 0)">パスカット</button>
+                    <button class="neutral-btn" onclick="recordAction('ブロック', 0)">ブロック</button>
+                    <button class="neutral-btn" onclick="recordAction('リバウンド', 0)">リバウンド</button>
+
+                    <button class="penalty-btn" onclick="recordAction('ダブルドリブル', 0)">ダブルドリブル</button>
+                    <button class="penalty-btn" onclick="recordAction('3sec', 0)">3sec</button>
+                    <button class="penalty-btn" onclick="recordAction('キックボール', 0)">キックボール</button>
+                    <button class="penalty-btn" onclick="recordAction('ラインクロス', 0)">ラインクロス</button>
+                    <button class="penalty-btn" onclick="recordAction('チャージング', 0)">チャージング</button>
+
+                    <button onclick="recordAction('7m得点', 1)">7m (得点)</button>
+                    <button class="yellow-btn" onclick="recordAction('7mシュートミス', 0)">7m（シュートミス）</button>
+                    
+                    <button class="red-btn" onclick="recordAction('警告', 0)">警告</button>
+                    <button class="red-btn" onclick="recordAction('2分間退場', 0)">2分間退場</button>
+                    <button class="red-btn" onclick="recordAction('失格', 0)">失格</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="team-column right-team">
+            <h2 id="displayTeamNameB">Team B</h2>
+            <div class="score" id="scoreB">0</div>
+            
+            <h4 class="area-title">コート</h4>
+            <div id="teamB-court-buttons" class="player-grid">
+                <p class="placeholder-text">※登録後に表示されます</p>
+            </div>
+
+            <h4 class="area-title bench-title">ベンチ</h4>
+            <div id="teamB-bench-buttons" class="player-grid bench-grid"></div>
+        </div>
+
+    </div>
+
+    <div class="match-info-container">
+        <input type="text" class="match-info-title" placeholder="大会名">
+        
+        <div class="match-info-sub">
+            <input type="text" class="match-info-text" placeholder="日付">
+        </div>
+
+        <!-- 対戦カードは日付の下に独立して表示 -->
+        <div id="matchUpDisplay" class="match-up-text"></div>
+    </div>
+
+
+    <button class="print-btn" onclick="window.print()">この記録をPDFで保存・印刷する</button>
+
+ <!-- 1. 試合のログを上に配置 -->
+ <div class="log-container">
+   <table>
+     <thead>
+       <tr>
+         <th id="thPlayerA" style="width: 15%;">Team A</th>
+         <th style="width: 20%;">アクション</th>
+         <th style="width: 8%;">得点</th>
+         <th style="width: 10%; background: #e9ecef;">時間</th>
+         <th style="width: 8%;">得点</th>
+         <th style="width: 20%;">アクション</th>
+         <th id="thPlayerB" style="width: 15%;">Team B</th>
+         <th class="noprint" style="width: 4%;">操作</th>
+       </tr>
+     </thead>
+     <tbody id="logTableBody">
+     </tbody>
+   </table>
+ </div>
+
+
+ <div class="stats-container" id="statsContainer" style="display: none;">
+   <h3 style="text-align: center; margin-top: 10px;">試合スタッツ</h3>
+   
+   <!-- Team Aのスタッツ -->
+   <div style="margin-bottom: 20px;">
+     <h4 id="statsTeamNameA" style="margin-bottom: 5px;">Team A</h4>
+     <table class="stats-table">
+       <thead>
+        <tr>
+         <th>選手</th>
+           <th>総得点(内7m)</th>
+           <th>シュート数</th>
+           <th>シュート率</th>
+           <th>7mシュート数</th>
+           <th>7mシュート率</th>
+           <th>GKセーブ数</th>
+           <th>セーブ率</th>
+           <th>7mセーブ数</th>
+           <th>7mセーブ率</th>
+         </tr>
+       </thead>
+       <tbody id="statsBodyA"></tbody>
+     </table>
+   </div>
+   
+   <!-- Team Bのスタッツ -->
+   <div>
+     <h4 id="statsTeamNameB" style="margin-bottom: 5px;">Team B</h4>
+     <table class="stats-table">
+       <thead>
+        <tr>
+         <th>選手</th>
+           <th>総得点(内7m)</th>
+           <th>シュート数</th>
+           <th>シュート率</th>
+           <th>7mシュート数</th>
+           <th>7mシュート率</th>
+           <th>GKセーブ数</th>
+           <th>セーブ率</th>
+           <th>7mセーブ数</th>
+           <th>7mセーブ率</th>
+         </tr>
+       </thead>
+       <tbody id="statsBodyB"></tbody>
+     </table>
+   </div>
+ </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
