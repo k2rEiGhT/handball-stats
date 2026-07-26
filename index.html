@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>6人制車椅子ハンドボール 記録</title>
+    <link rel="icon" href="favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -87,7 +88,6 @@
 
                     <button onclick="recordAction('得点', 1)">得点</button>
                     
-                    
                     <button class="yellow-btn" onclick="recordAction('シュートミス', 0)">シュートミス</button>
                     <button class="yellow-btn" onclick="recordAction('パスミス', 0)">パスミス</button>
                     <button class="yellow-btn" onclick="recordAction('キャッチミス', 0)">キャッチミス</button>
@@ -127,11 +127,12 @@
 
     </div>
 
+    <!-- 試合情報入力エリア（印刷時は一番上に出ます） -->
     <div class="match-info-container">
         <input type="text" class="match-info-title" placeholder="大会名">
         
         <div class="match-info-sub">
-            <input type="text" class="match-info-text" placeholder="日付">
+            <input type="text" class="match-info-text" placeholder="日付・会場など">
         </div>
 
         <!-- 対戦カードは日付の下に独立して表示 -->
@@ -139,9 +140,9 @@
     </div>
 
 
-<button class="print-btn" onclick="window.print()">この記録をPDFで保存・印刷する</button>
+    <button class="print-btn" onclick="window.print()">この記録をPDFで保存・印刷する</button>
 
-    <!-- ★追加：印刷と画面の表示順をコントロールする枠 -->
+    <!-- 印刷と画面の表示順をコントロールする枠 -->
     <div class="print-layout">
         
         <!-- 試合スタッツ（印刷時は先に配置、画面ではCSSで下に移動） -->

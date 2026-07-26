@@ -152,7 +152,7 @@ function updateRoster() {
   document.getElementById('displayTeamNameA').innerText = customTeamA;
   document.getElementById('displayTeamNameB').innerText = customTeamB;
   
-  // ★追加：タイムアウトボタンのチーム名も更新
+  // タイムアウトボタンのチーム名も更新
   const btnToA = document.getElementById('btnTimeoutA');
   const btnToB = document.getElementById('btnTimeoutB');
   if (btnToA) btnToA.innerText = customTeamA + ' T.O.';
@@ -292,7 +292,7 @@ function stopTimer() {
   }
 }
 
-// ★追加：前半終了ボタンの処理
+// 前半終了ボタンの処理
 function halfTime() {
   if (!confirm("前半を終了し、タイマーをリセットして後半に移りますか？")) return;
   

@@ -5,7 +5,6 @@ body {
     margin: auto; 
 }
 
-
 /* 選手名入力セクション */
 .setup-section {
     background: #f1f5f9;
@@ -265,7 +264,7 @@ button.player-btn {
 .timer-btn { font-size: 14px; padding: 8px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; }
 .timer-btn.start { background: #28a745; }
 .timer-btn.stop { background: #ffc107; color: black; }
-.timer-btn.halftime { background: #17a2b8; color: white; } /* ★これを追加 */
+.timer-btn.halftime { background: #17a2b8; color: white; }
 .timer-btn.end { background: #6c757d; }
 .timer-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -364,12 +363,6 @@ td small { color: #555; font-weight: bold; }
 
 .print-btn { display: block; width: 100%; padding: 15px; background: #28a745; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;}
 
-/* 印刷（PDF出力）用のスタイル */
-@media print {
-    .setup-section, .main-layout, .print-btn, .noprint { display: none; }
-    body { padding: 0; }
-}
-
 /* ================= 試合情報入力エリア ================= */
 .match-info-container {
   display: flex;
@@ -379,9 +372,9 @@ td small { color: #555; font-weight: bold; }
   margin-bottom: 25px;
 }
 .match-info-title {
-  font-size: 18px;
+  font-size: 22px; /* 少し大きく調整 */
   font-weight: bold;
-  width: 40%;
+  width: 60%;
   text-align: center;
   padding: 8px;
   border: 1px solid #ccc;
@@ -394,7 +387,7 @@ td small { color: #555; font-weight: bold; }
   width: 100%;
 }
 .match-info-text {
-  font-size: 18px;
+  font-size: 14px;
   width: 30%;
   text-align: center;
   padding: 6px;
@@ -402,10 +395,11 @@ td small { color: #555; font-weight: bold; }
   border-radius: 4px;
 }
 .match-up-text {
-  font-size: 18px;
+  font-size: 24px; /* 対戦カードを少し大きく見やすく調整 */
   font-weight: bold;
   color: #333;
 }
+
 /* ================= タブレット操作向けの最適化 ================= */
 
 /* 1. 全てのボタン：連続タップ時のズームや文字選択を防止し、反応を速くする */
@@ -453,6 +447,7 @@ button, .starter-label, select {
     min-width: 650px;
   }
 }
+
 /* ================= 画面表示の順番（Flexboxによる入れ替え） ================= */
 @media screen {
   .print-layout {
