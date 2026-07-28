@@ -256,8 +256,8 @@ function selectPlayer(team, type, id, name) {
     activeSelection[team].bench ? roster[team].bench.find(p => p.id === activeSelection[team].bench).name : null;
 
   if (targetPlayerName) {
-    let allPlayers = [...roster[team].court, ...roster[team].bench];
-    allPlayers.forEach(p => {
+    let courtPlayers = roster[team].court;
+    courtPlayers.forEach(p => {
       if (p.name !== targetPlayerName) {
         assistSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
       }
@@ -321,7 +321,7 @@ function getRecordTime(actionName, isSub = false) {
   if (manualTimeInput.value.trim() !== '') {
     return manualTimeInput.value.trim();
   }
-  const noAlertActions = ['警告', '2分間退場', '失格', 'ダブルドリブル', 'キックボール', '3sec', 'ラインクロス', 'ターンオーバー', 'リバウンド', 'チャージング', 'シュートミス', 'パスミス', 'パスカット', 'キャッチミス', 'ドリブルミス', 'GK指定/交代', 'タイムアウト'];
+  const noAlertActions = ['警告', '2分間退場', '失格', 'ダブルドリブル', 'キックボール', '3sec', 'ラインクロス', 'ターンオーバー', 'リバウンド', 'チャージング', 'ノーゴール', 'パスミス', 'パスカット', 'キャッチミス', 'ドリブルミス', 'GK交代', 'タイムアウト'];
   if (!isRunning && (!isSub && !noAlertActions.includes(actionName))) {
     if (!confirm('タイマーが停止中または開始前ですが、現在の表示時間で記録しますか？')) {
       return null;
@@ -661,9 +661,9 @@ function renderStats() {
     if (!log.playerId) return; 
     
     let isGoal = log.action.startsWith('得点');
-    let is7mGoal = log.action.startsWith('7m得点') || (log.action.startsWith('7m') && !log.action.includes('ミス'));
-    let isMiss = log.action.startsWith('シュートミス');
-    let is7mMiss = log.action.startsWith('7mシュートミス');
+    let is7mGoal = log.action.startsWith('7m得点');
+    let isMiss = log.action.startsWith('ノーゴール');
+    let is7mMiss = log.action.startsWith('7mノーゴール');
     let isPassMiss = log.action.startsWith('パスミス');
     let isCatchMiss = log.action.startsWith('キャッチミス');
     let isDribbleMiss = log.action.startsWith('ドリブルミス');
@@ -709,7 +709,7 @@ function renderStats() {
     };
 
     playerList.forEach(p => {
-      // 総得点の計算（ここは7mを含む）
+      // 総得点の計算（7mを含む）
       let totalGoals = p.goals + p.sevenM_goals;
 
       // 通常のシュート計算（7mを含まない）
