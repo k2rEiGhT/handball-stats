@@ -1,7 +1,7 @@
 body { 
     font-family: sans-serif; 
     padding: 20px; 
-    max-width: 1050px; /* 少し広げて余裕を持たせました */
+    max-width: 1050px;
     margin: auto; 
 }
 
@@ -60,16 +60,16 @@ body {
     padding-right: 5px;
 }
 
-/* GK選択プルダウン（適度なサイズに調整） */
+/* GK選択プルダウン */
 .gk-setup-row {
   margin-top: 10px;
 }
 
 .gk-setup-row select {
-  font-size: 14px; /* 大きすぎない標準的なサイズ */
-  padding: 6px 12px; /* 少しだけ余白を持たせて押しやすく */
+  font-size: 14px; 
+  padding: 6px 12px; 
   margin-top: 5px;
-  border: 1px solid #007bff; /* 枠線も細く */
+  border: 1px solid #aaa; 
   border-radius: 4px;
   background-color: #ffffff;
   cursor: pointer;
@@ -93,7 +93,6 @@ body {
     width: 100%;
 }
 
-/* ★修正箇所：固定の背番号ラベルと手入力ボックスの幅を完全固定してズレを防ぐ */
 .fixed-num {
     flex: 0 0 35px;
     font-weight: bold;
@@ -116,7 +115,7 @@ body {
 /* 名前入力欄 */
 .player-name-input {
     flex: 1;
-    min-width: 0; /* はみ出し防止 */
+    min-width: 0; 
     padding: 5px;
     box-sizing: border-box;
     font-size: 12px;
@@ -138,6 +137,27 @@ body {
 }
 .load-team-btn:hover {
   background-color: #001a7a;
+}
+
+/* 相手チーム入力ボタン用のコンテナとスタイル */
+.opponent-buttons-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+.load-opponent-btn {
+    flex: 1;
+    padding: 8px 4px;
+    background-color: #198754; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+.load-opponent-btn:hover {
+    background-color: #146c43;
 }
 
 /* コート選択チェックボックス */
@@ -186,8 +206,9 @@ body {
     background: #fafafa;
     text-align: center;
 }
-.left-team { border-color: #007bff; }
-.right-team { border-color: #dc3545; }
+
+.left-team { border-color: #00053a; }
+.right-team { border-color: #198754; }
 
 .team-column h2 { margin: 0 0 10px 0; font-size: 22px; }
 .score {
@@ -234,16 +255,20 @@ button.player-btn {
     font-size: 13px;
     word-break: break-all;
 }
+
 .left-team button.player-btn.selected { 
-    background: #007bff; 
+    background: #00053a; 
     color: white; 
-    border-color: #004a99; 
+    border-color: #00053a; 
 }
 .right-team button.player-btn.selected { 
-    background: #dc3545; 
+    background: #198754; 
     color: white; 
-    border-color: #a71d2a; 
+    border-color: #146c43; 
 }
+
+.left-team .gk-label { color: #00053a; font-weight: bold; }
+.right-team .gk-label { color: #198754; font-weight: bold; }
 
 /* 中央カラム：操作パネル */
 .center-column {
@@ -287,8 +312,10 @@ button.player-btn {
     justify-content: center;
     align-items: center;
 }
-.assist-container { border: 1px solid #007bff; border-style: solid; background: #e8f4f8; }
+
+.assist-container { border: 1px solid #aaa; border-style: solid; background: #f8f9fa; }
 .gk-container { border: 1px solid #dc3545; border-style: solid; background: #f8e8e8; } 
+
 #manualTime, #assistSelect, #gkSelect {
     width: 100px;
     padding: 4px;
@@ -308,8 +335,8 @@ button.player-btn {
     width: 100%;
 }
 .action-section button { 
-    width: 48%; 
-    padding: 10px 5px; 
+    width: calc((100% - 10px) / 3);
+    padding: 10px 2px; 
     margin: 0;
     display: inline-block;
     background: #fff; 
@@ -322,8 +349,11 @@ button.player-btn {
 .action-section button.full-width { width: 100%; }
 .action-section button:hover { background: #e2e6ea; }
 .action-section button.penalty-btn { border-color: #dc3545; color: #dc3545; }
-.action-section button.neutral-btn { border-color: #17a2b8; color: #17a2b8; }
+.action-section button.neutral-btn { border-color: #095a66; color: #095a66; }
 .action-section button.yellow-btn { border-color: #d39e00; color: #d39e00; }
+.action-section button.black-btn { background-color: #777; border-color: #333; color: #fff; }
+
+.action-section button:disabled {background-color: transparent; border-color: transparent; }
 
 /* 警告・退場・失格ボタンの特別デザイン（赤背景・白文字） */
 .action-section button.red-btn {
@@ -342,11 +372,37 @@ button.player-btn {
 }
 .action-section button.sub-btn:hover { background: #e0a800; }
 
-/* ログテーブル */
+/* ログテーブル・スタッツのテーブル共通設定 */
 .log-container { margin-top: 20px; }
 table { width: 100%; border-collapse: collapse; font-size: 14px;}
 th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-th { background: #f4f4f4; }
+
+/* テーブルのヘッダーを少し濃い網掛けに */
+th { 
+    background: #e2e8f0; 
+    color: #333; 
+    border: 1px solid #cbd5e1; 
+    padding: 8px; 
+    font-weight: bold;
+}
+
+.stats-team-a .stats-table th {
+    background: #00053a;
+    color: #ffffff;
+    border: 1px solid #00053a;
+    font-size: 12px; /* 13pxから12pxに少し縮小 */
+    padding: 8px 4px; /* 横の余白を少し狭める */
+    white-space: nowrap; /* ★タイトルが改行されるのを防ぐ */
+}
+.stats-team-b .stats-table th {
+    background: #198754;
+    color: #ffffff;
+    border: 1px solid #198754;
+    font-size: 12px; /* 13pxから12pxに少し縮小 */
+    padding: 8px 4px; /* 横の余白を少し狭める */
+    white-space: nowrap; /* ★タイトルが改行されるのを防ぐ */
+}
+
 td small { color: #555; font-weight: bold; }
 .score-col { font-weight: bold; font-size: 15px; background: #fdfdfd; }
 
@@ -361,55 +417,116 @@ td small { color: #555; font-weight: bold; }
 }
 .delete-btn:hover { background: #c82333; }
 
-.print-btn { display: block; width: 100%; padding: 15px; background: #28a745; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;}
 
-/* ================= 試合情報入力エリア ================= */
+/* ================= 表のタイトル（スタッツ・Team名）のデザイン ================= */
+.section-main-title {
+    text-align: center;
+    background: #f1f5f9; 
+    color: #333;
+    font-size: 16px; 
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 5px solid #343a40; 
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.stats-team-a h4 {
+    color: #00053a;
+    border-bottom: 2px solid #00053a;
+    padding: 4px 8px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    background: transparent;
+}
+
+.stats-team-b h4 {
+    color: #198754;
+    border-bottom: 2px solid #198754;
+    padding: 4px 8px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    background: transparent;
+}
+
+/* チーム合計行のスタイル設定 */
+.team-total-row {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border-top: 2px solid #333;
+}
+.team-total-row td {
+    border-bottom: 2px solid #333;
+}
+
+
+/* ================= PDF変換ボタン ================= */
+.footer-buttons {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+.print-btn { 
+    flex: 0.2; 
+    padding: 15px; 
+    color: white; 
+    font-size: 18px; 
+    font-weight: bold;
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    background: #dc3545; 
+}
+
+/* ================= 試合情報入力エリア（画面上）================= */
 .match-info-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 25px;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+.match-info-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
 }
 .match-info-title {
-  font-size: 22px; /* 少し大きく調整 */
+  flex: 2;
+  font-size: 16px; 
   font-weight: bold;
-  width: 60%;
-  text-align: center;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-.match-info-sub {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  width: 100%;
-}
 .match-info-text {
+  flex: 1;
   font-size: 14px;
-  width: 30%;
-  text-align: center;
-  padding: 6px;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 .match-up-text {
-  font-size: 24px; /* 対戦カードを少し大きく見やすく調整 */
+  font-size: 18px; 
   font-weight: bold;
   color: #333;
 }
 
 /* ================= タブレット操作向けの最適化 ================= */
-
-/* 1. 全てのボタン：連続タップ時のズームや文字選択を防止し、反応を速くする */
 button, .starter-label, select {
-  touch-action: manipulation; /* ズーム判定をなくしてタップ反応を即座にする */
-  user-select: none; /* 誤ってテキストを選択してしまうのを防ぐ */
+  touch-action: manipulation;
+  user-select: none;
   -webkit-user-select: none;
 }
 
-/* 2. タップしやすいようにボタンの最低限の高さを確保 */
 .player-btn, .action-section button, .timer-btn {
   min-height: 44px; 
 }
@@ -417,14 +534,10 @@ button, .starter-label, select {
   font-size: 14px;
 }
 
-/* 3. 画面が狭い場合（タブレットの縦持ちなど）の自動調整 */
 @media (max-width: 850px) {
-  /* 設定画面は横並びだと窮屈なので縦並びに変更 */
   .setup-container {
     flex-direction: column;
   }
-  
-  /* メインの記録画面は3列を維持しつつ、隙間を詰めて広く使う */
   .main-layout {
     gap: 5px;
   }
@@ -435,16 +548,17 @@ button, .starter-label, select {
     font-size: 36px;
   }
   .action-section button {
-    font-size: 11px; /* 文字が折り返してレイアウトが崩れるのを防ぐ */
+    font-size: 11px; 
     padding: 10px 2px;
   }
-
-  /* ログやスタッツの表が画面幅を超えた場合、横スクロールできるようにする */
   .log-container, .stats-container {
     overflow-x: auto;
   }
   table {
     min-width: 650px;
+  }
+  .footer-buttons {
+    flex-direction: column; /* スマホ・タブレット縦の場合はボタンを縦並びにする */
   }
 }
 
@@ -469,8 +583,15 @@ button, .starter-label, select {
     size: landscape;
   }
 
-  .setup-section, .main-layout, .print-btn, .noprint { display: none; }
-  body { padding: 0; }
+  /* 背景色や網掛けを印刷時にも強制的に出力する設定 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 操作パネルやフッターの送信ボタンなどは印刷時に非表示 */
+  .setup-section, .main-layout, .footer-buttons, .noprint { display: none; }
+  body { padding: 0; margin: 0; max-width: none; }
 
   /* 印刷時は画面の順序入れ替えを解除し、HTMLの記述順（スタッツA→B→ログ）に戻す */
   .print-layout {
@@ -489,13 +610,56 @@ button, .starter-label, select {
     break-before: page;
   }
 
-  /* 入力枠の線を消して、ただのテキストのように見せる */
-  .match-info-title, .match-info-text {
+  /* 印刷時の試合情報（ヘッダー）のレイアウトをコンパクトに */
+  .match-info-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    /* ★変更：コートライン風の二重線に変更 */
+    border-bottom: 4px double #333;
+    background: transparent;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+  }
+  
+  .match-info-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .match-info-title {
+    font-size: 14px;
+    font-weight: bold;
+    width: auto;
     border: none;
     background: transparent;
     padding: 0;
   }
   
+  .match-info-text {
+    font-size: 12px;
+    color: #555;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 0;
+    width: auto;
+  }
+
+  .match-up-text {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    text-align: right;
+  }
+
   /* 入力されていない場合のヒント文字（プレースホルダー）は印刷しない */
   .match-info-title::-webkit-input-placeholder { color: transparent; }
   .match-info-title::-moz-placeholder { color: transparent; }

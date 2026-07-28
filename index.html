@@ -16,7 +16,7 @@
         <div class="setup-container">
             <div class="team-setup">
                 <h3><input type="text" id="teamNameA" placeholder="チーム名"></h3>
-                <button type="button" class="load-team-btn" onclick="loadMyTeam()">すわろ〜ずを自動入力</button>
+                <button type="button" class="load-team-btn" onclick="loadMyTeam()">すわろ〜ず</button>
                 <div id="setupA" class="player-inputs"></div>
                 <div class="gk-setup-row">
                     <label for="gkSelectA"><strong>GK：</strong></label>
@@ -25,6 +25,12 @@
             </div>
             <div class="team-setup">
                 <h3><input type="text" id="teamNameB" placeholder="チーム名"></h3>
+                <!-- 相手チーム自動入力ボタン -->
+                <div class="opponent-buttons-container">
+                    <button type="button" class="load-opponent-btn" onclick="loadOpponentTeam(0)">Acro</button>
+                    <button type="button" class="load-opponent-btn" onclick="loadOpponentTeam(1)">LBH</button>
+                    <button type="button" class="load-opponent-btn" onclick="loadOpponentTeam(2)">未登録</button>
+                </div>
                 <div id="setupB" class="player-inputs"></div>
                 <div class="gk-setup-row">
                     <label for="gkSelectB"><strong>GK：</strong></label>
@@ -75,10 +81,12 @@
 
                 <div class="action-buttons">
                     <button onclick="recordAction('得点', 1)">得点</button>
-                    
-                    <button class="yellow-btn" onclick="recordAction('シュートミス', 0)">シュートミス</button>
+                    <button class="black-btn" onclick="recordAction('ノーゴール', 0)">ノーゴール</button>
+                    <button disabled></button>
                     <button class="yellow-btn" onclick="recordAction('パスミス', 0)">パスミス</button>
                     <button class="yellow-btn" onclick="recordAction('キャッチミス', 0)">キャッチミス</button>
+                    <button class="yellow-btn" onclick="recordAction('ドリブルミス', 0)">ドリブルミス</button>
+
 
                     <button class="neutral-btn" onclick="recordAction('パスカット', 0)">パスカット</button>
                     <button class="neutral-btn" onclick="recordAction('ブロック', 0)">ブロック</button>
@@ -86,12 +94,14 @@
 
                     <button class="penalty-btn" onclick="recordAction('ダブルドリブル', 0)">ダブルドリブル</button>
                     <button class="penalty-btn" onclick="recordAction('3sec', 0)">3sec</button>
-                    <button class="penalty-btn" onclick="recordAction('キックボール', 0)">キックボール</button>
                     <button class="penalty-btn" onclick="recordAction('ラインクロス', 0)">ラインクロス</button>
+                    <button class="penalty-btn" onclick="recordAction('キックボール', 0)">キックボール</button>
                     <button class="penalty-btn" onclick="recordAction('チャージング', 0)">チャージング</button>
+                    <button disabled></button>
 
-                    <button onclick="recordAction('7m得点', 1)">7m (得点)</button>
-                    <button class="yellow-btn" onclick="recordAction('7mシュートミス', 0)">7m（シュートミス）</button>
+                    <button onclick="recordAction('7m得点', 1)">7m（得点）</button>
+                    <button class="black-btn" onclick="recordAction('7mノーゴール', 0)">7m（ノーゴール）</button>
+                    <button disabled></button>
                     
                     <button class="red-btn" onclick="recordAction('警告', 0)">警告</button>
                     <button class="red-btn" onclick="recordAction('2分間退場', 0)">2分間退場</button>
@@ -100,20 +110,21 @@
                     <!-- 区切り線 -->
                     <hr class="divider" style="width: 100%; margin: 10px 0;">
 
-                    <!-- 指定された操作を失格ボタンの下に移動 -->
-                    <div class="manual-time-container" style="width: 100%;">
-                        <label for="manualTime">過去の時間を追加：</label>
-                        <input type="text" id="manualTime" placeholder="例: 04:30">
-                    </div>
-
                     <div class="sub-button-group" style="display: flex; gap: 5px; width: 100%;">
                         <button class="sub-btn" style="flex: 1;" onclick="recordSubstitution()">交代</button>
                         <button class="sub-btn" style="flex: 1; background: #17a2b8; border-color: #117a8b; color: white;" onclick="toggleGkRole()">GK交代</button>
                     </div>
 
                     <div class="sub-button-group" style="display: flex; gap: 5px; width: 100%; margin-bottom: 5px;">
-                        <button class="sub-btn" style="flex: 1; background: #007bff; color: white; border-color: #004a99;" onclick="recordTimeout('A')" id="btnTimeoutA">T.O.</button>
-                        <button class="sub-btn" style="flex: 1; background: #dc3545; color: white; border-color: #a71d2a;" onclick="recordTimeout('B')" id="btnTimeoutB">T.O.</button>
+                        <button class="sub-btn" style="flex: 1; background: #00053a; color: white; border-color: #00053a; font-weight: bold;" onclick="recordTimeout('A')" id="btnTimeoutA">T.O.</button>
+                        <button class="sub-btn" style="flex: 1; background: #198754; color: white; border-color: #146c43; font-weight: bold;" onclick="recordTimeout('B')" id="btnTimeoutB">T.O.</button>
+                    </div>
+
+                    <hr class="divider" style="width: 100%; margin: 10px 0;">
+
+                    <div class="manual-time-container" style="width: 100%;">
+                        <label for="manualTime">過去の時間を追加：</label>
+                        <input type="text" id="manualTime" placeholder="例: 04:30">
                     </div>
                 </div>
             </div>
@@ -136,27 +147,29 @@
 
     <!-- 試合情報入力エリア（印刷時は一番上に出ます） -->
     <div class="match-info-container">
-        <input type="text" class="match-info-title" placeholder="大会名">
-        <div class="match-info-sub">
-            <input type="text" class="match-info-text" placeholder="日付">
+        <div class="match-info-inputs">
+            <input type="text" class="match-info-title" placeholder="大会名">
+            <input type="text" class="match-info-text" placeholder="日付・会場など">
         </div>
-
         <!-- 対戦カードは日付の下に独立して表示 -->
         <div id="matchUpDisplay" class="match-up-text"></div>
     </div>
 
-    <button class="print-btn" onclick="window.print()">この記録をPDFで保存・印刷する</button>
+    <!-- ボタンを横並びにするための枠 -->
+    <div class="footer-buttons">
+        <button class="print-btn" onclick="window.print()">PDFに変換する</button>
+    </div>
 
     <!-- 印刷と画面の表示順をコントロールする枠 -->
     <div class="print-layout">
         
         <!-- 試合スタッツ（印刷時は先に配置、画面ではCSSで下に移動） -->
         <div class="stats-container" id="statsContainer" style="display: none;">
-            <h3 style="text-align: center; margin-top: 10px;">試合スタッツ</h3>
+            <h3 class="section-main-title noprint">試合スタッツ</h3>
             
             <!-- Team Aのスタッツ（1ページ目に表示） -->
             <div class="stats-team-a" style="margin-bottom: 20px;">
-                <h4 id="statsTeamNameA" style="margin-bottom: 5px;">Team A</h4>
+                <h4 id="statsTeamNameA">Team A</h4>
                 <table class="stats-table">
                     <thead>
                         <tr>
@@ -170,6 +183,9 @@
                             <th>セーブ率</th>
                             <th>7mセーブ数</th>
                             <th>7mセーブ率</th>
+                            <th>パスミス</th>
+                            <th>キャッチミス</th>
+                            <th>ドリブルミス</th>
                         </tr>
                     </thead>
                     <tbody id="statsBodyA"></tbody>
@@ -178,7 +194,7 @@
             
             <!-- Team Bのスタッツ（印刷時はここで改ページして2ページ目へ） -->
             <div class="stats-team-b">
-                <h4 id="statsTeamNameB" style="margin-bottom: 5px;">Team B</h4>
+                <h4 id="statsTeamNameB">Team B</h4>
                 <table class="stats-table">
                     <thead>
                         <tr>
@@ -192,6 +208,9 @@
                             <th>セーブ率</th>
                             <th>7mセーブ数</th>
                             <th>7mセーブ率</th>
+                            <th>パスミス</th>
+                            <th>キャッチミス</th>
+                            <th>ドリブルミス</th>
                         </tr>
                     </thead>
                     <tbody id="statsBodyB"></tbody>
@@ -201,13 +220,14 @@
 
         <!-- 試合のログ（印刷時はここで改ページして3ページ目へ、画面ではCSSで上に移動） -->
         <div class="log-container">
+            <h3 class="section-main-title">試合ログ</h3>
             <table>
                 <thead>
                     <tr>
                         <th id="thPlayerA" style="width: 15%;">Team A</th>
                         <th style="width: 20%;">アクション</th>
                         <th style="width: 8%;">得点</th>
-                        <th style="width: 10%; background: #e9ecef;">時間</th>
+                        <th style="width: 10%;">時間</th>
                         <th style="width: 8%;">得点</th>
                         <th style="width: 20%;">アクション</th>
                         <th id="thPlayerB" style="width: 15%;">Team B</th>

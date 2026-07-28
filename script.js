@@ -72,7 +72,7 @@ window.onload = function() {
     
     // 1から16まですべて背番号と名前の自由入力にする
     for (let i = 1; i <= 16; i++) {
-      if (i === 9) html += `</div><div class="input-col">`; // 9番目で右カラムへ
+      if (i === 9) html += `</div><div class="input-col">`;
       
       html += `
       <div class="player-input-row">
@@ -218,12 +218,12 @@ function updateRoster() {
   document.querySelector('.setup-section').removeAttribute('open');
 }
 
-// 選手ボタンの描画 (GKは青系の特別なラベルを付与)
+// 選手ボタンの描画
 function renderButtons() {
   function generateHtml(team, type) {
     return roster[team][type].map(p => {
       const isSelected = activeSelection[team][type] === p.id ? 'selected' : '';
-      const isGk = roster[team].gkId === p.id ? ' <span style="color:#007bff; font-weight:bold;">[GK]</span>' : '';
+      const isGk = roster[team].gkId === p.id ? ' <span class="gk-label">[GK]</span>' : '';
       return `<button class="player-btn ${isSelected}" onclick="selectPlayer('${team}', '${type}', '${p.id}', '${p.name}')">${p.name}${isGk}</button>`;
     }).join('');
   }
@@ -321,7 +321,7 @@ function getRecordTime(actionName, isSub = false) {
   if (manualTimeInput.value.trim() !== '') {
     return manualTimeInput.value.trim();
   }
-  const noAlertActions = ['警告', '2分間退場', '失格', 'ダブルドリブル', 'キックボール', '3sec', 'ラインクロス', 'ターンオーバー', 'リバウンド', 'チャージング', 'シュートミス', 'パスミス', 'パスカット', 'キャッチミス', 'GK指定/交代'];
+  const noAlertActions = ['警告', '2分間退場', '失格', 'ダブルドリブル', 'キックボール', '3sec', 'ラインクロス', 'ターンオーバー', 'リバウンド', 'チャージング', 'シュートミス', 'パスミス', 'パスカット', 'キャッチミス', 'ドリブルミス', 'GK指定/交代', 'タイムアウト'];
   if (!isRunning && (!isSub && !noAlertActions.includes(actionName))) {
     if (!confirm('タイマーが停止中または開始前ですが、現在の表示時間で記録しますか？')) {
       return null;
@@ -385,7 +385,6 @@ function renderLogs() {
     let log = matchLogs[i];
     
     // チームAのアクションなら左側に、チームBなら右側にデータを配置
-    // System（前半終了など）の場合は両方のアクション列に表示して目立たせる
     let aPlayer = log.team === 'A' ? log.player : '';
     let aAction = log.team === 'A' ? log.action : (log.team === 'System' ? log.action : '');
     let bPlayer = log.team === 'B' ? log.player : '';
@@ -534,8 +533,7 @@ function toggleGkRole() {
   renderButtons();
 }
 
-// ================= マイチーム自動入力機能 =================
-// ★ここにご自身のチーム名と選手リストを設定してください
+// ================= マイチームの自動入力機能 =================
 const myTeamData = {
   name: "すわろ〜ず",
   players: [
@@ -548,48 +546,105 @@ const myTeamData = {
     { num: "10", name: "馬場 康二朗", isStarter: true },
     { num: "11", name: "堤 史土", isStarter: false },
     { num: "15", name: "福田 あかね", isStarter: false }
-    // 必要に応じて16名まで追加可能
   ]
 };
 
 function loadMyTeam() {
   document.getElementById('teamNameA').value = myTeamData.name;
   
-  // 一度すべての入力をクリアする
   for (let i = 1; i <= 16; i++) {
     document.getElementById(`numA_${i}`).value = '';
     document.getElementById(`nameA_${i}`).value = '';
     document.querySelector(`.starter-check-A[value="${i}"]`).checked = false;
   }
 
-  // データを順番に入力枠に埋める
   myTeamData.players.forEach((p, index) => {
     let i = index + 1;
-    if (i > 16) return; // 最大16人まで
+    if (i > 16) return;
     
     document.getElementById(`numA_${i}`).value = p.num;
     document.getElementById(`nameA_${i}`).value = p.name;
     document.querySelector(`.starter-check-A[value="${i}"]`).checked = p.isStarter;
   });
 
-  // GKのドロップダウンを更新
   updateGkDropdown('A');
+}
+
+// =================相手チームの自動入力機能 =================
+const opponentTeams = [
+  {
+    name: "Acro",
+    players: [
+      { num: "1", name: "歴舎 望", isStarter: true },
+      { num: "3", name: "松本 爽", isStarter: true },
+      { num: "5", name: "齋藤 克弥", isStarter: true },
+      { num: "13", name: "足立 麻弥", isStarter: false },
+      { num: "30", name: "歴舎 敦輝", isStarter: true },
+      { num: "31", name: "深谷 直輝", isStarter: true },
+      { num: "56", name: "上中 大輔", isStarter: true },
+      { num: "99", name: "岸場 郁子", isStarter: false }
+    ]
+  },
+  {
+    name: "LBH",
+    players: [
+      { num: "2", name: "安田孝志", isStarter: true },
+      { num: "3", name: "東出修弥", isStarter: true },
+      { num: "5", name: "田中大樹", isStarter: true },
+      { num: "7", name: "木村正也", isStarter: true },
+      { num: "8", name: "佐藤璃恵子", isStarter: false },
+      { num: "21", name: "佐藤克輝", isStarter: true },
+      { num: "38", name: "友田幸作", isStarter: false },
+      { num: "73", name: "八橋龍二", isStarter: true }
+    ]
+  },
+  {
+    name: "未登録",
+    players: [
+      { num: "1", name: "A", isStarter: true },
+      { num: "2", name: "B", isStarter: true }
+    ]
+  }
+];
+
+function loadOpponentTeam(index) {
+  const teamData = opponentTeams[index];
+  document.getElementById('teamNameB').value = teamData.name;
+  
+  // 一度Team Bのすべての入力をクリアする
+  for (let i = 1; i <= 16; i++) {
+    document.getElementById(`numB_${i}`).value = '';
+    document.getElementById(`nameB_${i}`).value = '';
+    document.querySelector(`.starter-check-B[value="${i}"]`).checked = false;
+  }
+
+  // データを順番にTeam Bの入力枠に埋める
+  teamData.players.forEach((p, idx) => {
+    let i = idx + 1;
+    if (i > 16) return; // 最大16人まで
+    
+    document.getElementById(`numB_${i}`).value = p.num;
+    document.getElementById(`nameB_${i}`).value = p.name;
+    document.querySelector(`.starter-check-B[value="${i}"]`).checked = p.isStarter;
+  });
+
+  // GKのドロップダウンを更新
+  updateGkDropdown('B');
 }
 
 // ================= 統計(スタッツ)の計算・描画 =================
 function renderStats() {
   let stats = { A: {}, B: {} };
   
-  // 初期化：7m用の項目を細分化
+  // 初期化：7m用の項目、および各種ミス項目を追加
   let initStats = (team) => {
     let allPlayers = [...roster[team].court, ...roster[team].bench];
     allPlayers.forEach(p => {
       stats[team][p.id] = { 
         name: p.name, num: p.num, 
-        goals: 0, sevenM_goals: 0, 
-        misses: 0, sevenM_misses: 0, 
-        saves: 0, sevenM_saves: 0, 
-        conceded: 0, sevenM_conceded: 0 
+        goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0, 
+        saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0,
+        passMisses: 0, catchMisses: 0, dribbleMisses: 0
       };
     });
   };
@@ -609,8 +664,11 @@ function renderStats() {
     let is7mGoal = log.action.startsWith('7m得点') || (log.action.startsWith('7m') && !log.action.includes('ミス'));
     let isMiss = log.action.startsWith('シュートミス');
     let is7mMiss = log.action.startsWith('7mシュートミス');
+    let isPassMiss = log.action.startsWith('パスミス');
+    let isCatchMiss = log.action.startsWith('キャッチミス');
+    let isDribbleMiss = log.action.startsWith('ドリブルミス');
     
-    if (isGoal || is7mGoal || isMiss || is7mMiss) {
+    if (isGoal || is7mGoal || isMiss || is7mMiss || isPassMiss || isCatchMiss || isDribbleMiss) {
       let team = log.team;
       let oppTeam = team === 'A' ? 'B' : 'A';
       
@@ -620,6 +678,9 @@ function renderStats() {
         if (is7mGoal) stats[team][log.playerId].sevenM_goals++;
         if (isMiss) stats[team][log.playerId].misses++;
         if (is7mMiss) stats[team][log.playerId].sevenM_misses++;
+        if (isPassMiss) stats[team][log.playerId].passMisses++;
+        if (isCatchMiss) stats[team][log.playerId].catchMisses++;
+        if (isDribbleMiss) stats[team][log.playerId].dribbleMisses++;
       }
       
       // 相手GKのスタッツ加算（ミス＝セーブとして扱う）
@@ -639,6 +700,14 @@ function renderStats() {
     let html = '';
     let playerList = Object.values(stats[team]).sort((a, b) => a.num - b.num);
     
+    let teamTotal = {
+      goals: 0, sevenM_goals: 0,
+      misses: 0, sevenM_misses: 0,
+      saves: 0, sevenM_saves: 0,
+      conceded: 0, sevenM_conceded: 0,
+      passMisses: 0, catchMisses: 0, dribbleMisses: 0
+    };
+
     playerList.forEach(p => {
       // 総得点の計算（ここは7mを含む）
       let totalGoals = p.goals + p.sevenM_goals;
@@ -653,7 +722,7 @@ function renderStats() {
       let sevenMShotPct = sevenMShots > 0 ? Math.round((p.sevenM_goals / sevenMShots) * 100) + '%' : '-';
       let sevenMShotFraction = `${p.sevenM_goals}/${sevenMShots}`; // 7mシュート数 (成功/試行)
 
-      // 通常のGKセーブ計算（★7mを含まないように修正）
+      // 通常のGKセーブ計算
       let regularSaves = p.saves;
       let regularConceded = p.conceded;
       let regularGkFaced = regularSaves + regularConceded;
@@ -676,8 +745,61 @@ function renderStats() {
         <td>${savePct}</td>
         <td>${sevenMSaveFraction}</td>
         <td>${sevenMSavePct}</td>
+        <td>${p.passMisses}</td>
+        <td>${p.catchMisses}</td>
+        <td>${p.dribbleMisses}</td>
       </tr>`;
+
+      // 合計用に加算
+      teamTotal.goals += p.goals;
+      teamTotal.sevenM_goals += p.sevenM_goals;
+      teamTotal.misses += p.misses;
+      teamTotal.sevenM_misses += p.sevenM_misses;
+      teamTotal.saves += p.saves;
+      teamTotal.sevenM_saves += p.sevenM_saves;
+      teamTotal.conceded += p.conceded;
+      teamTotal.sevenM_conceded += p.sevenM_conceded;
+      teamTotal.passMisses += p.passMisses;
+      teamTotal.catchMisses += p.catchMisses;
+      teamTotal.dribbleMisses += p.dribbleMisses;
     });
+
+    // チーム合計行の計算とHTMLへの追加
+    let tTotalGoals = teamTotal.goals + teamTotal.sevenM_goals;
+    let tRegularShots = teamTotal.goals + teamTotal.misses;
+    let tShotPct = tRegularShots > 0 ? Math.round((teamTotal.goals / tRegularShots) * 100) + '%' : '-';
+    let tShotFraction = `${teamTotal.goals}/${tRegularShots}`;
+
+    let tSevenMShots = teamTotal.sevenM_goals + teamTotal.sevenM_misses;
+    let tSevenMShotPct = tSevenMShots > 0 ? Math.round((teamTotal.sevenM_goals / tSevenMShots) * 100) + '%' : '-';
+    let tSevenMShotFraction = `${teamTotal.sevenM_goals}/${tSevenMShots}`;
+
+    let tRegularSaves = teamTotal.saves;
+    let tRegularConceded = teamTotal.conceded;
+    let tRegularGkFaced = tRegularSaves + tRegularConceded;
+    let tSavePct = tRegularGkFaced > 0 ? Math.round((tRegularSaves / tRegularGkFaced) * 100) + '%' : '-';
+    let tSaveFraction = `${tRegularSaves}/${tRegularGkFaced}`;
+
+    let tSevenMGkFaced = teamTotal.sevenM_saves + teamTotal.sevenM_conceded;
+    let tSevenMSavePct = tSevenMGkFaced > 0 ? Math.round((teamTotal.sevenM_saves / tSevenMGkFaced) * 100) + '%' : '-';
+    let tSevenMSaveFraction = `${teamTotal.sevenM_saves}/${tSevenMGkFaced}`;
+
+    html += `<tr class="team-total-row">
+      <td style="text-align:left;">【チーム合計】</td>
+      <td>${tTotalGoals} <span style="font-size:10px; color:#555;">(${teamTotal.sevenM_goals})</span></td>
+      <td>${tShotFraction}</td>
+      <td>${tShotPct}</td>
+      <td>${tSevenMShotFraction}</td>
+      <td>${tSevenMShotPct}</td>
+      <td>${tSaveFraction}</td>
+      <td>${tSavePct}</td>
+      <td>${tSevenMSaveFraction}</td>
+      <td>${tSevenMSavePct}</td>
+      <td>${teamTotal.passMisses}</td>
+      <td>${teamTotal.catchMisses}</td>
+      <td>${teamTotal.dribbleMisses}</td>
+    </tr>`;
+
     return html;
   }
 
