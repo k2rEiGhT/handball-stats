@@ -904,10 +904,15 @@ function recordTimeout(team) {
   renderButtons();
 }
 
-// ================= LINEで結果とスタッツ画像を送る（スマホ完全対応版） =================
-async function shareToLineWithImage() {
+// ================= LINEで結果とスタッツ画像を送る（超安定・スマホ完全対応版） =================
+function shareToLineWithImage() {
+  // 1. ライブラリが読み込まれているかチェック
+  if (typeof html2canvas === 'undefined') {
+    alert("画像生成機能がまだ読み込まれていないか、通信エラーです。\n少し待ってから再度お試しください。");
+    return;
+  }
+
   const statsElement = document.getElementById('statsContainer');
-  
   if (!statsElement || statsElement.style.display === 'none') {
     alert("チームが登録されていません。");
     return;
@@ -922,62 +927,84 @@ async function shareToLineWithImage() {
   text += `${teamA}  ${scoreA} - ${scoreB}  ${teamB}\n\n`;
   text += `※詳細なスタッツは画像をご確認ください。`;
 
+  // 2. ボタンの文字を変更し、連続タップを防止
   const btn = document.querySelector('.line-btn');
   const originalText = btn.innerText;
   btn.innerText = "画像を作成中...";
   btn.disabled = true;
 
-  try {
-    // 1. html2canvasで画像化（async/awaitで処理を待つ）
-    const canvas = await html2canvas(statsElement, {
-      backgroundColor: '#ffffff',
-      scale: 2,
-      useCORS: true
-    });
+  // 3. UIの「作成中...」を画面に確実に反映させるために、ほんの少し待つ（これをしないとフリーズして見えます）
+  setTimeout(() => {
+    try {
+      // html2canvasで画像化（ズレ防止オプションを追加して安定化）
+      html2canvas(statsElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: document.documentElement.offsetWidth,
+        windowHeight: document.documentElement.offsetHeight
+      }).then(canvas => {
+        canvas.toBlob(blob => {
+          if (!blob) {
+            alert("画像データの作成に失敗しました。");
+            btn.innerText = originalText;
+            btn.disabled = false;
+            return;
+          }
 
-    // 2. コールバックではなくPromiseでBlobを取得
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-    if (!blob) throw new Error("画像データが作成できませんでした");
+          let file = null;
+          // 一部の古いスマホだと new File() でエラーになることがあるための対策
+          try {
+            file = new File([blob], "stats.png", { type: "image/png" });
+          } catch (e) {
+            console.warn("File constructor not supported", e);
+          }
 
-    const file = new File([blob], "stats.png", { type: "image/png" });
+          // スマホ標準のシェア機能（Web Share API）が使えるかチェックして試行
+          if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({
+              files: [file],
+              title: matchTitle,
+              text: text
+            }).then(() => {
+              // 共有成功時
+              btn.innerText = originalText;
+              btn.disabled = false;
+            }).catch(error => {
+              console.log('共有キャンセル、またはエラー', error);
+              // ユーザー自身によるキャンセル以外（自動で弾かれた等）ならフォールバックを表示
+              if (error.name !== 'AbortError') {
+                showFallbackShare(blob, text);
+              }
+              btn.innerText = originalText;
+              btn.disabled = false;
+            });
+          } else {
+            // PCや未対応スマホの場合は直接フォールバック（画面に表示するモード）へ
+            showFallbackShare(blob, text);
+            btn.innerText = originalText;
+            btn.disabled = false;
+          }
+        }, "image/png");
 
-    let shareSuccess = false;
+      }).catch(err => {
+        console.error("キャプチャエラー:", err);
+        alert("画面のキャプチャに失敗しました。\nブラウザを更新してお試しください。");
+        btn.innerText = originalText;
+        btn.disabled = false;
+      });
 
-    // 3. スマホの共有機能（Web Share API）を試みる
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: matchTitle,
-          text: text
-        });
-        shareSuccess = true;
-      } catch (error) {
-        console.log('共有キャンセル、またはエラー', error);
-        // AbortError（ユーザーによるキャンセル）以外はエラーとみなして代替手段へ
-        if (error.name !== 'AbortError') {
-          shareSuccess = false;
-        } else {
-          shareSuccess = true; 
-        }
-      }
+    } catch (err) {
+      alert("予期せぬエラーが発生しました。");
+      btn.innerText = originalText;
+      btn.disabled = false;
     }
-
-    // 4. アプリ内ブラウザ（LINE/SafariWebView等）で共有が弾かれた場合の確実な代替手段
-    if (!shareSuccess) {
-      showFallbackShare(blob, text);
-    }
-
-  } catch (err) {
-    console.error("画像化エラー:", err);
-    alert("画像の作成に失敗しました。\n※LINEやTwitterなどのアプリ内ブラウザを使用している場合は、右下のメニューから「Safari(ブラウザ)で開く」を選択してからお試しください。");
-  } finally {
-    btn.innerText = originalText;
-    btn.disabled = false;
-  }
+  }, 100);
 }
 
-// 共有機能が動作しないスマホ・PC向けの画面内フォールバック
+// 共有機能が動作しないスマホ・PC向けの画面内フォールバック（直接表示）
 function showFallbackShare(blob, text) {
   const url = URL.createObjectURL(blob);
   let resultArea = document.getElementById('result-image-area');
@@ -998,6 +1025,7 @@ function showFallbackShare(blob, text) {
   resultArea.style.borderRadius = "8px";
   resultArea.classList.add('noprint'); // 印刷時は消す
   
+  // ボタンのすぐ下に挿入
   document.querySelector('.footer-buttons').after(resultArea);
 
   const encodedText = encodeURIComponent(text);
@@ -1006,15 +1034,17 @@ function showFallbackShare(blob, text) {
   // 画像とLINEの送信リンクをDOMに書き込む
   resultArea.innerHTML = `
     <h4 style="margin-top:0; color:#333; font-size:18px;">画像が生成されました！</h4>
-    <p style="font-size:15px; color:#333; margin-bottom:15px; line-height:1.5;">
-      お使いのブラウザでは自動共有が制限されているため、<br>
-      以下の画像を<strong>長押し（PCは右クリック）して保存</strong>し、<br>下のボタンから手動でLINEに添付して送信してください。
+    <p style="font-size:14px; color:#333; margin-bottom:15px; line-height:1.5;">
+      お使いの環境では自動共有がブロックされたため、画面上に表示しています。<br>
+      以下の画像を<strong>長押し（PCは右クリック）して「写真に保存」</strong>し、<br>下のボタンからLINEを開いて画像を添付してください。
     </p>
     <img src="${url}" style="max-width:100%; height:auto; border:1px solid #ccc; margin-bottom:20px; border-radius:4px; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
     <br>
     <a href="${lineUrl}" target="_blank" style="display:inline-block; padding:15px 24px; background:#06C755; color:white; text-decoration:none; font-weight:bold; font-size: 16px; border-radius:8px; width:90%; box-sizing:border-box; box-shadow:0 2px 5px rgba(0,0,0,0.2);">LINEを開いてスコアを送る</a>
   `;
   
-  // 生成された場所に画面をスクロールする
-  resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // 少し待ってから、生成された場所に画面をスクロールする
+  setTimeout(() => {
+    resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 }
