@@ -27,7 +27,6 @@ let isEnded = false;
 // 登録画面でコートチェックを監視し、GK選択肢を動的にアップデートする
 function limitCheckAndGkUpdate(checkbox, team) {
   let index = checkbox.value;
-  // ★追加：コートにチェックを入れたら除外チェックを外す
   if (checkbox.checked) {
     let excludeCheck = document.querySelector(`.exclude-check-${team}[value="${index}"]`);
     if (excludeCheck) excludeCheck.checked = false;
@@ -42,11 +41,10 @@ function limitCheckAndGkUpdate(checkbox, team) {
   updateGkDropdown(team);
 }
 
-// ★新規追加：除外チェックの挙動
+// 除外チェックの挙動
 function handleExcludeCheck(checkbox, team) {
   let index = checkbox.value;
   if (checkbox.checked) {
-    // 除外をチェックしたらコートのチェックを外す
     let courtCheck = document.querySelector(`.starter-check-${team}[value="${index}"]`);
     if (courtCheck && courtCheck.checked) {
       courtCheck.checked = false;
@@ -69,7 +67,6 @@ function updateGkDropdown(team) {
   checkedCheckboxes.forEach(cb => {
     let index = cb.value;
     let nameVal = document.getElementById(`name${team}_${index}`).value.trim() || `選手${index}`;
-    // 1〜16まですべて入力欄から背番号を取得する仕様
     let numVal = document.getElementById(`num${team}_${index}`).value.trim() || index;
     html += `<option value="${team}_${index}">${numVal}. ${nameVal}</option>`;
   });
@@ -90,7 +87,6 @@ window.onload = function() {
     <div class="input-grid">
       <div class="input-col">`;
     
-    // 1から16まですべて背番号と名前の自由入力にする
     for (let i = 1; i <= 16; i++) {
       if (i === 9) html += `</div><div class="input-col">`;
       
@@ -114,21 +110,18 @@ window.onload = function() {
   setupA.innerHTML = buildInputs('A');
   setupB.innerHTML = buildInputs('B');
 
-  // ★追加：タイマーを画面のまま直接修正する機能
   const timerElement = document.getElementById('timer');
   if (timerElement) {
     timerElement.title = "クリックして時間を直接修正";
     timerElement.style.cursor = "pointer";
     
-    // クリックで編集モード（直接入力可能）にする
     timerElement.addEventListener('click', function() {
       if (isEnded) return;
-      if (isRunning) stopTimer(); // タイマーが動いていたら止める
+      if (isRunning) stopTimer(); 
       
-      this.contentEditable = true; // 直接編集を許可
+      this.contentEditable = true; 
       this.focus();
       
-      // テキストを全選択状態にして、すぐ上書き入力できるようにする
       const range = document.createRange();
       range.selectNodeContents(this);
       const sel = window.getSelection();
@@ -136,22 +129,18 @@ window.onload = function() {
       sel.addRange(range);
     });
 
-    // エンターキーを押したときに編集を完了する
     timerElement.addEventListener('keydown', function(e) {
-      // 変換中（日本語入力中）のEnterキーは無視
       if (e.isComposing) return; 
       if (e.key === 'Enter') {
         e.preventDefault();
-        this.blur(); // フォーカスを外して、すぐ下の blur イベントを強制発火
+        this.blur(); 
       }
     });
 
-    // 画面の別の場所をクリック（フォーカスが外れた）したときに時間を確定・反映する
     timerElement.addEventListener('blur', function() {
-      this.contentEditable = false; // 編集モードを終了
+      this.contentEditable = false; 
       let inputTime = this.innerText.trim();
       
-      // スマホ入力対策：全角数字や全角コロン（１２：３０）を半角に変換する
       inputTime = inputTime.replace(/[０-９：]/g, function(s) {
         return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
       });
@@ -170,43 +159,37 @@ window.onload = function() {
         alert("正しい形式（例: 05:30）で入力してください。");
       }
       
-      // 最終的な正しい時間（または間違っていた場合は元の時間）を再表示
       this.innerText = formatTime(elapsedSeconds);
     });
   }
 }
 
-// ================= 矢印キー・Enterキーで入力欄を移動する機能 =================
+// 矢印キー・Enterキーで入力欄を移動する機能
 document.addEventListener('keydown', function(e) {
-  // ↑(ArrowUp), ↓(ArrowDown), Enterキーのみ処理
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter') {
     const active = document.activeElement;
     
-    // 現在フォーカスされているのが、背番号か名前の入力欄かチェック
     const match = active.id ? active.id.match(/^(num|name)(A|B)_(\d+)$/) : null;
     if (match) {
-      // 変換中（日本語入力中）のEnterキーは無視する
       if (e.isComposing) return;
       
-      e.preventDefault(); // デフォルトの動き（画面スクロールなど）を止める
+      e.preventDefault(); 
       
       const type = match[1];
       const team = match[2];
       let idx = parseInt(match[3], 10);
       
-      // ↓またはEnterなら次の番号へ、↑なら前の番号へ
       if (e.key === 'ArrowDown' || e.key === 'Enter') {
         idx++;
       } else if (e.key === 'ArrowUp') {
         idx--;
       }
       
-      // 1〜16の範囲内ならフォーカスを移動
       if (idx >= 1 && idx <= 16) {
         const nextInput = document.getElementById(`${type}${team}_${idx}`);
         if (nextInput) {
           nextInput.focus();
-          nextInput.select(); // 連続入力しやすいように文字を選択状態にする
+          nextInput.select(); 
         }
       }
     }
@@ -218,7 +201,6 @@ function updateRoster() {
   customTeamA = document.getElementById('teamNameA').value.trim() || "Team A";
   customTeamB = document.getElementById('teamNameB').value.trim() || "Team B";
 
-  // 大会名の横に対戦カードを自動表示
   const matchUpDisplay = document.getElementById('matchUpDisplay');
   if (matchUpDisplay) {
     matchUpDisplay.innerText = `${customTeamA} vs. ${customTeamB}`;
@@ -227,7 +209,6 @@ function updateRoster() {
   const gkValA = document.getElementById('gkSelectA').value;
   const gkValB = document.getElementById('gkSelectB').value;
 
-  // GKの初期選択必須チェック
   if (!gkValA || !gkValB) {
     alert("両チームとも、コート上から1名ゴールキーパー(GK)を指定してください。");
     return;
@@ -236,13 +217,11 @@ function updateRoster() {
   document.getElementById('displayTeamNameA').innerText = customTeamA;
   document.getElementById('displayTeamNameB').innerText = customTeamB;
   
-  // タイムアウトボタンのチーム名も更新
   const btnToA = document.getElementById('btnTimeoutA');
   const btnToB = document.getElementById('btnTimeoutB');
   if (btnToA) btnToA.innerText = customTeamA + ' T.O.';
   if (btnToB) btnToB.innerText = customTeamB + ' T.O.';
 
-  // ログテーブルのヘッダー更新（左右のチーム名）
   document.getElementById('thPlayerA').innerText = customTeamA;
   document.getElementById('thPlayerB').innerText = customTeamB;
 
@@ -260,7 +239,6 @@ function updateRoster() {
       let numVal = document.getElementById(`numA_${i}`).value.trim();
       let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
       
-      // ソート用に背番号を数値化（空欄や文字列の場合は9999にして末尾へ）
       let numInt = parseInt(numVal, 10);
       if (isNaN(numInt)) numInt = 9999;
 
@@ -280,7 +258,6 @@ function updateRoster() {
       let numVal = document.getElementById(`numB_${i}`).value.trim();
       let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
       
-      // ソート用に背番号を数値化
       let numInt = parseInt(numVal, 10);
       if (isNaN(numInt)) numInt = 9999;
 
@@ -290,7 +267,6 @@ function updateRoster() {
     }
   }
 
-  // 両チームのコート・ベンチを背番号順（昇順）に並べ替え
   roster.A.court.sort((a, b) => a.num - b.num);
   roster.A.bench.sort((a, b) => a.num - b.num);
   roster.B.court.sort((a, b) => a.num - b.num);
@@ -299,7 +275,6 @@ function updateRoster() {
   renderButtons();
   renderLogs();
   
-  // スタッツ画面の表示と初期計算
   document.getElementById('statsContainer').style.display = 'block';
   renderStats();
   
@@ -353,46 +328,39 @@ function selectPlayer(team, type, id, name) {
   }
 }
 
-// ================= チームの左右入れ替え機能 =================
+// チームの左右入れ替え機能
 function swapTeams() {
-  // チーム名の入れ替え
   let tempTeamName = document.getElementById('teamNameA').value;
   document.getElementById('teamNameA').value = document.getElementById('teamNameB').value;
   document.getElementById('teamNameB').value = tempTeamName;
 
-  // 1〜16番の選手データ（背番号、名前、チェックボックス）を入れ替え
   for (let i = 1; i <= 16; i++) {
-    // Team Aの現在の値を取得
     let numA = document.getElementById(`numA_${i}`).value;
     let nameA = document.getElementById(`nameA_${i}`).value;
     let checkA = document.querySelector(`.starter-check-A[value="${i}"]`).checked;
     let excludeA = document.querySelector(`.exclude-check-A[value="${i}"]`).checked;
 
-    // Team Bの現在の値を取得
     let numB = document.getElementById(`numB_${i}`).value;
     let nameB = document.getElementById(`nameB_${i}`).value;
     let checkB = document.querySelector(`.starter-check-B[value="${i}"]`).checked;
     let excludeB = document.querySelector(`.exclude-check-B[value="${i}"]`).checked;
 
-    // Bの値をAに代入（右から左へ）
     document.getElementById(`numA_${i}`).value = numB;
     document.getElementById(`nameA_${i}`).value = nameB;
     document.querySelector(`.starter-check-A[value="${i}"]`).checked = checkB;
     document.querySelector(`.exclude-check-A[value="${i}"]`).checked = excludeB;
 
-    // Aの値をBに代入（左から右へ）
     document.getElementById(`numB_${i}`).value = numA;
     document.getElementById(`nameB_${i}`).value = nameA;
     document.querySelector(`.starter-check-B[value="${i}"]`).checked = checkA;
     document.querySelector(`.exclude-check-B[value="${i}"]`).checked = excludeA;
   }
 
-  // 両チームのGKドロップダウンリストを再構築
   updateGkDropdown('A');
   updateGkDropdown('B');
 }
 
-// ================= タイマー機能 =================
+// タイマー機能
 function formatTime(totalSeconds) {
   let m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
   let s = (totalSeconds % 60).toString().padStart(2, '0');
@@ -419,17 +387,14 @@ function stopTimer() {
   }
 }
 
-// 前半終了ボタンの処理
 function halfTime() {
   if (!confirm("前半を終了し、タイマーをリセットして後半に移りますか？")) return;
   
-  stopTimer(); // タイマーを止める
+  stopTimer(); 
   
-  // ログに記録を残す（システムメッセージとして記録）
   let recordTime = formatTime(elapsedSeconds);
   addLog(recordTime, 'System', "", "前半終了／後半開始", 0);
   
-  // タイマーを00:00に戻す
   elapsedSeconds = 0;
   document.getElementById('timer').innerText = formatTime(elapsedSeconds);
 }
@@ -440,7 +405,7 @@ function endTimer() {
   document.getElementById('btnStart').disabled = true;
   document.getElementById('btnStop').disabled = true;
   document.getElementById('btnEnd').disabled = true;
-  alert("試合終了！\n記録をPDFで保存してください。");
+  alert("試合終了！\n記録を保存またはシェアしてください。");
 }
 
 function getRecordTime(actionName, isSub = false) {
@@ -457,28 +422,27 @@ function getRecordTime(actionName, isSub = false) {
   return formatTime(elapsedSeconds);
 }
 
-// ================= ログの記録・描画 =================
+// ログの記録・描画
 function addLog(time, teamCode, playerName, actionText, points, playerId = null) {
   matchLogs.unshift({
     id: Date.now() + Math.random(),
     time: time,
     team: teamCode,
-    playerId: playerId,       // 誰がアクションを起こしたかを記憶
+    playerId: playerId,
     player: playerName,
     action: actionText,
     points: points,
-    gkIdA: roster.A.gkId,     // アクション当時のTeam AのGK
-    gkIdB: roster.B.gkId      // アクション当時のTeam BのGK
+    gkIdA: roster.A.gkId,
+    gkIdB: roster.B.gkId
   });
   renderLogs();
-  renderStats(); // ログ追加時にスタッツ再計算
+  renderStats(); 
 }
 
 function renderLogs() {
   let currentScoreA = 0;
   let currentScoreB = 0;
   
-  // 古い記録から順に累計得点と表示用のスコアを計算
   for (let i = matchLogs.length - 1; i >= 0; i--) {
     let log = matchLogs[i];
     let scoreChangedA = false;
@@ -495,7 +459,6 @@ function renderLogs() {
       }
     }
     
-    // 累計得点は保持しつつ、画面表示用は変更があった時のみ数字にする
     log.cumScoreA = currentScoreA;
     log.cumScoreB = currentScoreB;
     log.displayScoreA = scoreChangedA ? currentScoreA : '-';
@@ -511,7 +474,6 @@ function renderLogs() {
   for (let i = 0; i < matchLogs.length; i++) {
     let log = matchLogs[i];
     
-    // チームAのアクションなら左側に、チームBなら右側にデータを配置
     let aPlayer = log.team === 'A' ? log.player : '';
     let aAction = log.team === 'A' ? log.action : (log.team === 'System' ? log.action : '');
     let bPlayer = log.team === 'B' ? log.player : '';
@@ -539,10 +501,10 @@ function deleteLog(id) {
   if (!confirm('この記録を削除しますか？\n※以降の累計得点も自動的に修正されます。')) return;
   matchLogs = matchLogs.filter(log => log.id !== id);
   renderLogs();
-  renderStats(); // ログ削除時にスタッツ再計算
+  renderStats(); 
 }
 
-// ================= アクションの記録 =================
+// アクションの記録
 function recordAction(actionName, points) {
   let team = activeSelection.A.court || activeSelection.A.bench ? 'A' : 
     activeSelection.B.court || activeSelection.B.bench ? 'B' : null;
@@ -566,10 +528,8 @@ function recordAction(actionName, points) {
     assistText = `<br><small>Ast: ${assistSelect.value}</small>`;
   }
 
-  // GKの記録を判別
   const isGk = (roster[team].gkId === targetId) ? " [GK]" : "";
 
-  // 最後に targetId を追加で渡す
   addLog(recordTime, team, targetPlayer + isGk, `${actionName}${assistText}`, points, targetId);
 
   activeSelection[team].court = null;
@@ -579,7 +539,7 @@ function recordAction(actionName, points) {
   renderButtons();
 }
 
-// ================= 交代の記録と処理 =================
+// 交代の記録と処理
 function recordSubstitution() {
   let team = (activeSelection.A.court && activeSelection.A.bench) ? 'A' : 
     (activeSelection.B.court && activeSelection.B.bench) ? 'B' : null;
@@ -601,13 +561,11 @@ function recordSubstitution() {
   let cPlayer = roster[team].court[cIndex];
   let bPlayer = roster[team].bench[bIndex];
 
-  // GKが退く(または入る)場合のラベル処理
   let outLabel = (roster[team].gkId === cId) ? `${cPlayer.name}(GK)` : cPlayer.name;
   let inLabel = (roster[team].gkId === cId) ? `${bPlayer.name}(GK)` : bPlayer.name;
 
   addLog(recordTime, team, "-", `交代 (OUT: ${outLabel} / IN: ${inLabel})`, 0);
 
-  // GKがベンチに下がる場合は、新しく入ってきた選手に自動でGKを引き継ぐ
   if (roster[team].gkId === cId) {
     roster[team].gkId = bId;
   }
@@ -623,7 +581,7 @@ function recordSubstitution() {
   renderButtons();
 }
 
-// ================= GKの役割切り替え機能 =================
+// GKの役割切り替え機能
 function toggleGkRole() {
   let team = activeSelection.A.court ? 'A' : activeSelection.B.court ? 'B' : null;
 
@@ -660,7 +618,7 @@ function toggleGkRole() {
   renderButtons();
 }
 
-// ================= マイチームの自動入力機能 =================
+// マイチームの自動入力機能
 const myTeamData = {
   name: "すわろ〜ず",
   players: [
@@ -698,7 +656,7 @@ function loadMyTeam() {
   updateGkDropdown('A');
 }
 
-// =================相手チームの自動入力機能 =================
+// 相手チームの自動入力機能
 const opponentTeams = [
   {
     name: "Acro",
@@ -745,7 +703,6 @@ function loadOpponentTeam(index) {
   const teamData = opponentTeams[index];
   document.getElementById('teamNameB').value = teamData.name;
   
-  // 一度Team Bのすべての入力をクリアする
   for (let i = 1; i <= 16; i++) {
     document.getElementById(`numB_${i}`).value = '';
     document.getElementById(`nameB_${i}`).value = '';
@@ -753,25 +710,22 @@ function loadOpponentTeam(index) {
     document.querySelector(`.exclude-check-B[value="${i}"]`).checked = false;
   }
 
-  // データを順番にTeam Bの入力枠に埋める
   teamData.players.forEach((p, idx) => {
     let i = idx + 1;
-    if (i > 16) return; // 最大16人まで
+    if (i > 16) return; 
     
     document.getElementById(`numB_${i}`).value = p.num;
     document.getElementById(`nameB_${i}`).value = p.name;
     document.querySelector(`.starter-check-B[value="${i}"]`).checked = p.isStarter;
   });
 
-  // GKのドロップダウンを更新
   updateGkDropdown('B');
 }
 
-// ================= 統計(スタッツ)の計算・描画 =================
+// 統計(スタッツ)の計算・描画
 function renderStats() {
   let stats = { A: {}, B: {} };
   
-  // 初期化：7m用の項目、および各種ミス項目を追加
   let initStats = (team) => {
     let allPlayers = [...roster[team].court, ...roster[team].bench];
     allPlayers.forEach(p => {
@@ -791,7 +745,6 @@ function renderStats() {
     return;
   }
 
-  // ログを全てなぞって集計する
   matchLogs.forEach(log => {
     if (!log.playerId) return; 
     
@@ -807,7 +760,6 @@ function renderStats() {
       let team = log.team;
       let oppTeam = team === 'A' ? 'B' : 'A';
       
-      // シューターのスタッツ加算
       if (stats[team][log.playerId]) {
         if (isGoal) stats[team][log.playerId].goals++;
         if (is7mGoal) stats[team][log.playerId].sevenM_goals++;
@@ -818,7 +770,6 @@ function renderStats() {
         if (isDribbleMiss) stats[team][log.playerId].dribbleMisses++;
       }
       
-      // 相手GKのスタッツ加算（ミス＝セーブとして扱う）
       let oppGkId = oppTeam === 'A' ? log.gkIdA : log.gkIdB;
       if (oppGkId && stats[oppTeam][oppGkId]) {
         if (isGoal) stats[oppTeam][oppGkId].conceded++;
@@ -830,7 +781,6 @@ function renderStats() {
   });
 
 
-// HTML構築
   function buildStatsHTML(team) {
     let html = '';
     let playerList = Object.values(stats[team]).sort((a, b) => a.num - b.num);
@@ -844,30 +794,25 @@ function renderStats() {
     };
 
     playerList.forEach(p => {
-      // 総得点の計算（7mを含む）
       let totalGoals = p.goals + p.sevenM_goals;
 
-      // 通常のシュート計算（7mを含まない）
       let regularShots = p.goals + p.misses;
       let shotPct = regularShots > 0 ? Math.round((p.goals / regularShots) * 100) + '%' : '-';
-      let shotFraction = `${p.goals}/${regularShots}`; // シュート数 (成功/試行)
+      let shotFraction = `${p.goals}/${regularShots}`; 
       
-      // 7mのシュート計算
       let sevenMShots = p.sevenM_goals + p.sevenM_misses;
       let sevenMShotPct = sevenMShots > 0 ? Math.round((p.sevenM_goals / sevenMShots) * 100) + '%' : '-';
-      let sevenMShotFraction = `${p.sevenM_goals}/${sevenMShots}`; // 7mシュート数 (成功/試行)
+      let sevenMShotFraction = `${p.sevenM_goals}/${sevenMShots}`; 
 
-      // 通常のGKセーブ計算
       let regularSaves = p.saves;
       let regularConceded = p.conceded;
       let regularGkFaced = regularSaves + regularConceded;
       let savePct = regularGkFaced > 0 ? Math.round((regularSaves / regularGkFaced) * 100) + '%' : '-';
-      let saveFraction = `${regularSaves}/${regularGkFaced}`; // GKセーブ数 (セーブ/被シュート)
+      let saveFraction = `${regularSaves}/${regularGkFaced}`; 
       
-      // 7mのGKセーブ計算
       let sevenMGkFaced = p.sevenM_saves + p.sevenM_conceded;
       let sevenMSavePct = sevenMGkFaced > 0 ? Math.round((p.sevenM_saves / sevenMGkFaced) * 100) + '%' : '-';
-      let sevenMSaveFraction = `${p.sevenM_saves}/${sevenMGkFaced}`; // 7mセーブ数 (セーブ/被シュート)
+      let sevenMSaveFraction = `${p.sevenM_saves}/${sevenMGkFaced}`; 
       
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
@@ -885,7 +830,6 @@ function renderStats() {
         <td>${p.dribbleMisses}</td>
       </tr>`;
 
-      // 合計用に加算
       teamTotal.goals += p.goals;
       teamTotal.sevenM_goals += p.sevenM_goals;
       teamTotal.misses += p.misses;
@@ -899,7 +843,6 @@ function renderStats() {
       teamTotal.dribbleMisses += p.dribbleMisses;
     });
 
-    // チーム合計行の計算とHTMLへの追加
     let tTotalGoals = teamTotal.goals + teamTotal.sevenM_goals;
     let tRegularShots = teamTotal.goals + teamTotal.misses;
     let tShotPct = tRegularShots > 0 ? Math.round((teamTotal.goals / tRegularShots) * 100) + '%' : '-';
@@ -944,19 +887,15 @@ function renderStats() {
   document.getElementById('statsBodyB').innerHTML = buildStatsHTML('B');
 }
 
-// ================= タイムアウトの記録と処理 =================
+// タイムアウトの記録と処理
 function recordTimeout(team) {
-  // 時間を取得（引数にtrueを渡して停止警告をスキップ）
   const recordTime = getRecordTime("タイムアウト", true);
   if (recordTime === null) return;
 
-  // ★タイマーを自動的にストップ
   stopTimer();
 
-  // ログに追加（タイムアウトはチーム全体のアクションなので選手名は「-」）
   addLog(recordTime, team, "-", "タイムアウト", 0);
 
-  // 選手が選択状態だった場合は解除してリセット
   activeSelection.A.court = null;
   activeSelection.A.bench = null;
   activeSelection.B.court = null;
@@ -965,17 +904,15 @@ function recordTimeout(team) {
   renderButtons();
 }
 
-// ================= LINEで結果とスタッツ画像を送る =================
+// ================= LINEで結果とスタッツ画像を送る（スマホ完全対応版） =================
 async function shareToLineWithImage() {
   const statsElement = document.getElementById('statsContainer');
   
-  // スタッツ画面が表示されていない（登録前）場合は弾く
   if (!statsElement || statsElement.style.display === 'none') {
     alert("チームが登録されていません。");
     return;
   }
 
-  // LINEに送るテキストの準備
   const teamA = document.getElementById('displayTeamNameA').innerText;
   const teamB = document.getElementById('displayTeamNameB').innerText;
   const matchTitle = document.querySelector('.match-info-title').value || "試合結果";
@@ -985,70 +922,99 @@ async function shareToLineWithImage() {
   text += `${teamA}  ${scoreA} - ${scoreB}  ${teamB}\n\n`;
   text += `※詳細なスタッツは画像をご確認ください。`;
 
-  try {
-    // 処理中であることがわかるようにボタンの文字を変更
-    const btn = document.querySelector('.line-btn');
-    const originalText = btn.innerText;
-    btn.innerText = "画像を作成中...";
-    btn.disabled = true;
+  const btn = document.querySelector('.line-btn');
+  const originalText = btn.innerText;
+  btn.innerText = "画像を作成中...";
+  btn.disabled = true;
 
-    // html2canvasでスタッツ部分を画像化
+  try {
+    // 1. html2canvasで画像化（async/awaitで処理を待つ）
     const canvas = await html2canvas(statsElement, {
-      backgroundColor: '#ffffff', // 背景を白に設定（透過防止）
-      scale: 2 // 高画質化
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true
     });
 
-    // Canvasを画像ファイル（Blob）に変換
-    canvas.toBlob(async (blob) => {
-      if (!blob) {
-        alert("画像の生成に失敗しました。");
-        btn.innerText = originalText;
-        btn.disabled = false;
-        return;
-      }
+    // 2. コールバックではなくPromiseでBlobを取得
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) throw new Error("画像データが作成できませんでした");
 
-      const file = new File([blob], "stats.png", { type: "image/png" });
+    const file = new File([blob], "stats.png", { type: "image/png" });
 
-      // スマホの共有機能（Web Share API）が使える場合
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],      // 画像
-            title: matchTitle,
-            text: text          // スコアテキスト
-          });
-        } catch (error) {
-          console.log('共有がキャンセルされたか失敗しました', error);
+    let shareSuccess = false;
+
+    // 3. スマホの共有機能（Web Share API）を試みる
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: matchTitle,
+          text: text
+        });
+        shareSuccess = true;
+      } catch (error) {
+        console.log('共有キャンセル、またはエラー', error);
+        // AbortError（ユーザーによるキャンセル）以外はエラーとみなして代替手段へ
+        if (error.name !== 'AbortError') {
+          shareSuccess = false;
+        } else {
+          shareSuccess = true; 
         }
-      } else {
-        // PCなど、Web Share API非対応の場合は画像をダウンロードしつつ、LINEのWeb画面を開く
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "match_stats.png";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        const encodedText = encodeURIComponent(text);
-        const lineUrl = `https://line.me/R/msg/text/?${encodedText}`;
-        window.open(lineUrl, '_blank');
-        
-        alert("スタッツ画像をダウンロードしました。LINEに手動で添付してください。");
       }
+    }
 
-      // ボタンを元に戻す
-      btn.innerText = originalText;
-      btn.disabled = false;
-
-    }, "image/png");
+    // 4. アプリ内ブラウザ（LINE/SafariWebView等）で共有が弾かれた場合の確実な代替手段
+    if (!shareSuccess) {
+      showFallbackShare(blob, text);
+    }
 
   } catch (err) {
     console.error("画像化エラー:", err);
-    alert("画像の作成に失敗しました。");
-    const btn = document.querySelector('.line-btn');
-    btn.innerText = "LINEで結果とスタッツ画像を送る";
+    alert("画像の作成に失敗しました。\n※LINEやTwitterなどのアプリ内ブラウザを使用している場合は、右下のメニューから「Safari(ブラウザ)で開く」を選択してからお試しください。");
+  } finally {
+    btn.innerText = originalText;
     btn.disabled = false;
   }
+}
+
+// 共有機能が動作しないスマホ・PC向けの画面内フォールバック
+function showFallbackShare(blob, text) {
+  const url = URL.createObjectURL(blob);
+  let resultArea = document.getElementById('result-image-area');
+  
+  // 既に表示されている場合は一旦消す
+  if (resultArea) {
+    resultArea.remove();
+  }
+
+  // 画面上に画像表示領域を新しく作る
+  resultArea = document.createElement('div');
+  resultArea.id = 'result-image-area';
+  resultArea.style.marginTop = "20px";
+  resultArea.style.textAlign = "center";
+  resultArea.style.padding = "20px 10px";
+  resultArea.style.background = "#e9ecef";
+  resultArea.style.border = "2px dashed #6c757d";
+  resultArea.style.borderRadius = "8px";
+  resultArea.classList.add('noprint'); // 印刷時は消す
+  
+  document.querySelector('.footer-buttons').after(resultArea);
+
+  const encodedText = encodeURIComponent(text);
+  const lineUrl = `https://line.me/R/msg/text/?${encodedText}`;
+
+  // 画像とLINEの送信リンクをDOMに書き込む
+  resultArea.innerHTML = `
+    <h4 style="margin-top:0; color:#333; font-size:18px;">画像が生成されました！</h4>
+    <p style="font-size:15px; color:#333; margin-bottom:15px; line-height:1.5;">
+      お使いのブラウザでは自動共有が制限されているため、<br>
+      以下の画像を<strong>長押し（PCは右クリック）して保存</strong>し、<br>下のボタンから手動でLINEに添付して送信してください。
+    </p>
+    <img src="${url}" style="max-width:100%; height:auto; border:1px solid #ccc; margin-bottom:20px; border-radius:4px; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+    <br>
+    <a href="${lineUrl}" target="_blank" style="display:inline-block; padding:15px 24px; background:#06C755; color:white; text-decoration:none; font-weight:bold; font-size: 16px; border-radius:8px; width:90%; box-sizing:border-box; box-shadow:0 2px 5px rgba(0,0,0,0.2);">LINEを開いてスコアを送る</a>
+  `;
+  
+  // 生成された場所に画面をスクロールする
+  resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
