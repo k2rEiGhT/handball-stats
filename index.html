@@ -23,6 +23,11 @@
                     <select id="gkSelectA"><option value="">選択してください</option></select>
                 </div>
             </div>
+
+            <div class="swap-container">
+                <button type="button" class="swap-btn" onclick="swapTeams()">⇄</button>
+            
+            </div>
             <div class="team-setup">
                 <h3><input type="text" id="teamNameB" placeholder="チーム名"></h3>
                 <!-- 相手チーム自動入力ボタン -->
@@ -96,6 +101,9 @@
                     <button class="penalty-btn" onclick="recordAction('ラインクロス', 0)">ラインクロス</button>
                     <button class="penalty-btn" onclick="recordAction('キックボール', 0)">キックボール</button>
                     <button class="penalty-btn" onclick="recordAction('チャージング', 0)">チャージング</button>
+                    <button class="penalty-btn" onclick="recordAction('OFファウル', 0)">OFファウル</button>
+                    <button class="penalty-btn" onclick="recordAction('DFファウル', 0)">DFファウル</button>
+                    <button disabled></button>
                     <button disabled></button>
 
                     <button onclick="recordAction('7m得点', 1)">7m（得点）</button>
@@ -157,6 +165,7 @@
     <!-- ボタンを横並びにするための枠 -->
     <div class="footer-buttons">
         <button class="print-btn" onclick="window.print()">PDFに変換する</button>
+        <button class="line-btn" onclick="shareToLine()">LINEで結果を送る</button>
     </div>
 
     <!-- 印刷と画面の表示順をコントロールする枠 -->

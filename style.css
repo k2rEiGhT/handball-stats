@@ -139,6 +139,39 @@ body {
   background-color: #001a7a;
 }
 
+/* ================= 左右入れ替えボタンのスタイル ================= */
+.swap-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.swap-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1.5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.swap-btn:hover {
+    background-color: #5a6268;
+}
+
+@media (max-width: 850px) {
+  /* スマホ等で縦並びになった場合はボタンを横向きテキストにする */
+  .swap-btn {
+      padding: 10px;
+      line-height: normal;
+  }
+  .swap-btn br {
+      display: none;
+  }
+}
+
 /* 相手チーム入力ボタン用のコンテナとスタイル */
 .opponent-buttons-container {
     display: flex;
@@ -174,6 +207,23 @@ body {
     height: 16px;
     margin: 0;
     cursor: pointer;
+}
+
+/* 除外チェックボックス */
+.exclude-label {
+    flex: 0 0 24px;
+    margin-left: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.exclude-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #dc3545; /* 除外チェックボックスを赤色（危険色）にする */
 }
 
 .update-btn {
@@ -285,6 +335,7 @@ button.player-btn {
 /* タイマー */
 .timer-container { text-align: center; width: 100%; }
 #timer { font-size: 40px; font-weight: bold; margin-bottom: 10px; font-family: monospace; }
+#timer:hover { opacity: 0.6;    text-decoration: underline;}
 .timer-controls { display: flex; justify-content: center; gap: 5px; }
 .timer-btn { font-size: 14px; padding: 8px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; }
 .timer-btn.start { background: #28a745; }
@@ -478,6 +529,46 @@ td small { color: #555; font-weight: bold; }
     border-radius: 8px; 
     cursor: pointer; 
     background: #dc3545; 
+}
+/* ================= PDF変換・LINEボタン ================= */
+.footer-buttons {
+    display: flex;
+    gap: 15px; /* ★ボタンの間に隙間を空ける */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+.print-btn { 
+    flex: 1; /* ★flex: 0.2から変更 */
+    padding: 15px; 
+    color: white; 
+    font-size: 18px; 
+    font-weight: bold;
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    background: #dc3545; 
+}
+
+/* ★追加：LINEボタンのスタイル */
+.line-btn {
+    flex: 1;
+    padding: 15px; 
+    color: white; 
+    font-size: 18px; 
+    font-weight: bold;
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    background: #05a546; 
+}
+
+/* スマホ表示の時はボタンを縦並びにする */
+@media (max-width: 850px) {
+  .footer-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 /* ================= 試合情報入力エリア（画面上）================= */

@@ -26,6 +26,13 @@ let isEnded = false;
 
 // 登録画面でコートチェックを監視し、GK選択肢を動的にアップデートする
 function limitCheckAndGkUpdate(checkbox, team) {
+  let index = checkbox.value;
+  // ★追加：コートにチェックを入れたら除外チェックを外す
+  if (checkbox.checked) {
+    let excludeCheck = document.querySelector(`.exclude-check-${team}[value="${index}"]`);
+    if (excludeCheck) excludeCheck.checked = false;
+  }
+
   let checkedCount = document.querySelectorAll(`.starter-check-${team}:checked`).length;
   if (checkedCount > 6) {
     checkbox.checked = false;
@@ -33,6 +40,19 @@ function limitCheckAndGkUpdate(checkbox, team) {
     return;
   }
   updateGkDropdown(team);
+}
+
+// ★新規追加：除外チェックの挙動
+function handleExcludeCheck(checkbox, team) {
+  let index = checkbox.value;
+  if (checkbox.checked) {
+    // 除外をチェックしたらコートのチェックを外す
+    let courtCheck = document.querySelector(`.starter-check-${team}[value="${index}"]`);
+    if (courtCheck && courtCheck.checked) {
+      courtCheck.checked = false;
+      updateGkDropdown(team);
+    }
+  }
 }
 
 // 登録画面のGKセレクトボックスを構築
@@ -56,7 +76,7 @@ function updateGkDropdown(team) {
   gkSelect.innerHTML = html;
 }
 
-// 初期化：入力欄とチェックボックスの生成 (16名まで)
+// 初期化：入力欄とチェックボックスの生成 (16名まで)、およびタイマー編集イベントの登録
 window.onload = function() {
   const setupA = document.getElementById('setupA');
   const setupB = document.getElementById('setupB');
@@ -64,8 +84,8 @@ window.onload = function() {
   function buildInputs(teamPrefix) {
     let html = `
     <div class="setup-header">
-      <div class="setup-header-col">コート</div>
-      <div class="setup-header-col">コート</div>
+      <div class="setup-header-col">コート/除外</div>
+      <div class="setup-header-col">コート/除外</div>
     </div>
     <div class="input-grid">
       <div class="input-col">`;
@@ -78,8 +98,11 @@ window.onload = function() {
       <div class="player-input-row">
         <input type="text" id="num${teamPrefix}_${i}" class="player-num-input" placeholder="No." oninput="updateGkDropdown('${teamPrefix}')">
         <input type="text" id="name${teamPrefix}_${i}" class="player-name-input" placeholder="名前" oninput="updateGkDropdown('${teamPrefix}')">
-        <label class="starter-label">
+        <label class="starter-label" title="コート">
           <input type="checkbox" class="starter-check-${teamPrefix}" value="${i}" onclick="limitCheckAndGkUpdate(this, '${teamPrefix}')">
+        </label>
+        <label class="exclude-label" title="除外">
+          <input type="checkbox" class="exclude-check-${teamPrefix}" value="${i}" onclick="handleExcludeCheck(this, '${teamPrefix}')">
         </label>
       </div>`;
     }
@@ -90,6 +113,67 @@ window.onload = function() {
 
   setupA.innerHTML = buildInputs('A');
   setupB.innerHTML = buildInputs('B');
+
+  // ★追加：タイマーを画面のまま直接修正する機能
+  const timerElement = document.getElementById('timer');
+  if (timerElement) {
+    timerElement.title = "クリックして時間を直接修正";
+    timerElement.style.cursor = "pointer";
+    
+    // クリックで編集モード（直接入力可能）にする
+    timerElement.addEventListener('click', function() {
+      if (isEnded) return;
+      if (isRunning) stopTimer(); // タイマーが動いていたら止める
+      
+      this.contentEditable = true; // 直接編集を許可
+      this.focus();
+      
+      // テキストを全選択状態にして、すぐ上書き入力できるようにする
+      const range = document.createRange();
+      range.selectNodeContents(this);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+
+    // エンターキーを押したときに編集を完了する
+    timerElement.addEventListener('keydown', function(e) {
+      // 変換中（日本語入力中）のEnterキーは無視
+      if (e.isComposing) return; 
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.blur(); // フォーカスを外して、すぐ下の blur イベントを強制発火
+      }
+    });
+
+    // 画面の別の場所をクリック（フォーカスが外れた）したときに時間を確定・反映する
+    timerElement.addEventListener('blur', function() {
+      this.contentEditable = false; // 編集モードを終了
+      let inputTime = this.innerText.trim();
+      
+      // スマホ入力対策：全角数字や全角コロン（１２：３０）を半角に変換する
+      inputTime = inputTime.replace(/[０-９：]/g, function(s) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+      });
+      
+      let parts = inputTime.split(':');
+      if (parts.length === 2) {
+        let m = parseInt(parts[0], 10);
+        let s = parseInt(parts[1], 10);
+        
+        if (!isNaN(m) && !isNaN(s) && m >= 0 && s >= 0 && s < 60) {
+          elapsedSeconds = m * 60 + s;
+        } else {
+          alert("正しい形式（例: 05:30）で入力してください。秒数は0〜59である必要があります。");
+        }
+      } else {
+        alert("正しい形式（例: 05:30）で入力してください。");
+      }
+      
+      // 最終的な正しい時間（または間違っていた場合は元の時間）を再表示
+      this.innerText = formatTime(elapsedSeconds);
+    });
+  }
 }
 
 // ================= 矢印キー・Enterキーで入力欄を移動する機能 =================
@@ -170,7 +254,9 @@ function updateRoster() {
   for (let i = 1; i <= 16; i++) {
     let nameInput = document.getElementById(`nameA_${i}`).value.trim();
     let isCourt = document.querySelector(`.starter-check-A[value="${i}"]`).checked;
-    if (nameInput) {
+    let isExcluded = document.querySelector(`.exclude-check-A[value="${i}"]`).checked;
+    
+    if (nameInput && !isExcluded) {
       let numVal = document.getElementById(`numA_${i}`).value.trim();
       let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
       
@@ -188,7 +274,9 @@ function updateRoster() {
   for (let i = 1; i <= 16; i++) {
     let nameInput = document.getElementById(`nameB_${i}`).value.trim();
     let isCourt = document.querySelector(`.starter-check-B[value="${i}"]`).checked;
-    if (nameInput) {
+    let isExcluded = document.querySelector(`.exclude-check-B[value="${i}"]`).checked;
+    
+    if (nameInput && !isExcluded) {
       let numVal = document.getElementById(`numB_${i}`).value.trim();
       let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
       
@@ -263,6 +351,45 @@ function selectPlayer(team, type, id, name) {
       }
     });
   }
+}
+
+// ================= チームの左右入れ替え機能 =================
+function swapTeams() {
+  // チーム名の入れ替え
+  let tempTeamName = document.getElementById('teamNameA').value;
+  document.getElementById('teamNameA').value = document.getElementById('teamNameB').value;
+  document.getElementById('teamNameB').value = tempTeamName;
+
+  // 1〜16番の選手データ（背番号、名前、チェックボックス）を入れ替え
+  for (let i = 1; i <= 16; i++) {
+    // Team Aの現在の値を取得
+    let numA = document.getElementById(`numA_${i}`).value;
+    let nameA = document.getElementById(`nameA_${i}`).value;
+    let checkA = document.querySelector(`.starter-check-A[value="${i}"]`).checked;
+    let excludeA = document.querySelector(`.exclude-check-A[value="${i}"]`).checked;
+
+    // Team Bの現在の値を取得
+    let numB = document.getElementById(`numB_${i}`).value;
+    let nameB = document.getElementById(`nameB_${i}`).value;
+    let checkB = document.querySelector(`.starter-check-B[value="${i}"]`).checked;
+    let excludeB = document.querySelector(`.exclude-check-B[value="${i}"]`).checked;
+
+    // Bの値をAに代入（右から左へ）
+    document.getElementById(`numA_${i}`).value = numB;
+    document.getElementById(`nameA_${i}`).value = nameB;
+    document.querySelector(`.starter-check-A[value="${i}"]`).checked = checkB;
+    document.querySelector(`.exclude-check-A[value="${i}"]`).checked = excludeB;
+
+    // Aの値をBに代入（左から右へ）
+    document.getElementById(`numB_${i}`).value = numA;
+    document.getElementById(`nameB_${i}`).value = nameA;
+    document.querySelector(`.starter-check-B[value="${i}"]`).checked = checkA;
+    document.querySelector(`.exclude-check-B[value="${i}"]`).checked = excludeA;
+  }
+
+  // 両チームのGKドロップダウンリストを再構築
+  updateGkDropdown('A');
+  updateGkDropdown('B');
 }
 
 // ================= タイマー機能 =================
@@ -556,6 +683,7 @@ function loadMyTeam() {
     document.getElementById(`numA_${i}`).value = '';
     document.getElementById(`nameA_${i}`).value = '';
     document.querySelector(`.starter-check-A[value="${i}"]`).checked = false;
+    document.querySelector(`.exclude-check-A[value="${i}"]`).checked = false;
   }
 
   myTeamData.players.forEach((p, index) => {
@@ -579,6 +707,7 @@ const opponentTeams = [
       { num: "3", name: "松本 爽", isStarter: true },
       { num: "5", name: "齋藤 克弥", isStarter: true },
       { num: "13", name: "足立 麻弥", isStarter: false },
+      { num: "14", name: "大濵 佑輔", isStarter: false },
       { num: "30", name: "歴舎 敦輝", isStarter: true },
       { num: "31", name: "深谷 直輝", isStarter: true },
       { num: "56", name: "上中 大輔", isStarter: true },
@@ -588,14 +717,19 @@ const opponentTeams = [
   {
     name: "LBH",
     players: [
-      { num: "2", name: "安田孝志", isStarter: true },
-      { num: "3", name: "東出修弥", isStarter: true },
-      { num: "5", name: "田中大樹", isStarter: true },
-      { num: "7", name: "木村正也", isStarter: true },
-      { num: "8", name: "佐藤璃恵子", isStarter: false },
-      { num: "21", name: "佐藤克輝", isStarter: true },
-      { num: "38", name: "友田幸作", isStarter: false },
-      { num: "73", name: "八橋龍二", isStarter: true }
+      { num: "2", name: "安田 孝志", isStarter: true },
+      { num: "3", name: "東出 修弥", isStarter: true },
+      { num: "4", name: "東 武志", isStarter: true },
+      { num: "5", name: "田中 大樹", isStarter: true },
+      { num: "7", name: "木村 正也", isStarter: true },
+      { num: "8", name: "佐藤 璃恵子", isStarter: false },
+      { num: "21", name: "佐藤 克輝", isStarter: true },
+      { num: "38", name: "友田 幸作", isStarter: false },
+      { num: "51", name: "磯井 秀人", isStarter: false },
+      { num: "73", name: "八橋 龍二", isStarter: true },
+      { num: "84", name: "橋口 勇喜", isStarter: false },
+      { num: "88", name: "廣田 琢磨", isStarter: false },
+      { num: "99", name: "大石 亜木菜", isStarter: false }
     ]
   },
   {
@@ -616,6 +750,7 @@ function loadOpponentTeam(index) {
     document.getElementById(`numB_${i}`).value = '';
     document.getElementById(`nameB_${i}`).value = '';
     document.querySelector(`.starter-check-B[value="${i}"]`).checked = false;
+    document.querySelector(`.exclude-check-B[value="${i}"]`).checked = false;
   }
 
   // データを順番にTeam Bの入力枠に埋める
@@ -828,4 +963,26 @@ function recordTimeout(team) {
   activeSelection.B.bench = null;
   document.getElementById('manualTime').value = '';
   renderButtons();
+}
+
+// ================= LINEで試合結果をテキストで共有する =================
+function shareToLine() {
+  const teamA = document.getElementById('displayTeamNameA').innerText;
+  const teamB = document.getElementById('displayTeamNameB').innerText;
+  
+  // 試合情報を取得
+  const matchTitle = document.querySelector('.match-info-title').value || "試合結果";
+  const matchDate = document.querySelector('.match-info-text').value || "";
+
+  // LINEに送るメッセージを作成
+  let text = `【${matchTitle}】\n${matchDate}\n\n`;
+  text += `${teamA}  ${scoreA} - ${scoreB}  ${teamB}\n\n`;
+  text += `※詳細なスコアシートはPDFでご確認ください。`;
+
+  // URLエンコードしてLINEの共有URLスキームを作成
+  const encodedText = encodeURIComponent(text);
+  const lineUrl = `https://line.me/R/msg/text/?${encodedText}`;
+
+  // 新しいタブでLINEを開く（スマホの場合はLINEアプリが起動します）
+  window.open(lineUrl, '_blank');
 }
