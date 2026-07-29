@@ -550,11 +550,9 @@ td small { color: #555; font-weight: bold; }
     cursor: pointer; 
 }
 
-.print-btn { background: #dc3545; }
-.print-btn:hover { background: #c82333; }
+.print-btn { background: #c82333; }
 
-.line-btn { background: #06C755; }
-.line-btn:hover { background: #05a546; }
+.line-btn { background: #05a546; }
 .line-btn:disabled { background: #6c757d; cursor: not-allowed; }
 
 /* スマホ表示の時はボタンを縦並びにする */
