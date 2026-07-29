@@ -448,7 +448,7 @@ function getRecordTime(actionName, isSub = false) {
   if (manualTimeInput.value.trim() !== '') {
     return manualTimeInput.value.trim();
   }
-  const noAlertActions = ['警告', '2分間退場', '失格', 'ダブルドリブル', 'キックボール', '3sec', 'ラインクロス', 'ターンオーバー', 'リバウンド', 'チャージング', 'ノーゴール', 'パスミス', 'パスカット', 'キャッチミス', 'ドリブルミス', 'GK交代', 'タイムアウト'];
+  const noAlertActions = ['警告', '2分間退場', '失格', 'ダブルドリブル', 'キックボール', '3sec', 'ラインクロス', 'ターンオーバー', 'リバウンド', 'チャージング', 'ノーゴール', 'パスミス', 'パスカット', 'キャッチミス', 'ドリブルミス', 'GK交代', 'タイムアウト', 'OFファウル', 'DFファウル'];
   if (!isRunning && (!isSub && !noAlertActions.includes(actionName))) {
     if (!confirm('タイマーが停止中または開始前ですが、現在の表示時間で記録しますか？')) {
       return null;
@@ -965,24 +965,90 @@ function recordTimeout(team) {
   renderButtons();
 }
 
-// ================= LINEで試合結果をテキストで共有する =================
-function shareToLine() {
+// ================= LINEで結果とスタッツ画像を送る =================
+async function shareToLineWithImage() {
+  const statsElement = document.getElementById('statsContainer');
+  
+  // スタッツ画面が表示されていない（登録前）場合は弾く
+  if (!statsElement || statsElement.style.display === 'none') {
+    alert("チームが登録されていません。");
+    return;
+  }
+
+  // LINEに送るテキストの準備
   const teamA = document.getElementById('displayTeamNameA').innerText;
   const teamB = document.getElementById('displayTeamNameB').innerText;
-  
-  // 試合情報を取得
   const matchTitle = document.querySelector('.match-info-title').value || "試合結果";
   const matchDate = document.querySelector('.match-info-text').value || "";
 
-  // LINEに送るメッセージを作成
   let text = `【${matchTitle}】\n${matchDate}\n\n`;
   text += `${teamA}  ${scoreA} - ${scoreB}  ${teamB}\n\n`;
-  text += `※詳細なスコアシートはPDFでご確認ください。`;
+  text += `※詳細なスタッツは画像をご確認ください。`;
 
-  // URLエンコードしてLINEの共有URLスキームを作成
-  const encodedText = encodeURIComponent(text);
-  const lineUrl = `https://line.me/R/msg/text/?${encodedText}`;
+  try {
+    // 処理中であることがわかるようにボタンの文字を変更
+    const btn = document.querySelector('.line-btn');
+    const originalText = btn.innerText;
+    btn.innerText = "画像を作成中...";
+    btn.disabled = true;
 
-  // 新しいタブでLINEを開く（スマホの場合はLINEアプリが起動します）
-  window.open(lineUrl, '_blank');
+    // html2canvasでスタッツ部分を画像化
+    const canvas = await html2canvas(statsElement, {
+      backgroundColor: '#ffffff', // 背景を白に設定（透過防止）
+      scale: 2 // 高画質化
+    });
+
+    // Canvasを画像ファイル（Blob）に変換
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert("画像の生成に失敗しました。");
+        btn.innerText = originalText;
+        btn.disabled = false;
+        return;
+      }
+
+      const file = new File([blob], "stats.png", { type: "image/png" });
+
+      // スマホの共有機能（Web Share API）が使える場合
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],      // 画像
+            title: matchTitle,
+            text: text          // スコアテキスト
+          });
+        } catch (error) {
+          console.log('共有がキャンセルされたか失敗しました', error);
+        }
+      } else {
+        // PCなど、Web Share API非対応の場合は画像をダウンロードしつつ、LINEのWeb画面を開く
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "match_stats.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        const encodedText = encodeURIComponent(text);
+        const lineUrl = `https://line.me/R/msg/text/?${encodedText}`;
+        window.open(lineUrl, '_blank');
+        
+        alert("スタッツ画像をダウンロードしました。LINEに手動で添付してください。");
+      }
+
+      // ボタンを元に戻す
+      btn.innerText = originalText;
+      btn.disabled = false;
+
+    }, "image/png");
+
+  } catch (err) {
+    console.error("画像化エラー:", err);
+    alert("画像の作成に失敗しました。");
+    const btn = document.querySelector('.line-btn');
+    btn.innerText = "LINEで結果とスタッツ画像を送る";
+    btn.disabled = false;
+  }
 }

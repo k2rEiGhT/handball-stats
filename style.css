@@ -334,8 +334,27 @@ button.player-btn {
 
 /* タイマー */
 .timer-container { text-align: center; width: 100%; }
-#timer { font-size: 40px; font-weight: bold; margin-bottom: 10px; font-family: monospace; }
-#timer:hover { opacity: 0.6;    text-decoration: underline;}
+#timer { 
+    font-size: 40px; 
+    font-weight: bold; 
+    margin-bottom: 10px; 
+    font-family: monospace; 
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    padding: 2px 10px;
+    display: inline-block;
+}
+#timer:hover { 
+    background-color: #e9ecef;
+    opacity: 0.6;    
+    text-decoration: underline;
+}
+#timer[contenteditable="true"] {
+    outline: 2px dashed #007bff;
+    background-color: #fff;
+    color: #007bff;
+}
+
 .timer-controls { display: flex; justify-content: center; gap: 5px; }
 .timer-btn { font-size: 14px; padding: 8px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; }
 .timer-btn.start { background: #28a745; }
@@ -512,24 +531,6 @@ td small { color: #555; font-weight: bold; }
 }
 
 
-/* ================= PDF変換ボタン ================= */
-.footer-buttons {
-    display: flex;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 100%;
-}
-.print-btn { 
-    flex: 0.2; 
-    padding: 15px; 
-    color: white; 
-    font-size: 18px; 
-    font-weight: bold;
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    background: #dc3545; 
-}
 /* ================= PDF変換・LINEボタン ================= */
 .footer-buttons {
     display: flex;
@@ -538,8 +539,8 @@ td small { color: #555; font-weight: bold; }
     margin-bottom: 20px;
     width: 100%;
 }
-.print-btn { 
-    flex: 1; /* ★flex: 0.2から変更 */
+.print-btn, .line-btn { 
+    flex: 1; 
     padding: 15px; 
     color: white; 
     font-size: 18px; 
@@ -547,21 +548,14 @@ td small { color: #555; font-weight: bold; }
     border: none; 
     border-radius: 8px; 
     cursor: pointer; 
-    background: #dc3545; 
 }
 
-/* ★追加：LINEボタンのスタイル */
-.line-btn {
-    flex: 1;
-    padding: 15px; 
-    color: white; 
-    font-size: 18px; 
-    font-weight: bold;
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    background: #05a546; 
-}
+.print-btn { background: #dc3545; }
+.print-btn:hover { background: #c82333; }
+
+.line-btn { background: #06C755; }
+.line-btn:hover { background: #05a546; }
+.line-btn:disabled { background: #6c757d; cursor: not-allowed; }
 
 /* スマホ表示の時はボタンを縦並びにする */
 @media (max-width: 850px) {
@@ -647,9 +641,6 @@ button, .starter-label, select {
   }
   table {
     min-width: 650px;
-  }
-  .footer-buttons {
-    flex-direction: column; /* スマホ・タブレット縦の場合はボタンを縦並びにする */
   }
 }
 
