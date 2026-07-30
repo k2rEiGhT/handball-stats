@@ -334,27 +334,8 @@ button.player-btn {
 
 /* タイマー */
 .timer-container { text-align: center; width: 100%; }
-#timer { 
-    font-size: 40px; 
-    font-weight: bold; 
-    margin-bottom: 10px; 
-    font-family: monospace; 
-    transition: all 0.2s ease;
-    border-radius: 8px;
-    padding: 2px 10px;
-    display: inline-block;
-}
-#timer:hover { 
-    background-color: #e9ecef;
-    opacity: 0.6;    
-    text-decoration: underline;
-}
-#timer[contenteditable="true"] {
-    outline: 2px dashed #007bff;
-    background-color: #fff;
-    color: #007bff;
-}
-
+#timer { font-size: 40px; font-weight: bold; margin-bottom: 10px; font-family: monospace; }
+#timer:hover { opacity: 0.6;    text-decoration: underline;}
 .timer-controls { display: flex; justify-content: center; gap: 5px; }
 .timer-btn { font-size: 14px; padding: 8px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; }
 .timer-btn.start { background: #28a745; }
@@ -441,6 +422,21 @@ button.player-btn {
     margin-bottom: 10px;
 }
 .action-section button.sub-btn:hover { background: #e0a800; }
+
+/* ================= 名前の欄の折り返し防止 ================= */
+/* スタッツテーブルの選手名（1列目） */
+.stats-table td:first-child {
+    white-space: nowrap; /* 文字の折り返しを禁止 */
+    word-break: keep-all; /* 単語の途中で改行させない */
+    min-width: 110px; /* 最低限の幅を確保（必要に応じて数値を調整してください） */
+}
+
+/* 試合ログテーブルのTeam A選手名（1列目）とTeam B選手名（7列目） */
+#logTableBody td:first-child,
+#logTableBody td:nth-child(7) {
+    white-space: nowrap;
+    word-break: keep-all;
+}
 
 /* ログテーブル・スタッツのテーブル共通設定 */
 .log-container { margin-top: 20px; }
@@ -531,6 +527,24 @@ td small { color: #555; font-weight: bold; }
 }
 
 
+/* ================= PDF変換ボタン ================= */
+.footer-buttons {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+.print-btn { 
+    flex: 0.2; 
+    padding: 15px; 
+    color: white; 
+    font-size: 18px; 
+    font-weight: bold;
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    background: #dc3545; 
+}
 /* ================= PDF変換・LINEボタン ================= */
 .footer-buttons {
     display: flex;
@@ -539,8 +553,8 @@ td small { color: #555; font-weight: bold; }
     margin-bottom: 20px;
     width: 100%;
 }
-.print-btn, .line-btn { 
-    flex: 1; 
+.print-btn { 
+    flex: 1; /* ★flex: 0.2から変更 */
     padding: 15px; 
     color: white; 
     font-size: 18px; 
@@ -548,12 +562,21 @@ td small { color: #555; font-weight: bold; }
     border: none; 
     border-radius: 8px; 
     cursor: pointer; 
+    background: #dc3545; 
 }
 
-.print-btn { background: #c82333; }
-
-.line-btn { background: #05a546; }
-.line-btn:disabled { background: #6c757d; cursor: not-allowed; }
+/* ★追加：LINEボタンのスタイル */
+.line-btn {
+    flex: 1;
+    padding: 15px; 
+    color: white; 
+    font-size: 18px; 
+    font-weight: bold;
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    background: #05a546; 
+}
 
 /* スマホ表示の時はボタンを縦並びにする */
 @media (max-width: 850px) {
@@ -639,6 +662,9 @@ button, .starter-label, select {
   }
   table {
     min-width: 650px;
+  }
+  .footer-buttons {
+    flex-direction: column; /* スマホ・タブレット縦の場合はボタンを縦並びにする */
   }
 }
 
