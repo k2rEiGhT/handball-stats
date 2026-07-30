@@ -1034,14 +1034,10 @@ setInterval(function() {
   // タイマーが動いている、または1秒でも進んでいる、または試合終了している場合のみ実行
   if (isRunning || elapsedSeconds > 0 || isEnded) {
     const matchTitle = document.querySelector('.match-info-title').value.trim() || "大会名未定";
-    let matchDate = document.querySelector('.match-info-text').value.trim() || "日付未定";
     const matchUp = document.getElementById('matchUpDisplay').innerText.trim() || "対戦カード未定";
 
-    // 日付のスラッシュをハイフンに変換
-    matchDate = matchDate.replace(/\//g, '-');
-
-    // ブラウザのタイトルを更新
-    document.title = `${matchTitle}_${matchDate}_${matchUp}`;
+    // ブラウザのタイトル（PDFの保存ファイル名）を「大会名 対戦カード」に更新（間に半角スペース）
+    document.title = `${matchTitle} ${matchUp}`;
   }
 }, 1000);
 
