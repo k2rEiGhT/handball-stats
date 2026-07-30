@@ -175,6 +175,7 @@ body {
     display: flex;
     gap: 5px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 .load-opponent-btn {
     flex: 1;
