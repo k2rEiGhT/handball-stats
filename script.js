@@ -721,6 +721,7 @@ const opponentTeams = [
       { num: "21", name: "佐藤 克輝", isStarter: true },
       { num: "38", name: "友田 幸作", isStarter: false },
       { num: "51", name: "磯井 秀人", isStarter: false },
+      { num: "70", name: "北野 尚人", isStarter: false },
       { num: "73", name: "八橋 龍二", isStarter: true },
       { num: "84", name: "橋口 勇喜", isStarter: false },
       { num: "88", name: "廣田 琢磨", isStarter: false },
