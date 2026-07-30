@@ -965,8 +965,9 @@ function recordTimeout(team) {
   renderButtons();
 }
 
-// ================= LINEで試合結果を画像としてシェアする =================
-function shareToLine() {
+
+// ================= 試合結果を画像として保存する =================
+function saveAsImage() {
   // 画面から必要な情報を取得
   const matchTitle = document.querySelector('.match-info-title').value || "試合結果";
   const matchDate = document.querySelector('.match-info-text').value || "";
@@ -979,7 +980,7 @@ function shareToLine() {
   canvas.height = 500;
   const ctx = canvas.getContext('2d');
 
-  // 背景を白に塗りつぶす（これがないと背景が透明になってしまいます）
+  // 背景を白に塗りつぶす
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -1006,41 +1007,24 @@ function shareToLine() {
   // 4. Team A (左側)
   ctx.fillStyle = '#00053a';
   ctx.font = 'bold 40px sans-serif';
-  // 中心から左に配置。名前が長くても幅300px以内に収め、中央の点数と被らないようにする
+  // チーム名が長くても幅300px以内に収める
   ctx.fillText(teamA, 200, 300, 300);
 
   // 5. Team B (右側)
   ctx.fillStyle = '#198754';
   ctx.font = 'bold 40px sans-serif';
-  // 中心から右に配置。同じく幅300px以内に収める
   ctx.fillText(teamB, 800, 300, 300);
 
   // 6. フッターメッセージ (下部)
   ctx.fillStyle = '#999999';
   ctx.font = '24px sans-serif';
-  ctx.fillText('※詳細なスコアシートはPDFでご確認ください。', 500, 440);
+  ctx.fillText('※詳細なスコアはPDFでご確認ください。', 500, 440);
 
   // ========================================================
-  // iPadのシェア機能を使って、作成した画像をLINEに送る
+  // 作成した画像をiPad（端末）にダウンロードする
   // ========================================================
-  if (navigator.share) {
-    canvas.toBlob(async (blob) => {
-      // 画像ファイルとしてパッケージング
-      const file = new File([blob], 'match_result.png', { type: 'image/png' });
-      try {
-        // iPadの共有メニュー（AirDropやLINEが並ぶ画面）を呼び出す
-        await navigator.share({
-          files: [file],
-          title: '試合結果',
-          text: `${matchTitle}\n${matchDate}` // 画像と一緒に添えるテキスト
-        });
-      } catch (err) {
-        console.log('シェアがキャンセルされたか、失敗しました', err);
-      }
-    });
-  } else {
-    // （万が一PCなどで画像シェア機能が使えない場合の予備ルート）
-    let text = `【${matchTitle}】\n${matchDate}\n\n${teamA}  ${scoreA} - ${scoreB}  ${teamB}\n\n※詳細なスコアシートはPDFでご確認ください。`;
-    window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`, '_blank');
-  }
+  const link = document.createElement('a');
+  link.download = `${matchTitle}_試合結果.png`; // 保存されるファイル名
+  link.href = canvas.toDataURL("image/png");
+  link.click();
 }
