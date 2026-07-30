@@ -964,3 +964,29 @@ function recordTimeout(team) {
   document.getElementById('manualTime').value = '';
   renderButtons();
 }
+
+// ================= PDF変換時のファイル名（タイトル）変更機能 =================
+function printToPDF() {
+  // 元のタイトル（"6人制WH ScoreSheet"）を保存しておく
+  const originalTitle = document.title;
+
+  // 画面に入力・表示されている情報を取得する
+  const matchTitle = document.querySelector('.match-info-title').value.trim() || "大会名未定";
+  const matchDate = document.querySelector('.match-info-text').value.trim() || "日付未定";
+  const matchUp = document.getElementById('matchUpDisplay').innerText.trim() || "対戦カード未定";
+
+  // PDFのファイル名にしたい文字列を作成（例：「市民大会_2026年10月1日_TeamA vs TeamB」）
+  // ※ファイル名に使えない記号（/ など）は、iPad側で自動的にハイフン等に変換されます
+  const newFilename = `${matchTitle}_${matchDate}_${matchUp}`;
+
+  // ブラウザのタイトルを一時的に書き換える
+  document.title = newFilename;
+
+  // 印刷（PDF作成）ダイアログを呼び出す
+  window.print();
+
+  // ダイアログが出た後、元のタイトルに戻す（iPadの処理待ちのため少し時間を遅らせる）
+  setTimeout(() => {
+    document.title = originalTitle;
+  }, 1000);
+}
