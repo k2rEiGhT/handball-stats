@@ -436,11 +436,6 @@ function halfTime() {
 
 function endTimer() {
   stopTimer();
-  isEnded = true;
-  document.getElementById('btnStart').disabled = true;
-  document.getElementById('btnStop').disabled = true;
-  document.getElementById('btnEnd').disabled = true;
-  alert("試合終了！\n記録をPDFで保存してください。");
 }
 
 function getRecordTime(actionName, isSub = false) {
