@@ -99,10 +99,7 @@
                     <button class="penalty-btn" onclick="recordAction('ラインクロス', 0)">ラインクロス</button>
                     <button class="penalty-btn" onclick="recordAction('キックボール', 0)">キックボール</button>
                     <button class="penalty-btn" onclick="recordAction('チャージング', 0)">チャージング</button>
-                    <button class="penalty-btn" onclick="recordAction('OFファウル', 0)">OFファウル</button>
                     <button class="penalty-btn" onclick="recordAction('DFファウル', 0)">DFファウル</button>
-                    <button disabled></button>
-                    <button disabled></button>
 
                     <button onclick="recordAction('7m得点', 1)">7m（得点）</button>
                     <button class="black-btn" onclick="recordAction('7mノーゴール', 0)">7m（ノーゴール）</button>
@@ -180,17 +177,13 @@
                         <tr>
                             <th>選手</th>
                             <th>総得点(内7m)</th>
-                            <th>シュート数</th>
-                            <th>シュート率</th>
-                            <th>7mシュート数</th>
-                            <th>7mシュート率</th>
-                            <th>GKセーブ数</th>
-                            <th>セーブ率</th>
-                            <th>7mセーブ数</th>
-                            <th>7mセーブ率</th>
-                            <th>パスミス</th>
-                            <th>キャッチミス</th>
-                            <th>ドリブルミス</th>
+                            <th>シュート</th>
+                            <th>7mシュート</th>
+                            <th>GKセーブ</th>
+                            <th>7mセーブ</th>
+                            <th>OFミス</th>
+                            <th>OFファウル</th>
+                            <th>DFファウル</th>
                         </tr>
                     </thead>
                     <tbody id="statsBodyA"></tbody>

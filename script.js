@@ -767,7 +767,7 @@ function loadOpponentTeam(index) {
 function renderStats() {
   let stats = { A: {}, B: {} };
   
-  // 初期化：7m用の項目、および各種ミス項目を追加
+  // 初期化：新しい項目（OFミス、OFファウル、DFファウル）を追加
   let initStats = (team) => {
     let allPlayers = [...roster[team].court, ...roster[team].bench];
     allPlayers.forEach(p => {
@@ -775,7 +775,9 @@ function renderStats() {
         name: p.name, num: p.num, 
         goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0, 
         saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0,
-        passMisses: 0, catchMisses: 0, dribbleMisses: 0
+        ofMisses: 0, // パス・キャッチ・ドリブルミスの合算
+        ofFouls: 0,  // ダブルドリブル、3sec、ラインクロス、キックボール、チャージング、OFファウル
+        dfFouls: 0   // DFファウル
       };
     });
   };
@@ -795,23 +797,36 @@ function renderStats() {
     let is7mGoal = log.action.startsWith('7m得点');
     let isMiss = log.action.startsWith('ノーゴール');
     let is7mMiss = log.action.startsWith('7mノーゴール');
-    let isPassMiss = log.action.startsWith('パスミス');
-    let isCatchMiss = log.action.startsWith('キャッチミス');
-    let isDribbleMiss = log.action.startsWith('ドリブルミス');
     
-    if (isGoal || is7mGoal || isMiss || is7mMiss || isPassMiss || isCatchMiss || isDribbleMiss) {
+    // OFミスにまとめるアクション
+    let isOfMiss = log.action.startsWith('パスミス') || 
+                   log.action.startsWith('キャッチミス') || 
+                   log.action.startsWith('ドリブルミス');
+                   
+    // OFファウルにまとめるアクション
+    let isOfFoul = log.action.startsWith('ダブルドリブル') || 
+                   log.action.startsWith('3sec') || 
+                   log.action.startsWith('ラインクロス') || 
+                   log.action.startsWith('キックボール') || 
+                   log.action.startsWith('チャージング') || 
+                   log.action.startsWith('OFファウル');
+                   
+    // DFファウル
+    let isDfFoul = log.action.startsWith('DFファウル');
+    
+    if (isGoal || is7mGoal || isMiss || is7mMiss || isOfMiss || isOfFoul || isDfFoul) {
       let team = log.team;
       let oppTeam = team === 'A' ? 'B' : 'A';
       
-      // シューターのスタッツ加算
+      // シューター・プレイヤーのスタッツ加算
       if (stats[team][log.playerId]) {
         if (isGoal) stats[team][log.playerId].goals++;
         if (is7mGoal) stats[team][log.playerId].sevenM_goals++;
         if (isMiss) stats[team][log.playerId].misses++;
         if (is7mMiss) stats[team][log.playerId].sevenM_misses++;
-        if (isPassMiss) stats[team][log.playerId].passMisses++;
-        if (isCatchMiss) stats[team][log.playerId].catchMisses++;
-        if (isDribbleMiss) stats[team][log.playerId].dribbleMisses++;
+        if (isOfMiss) stats[team][log.playerId].ofMisses++;
+        if (isOfFoul) stats[team][log.playerId].ofFouls++;
+        if (isDfFoul) stats[team][log.playerId].dfFouls++;
       }
       
       // 相手GKのスタッツ加算（ミス＝セーブとして扱う）
@@ -825,8 +840,7 @@ function renderStats() {
     }
   });
 
-
-// HTML構築
+  // HTML構築（指定されたフォーマットに変更）
   function buildStatsHTML(team) {
     let html = '';
     let playerList = Object.values(stats[team]).sort((a, b) => a.num - b.num);
@@ -836,52 +850,43 @@ function renderStats() {
       misses: 0, sevenM_misses: 0,
       saves: 0, sevenM_saves: 0,
       conceded: 0, sevenM_conceded: 0,
-      passMisses: 0, catchMisses: 0, dribbleMisses: 0
+      ofMisses: 0, ofFouls: 0, dfFouls: 0
+    };
+
+    // 数値から「成功数/試行数 (パーセンテージ)」の文字列を生成するヘルパー関数
+    const formatStat = (success, attempt) => {
+      if (attempt === 0) return '-';
+      let pct = Math.round((success / attempt) * 100);
+      return `${success}/${attempt}（${pct}％）`;
     };
 
     playerList.forEach(p => {
-      // 総得点の計算（7mを含む）
+      // 合計の計算
       let totalGoals = p.goals + p.sevenM_goals;
-
-      // 通常のシュート計算（7mを含まない）
-      let regularShots = p.goals + p.misses;
-      let shotPct = regularShots > 0 ? Math.round((p.goals / regularShots) * 100) + '%' : '-';
-      let shotFraction = `${p.goals}/${regularShots}`; // シュート数 (成功/試行)
-      
-      // 7mのシュート計算
-      let sevenMShots = p.sevenM_goals + p.sevenM_misses;
-      let sevenMShotPct = sevenMShots > 0 ? Math.round((p.sevenM_goals / sevenMShots) * 100) + '%' : '-';
-      let sevenMShotFraction = `${p.sevenM_goals}/${sevenMShots}`; // 7mシュート数 (成功/試行)
-
-      // 通常のGKセーブ計算
-      let regularSaves = p.saves;
-      let regularConceded = p.conceded;
-      let regularGkFaced = regularSaves + regularConceded;
-      let savePct = regularGkFaced > 0 ? Math.round((regularSaves / regularGkFaced) * 100) + '%' : '-';
-      let saveFraction = `${regularSaves}/${regularGkFaced}`; // GKセーブ数 (セーブ/被シュート)
-      
-      // 7mのGKセーブ計算
+      let regularShotsTotal = p.goals + p.misses;
+      let sevenMShotsTotal = p.sevenM_goals + p.sevenM_misses;
+      let regularGkFaced = p.saves + p.conceded;
       let sevenMGkFaced = p.sevenM_saves + p.sevenM_conceded;
-      let sevenMSavePct = sevenMGkFaced > 0 ? Math.round((p.sevenM_saves / sevenMGkFaced) * 100) + '%' : '-';
-      let sevenMSaveFraction = `${p.sevenM_saves}/${sevenMGkFaced}`; // 7mセーブ数 (セーブ/被シュート)
+
+      // フォーマット済みの文字列を取得
+      let shotDisplay = formatStat(p.goals, regularShotsTotal);
+      let sevenMShotDisplay = formatStat(p.sevenM_goals, sevenMShotsTotal);
+      let saveDisplay = formatStat(p.saves, regularGkFaced);
+      let sevenMSaveDisplay = formatStat(p.sevenM_saves, sevenMGkFaced);
       
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
         <td>${totalGoals} <span style="font-size:10px; color:#555;">(${p.sevenM_goals})</span></td>
-        <td>${shotFraction}</td>
-        <td>${shotPct}</td>
-        <td>${sevenMShotFraction}</td>
-        <td>${sevenMShotPct}</td>
-        <td>${saveFraction}</td>
-        <td>${savePct}</td>
-        <td>${sevenMSaveFraction}</td>
-        <td>${sevenMSavePct}</td>
-        <td>${p.passMisses}</td>
-        <td>${p.catchMisses}</td>
-        <td>${p.dribbleMisses}</td>
+        <td>${shotDisplay}</td>
+        <td>${sevenMShotDisplay}</td>
+        <td>${saveDisplay}</td>
+        <td>${sevenMSaveDisplay}</td>
+        <td>${p.ofMisses}</td>
+        <td>${p.ofFouls}</td>
+        <td>${p.dfFouls}</td>
       </tr>`;
 
-      // 合計用に加算
+      // チーム合計用に加算
       teamTotal.goals += p.goals;
       teamTotal.sevenM_goals += p.sevenM_goals;
       teamTotal.misses += p.misses;
@@ -890,45 +895,33 @@ function renderStats() {
       teamTotal.sevenM_saves += p.sevenM_saves;
       teamTotal.conceded += p.conceded;
       teamTotal.sevenM_conceded += p.sevenM_conceded;
-      teamTotal.passMisses += p.passMisses;
-      teamTotal.catchMisses += p.catchMisses;
-      teamTotal.dribbleMisses += p.dribbleMisses;
+      teamTotal.ofMisses += p.ofMisses;
+      teamTotal.ofFouls += p.ofFouls;
+      teamTotal.dfFouls += p.dfFouls;
     });
 
-    // チーム合計行の計算とHTMLへの追加
+    // チーム合計行の計算と表示
     let tTotalGoals = teamTotal.goals + teamTotal.sevenM_goals;
-    let tRegularShots = teamTotal.goals + teamTotal.misses;
-    let tShotPct = tRegularShots > 0 ? Math.round((teamTotal.goals / tRegularShots) * 100) + '%' : '-';
-    let tShotFraction = `${teamTotal.goals}/${tRegularShots}`;
-
-    let tSevenMShots = teamTotal.sevenM_goals + teamTotal.sevenM_misses;
-    let tSevenMShotPct = tSevenMShots > 0 ? Math.round((teamTotal.sevenM_goals / tSevenMShots) * 100) + '%' : '-';
-    let tSevenMShotFraction = `${teamTotal.sevenM_goals}/${tSevenMShots}`;
-
-    let tRegularSaves = teamTotal.saves;
-    let tRegularConceded = teamTotal.conceded;
-    let tRegularGkFaced = tRegularSaves + tRegularConceded;
-    let tSavePct = tRegularGkFaced > 0 ? Math.round((tRegularSaves / tRegularGkFaced) * 100) + '%' : '-';
-    let tSaveFraction = `${tRegularSaves}/${tRegularGkFaced}`;
-
+    let tRegularShotsTotal = teamTotal.goals + teamTotal.misses;
+    let tSevenMShotsTotal = teamTotal.sevenM_goals + teamTotal.sevenM_misses;
+    let tRegularGkFaced = teamTotal.saves + teamTotal.conceded;
     let tSevenMGkFaced = teamTotal.sevenM_saves + teamTotal.sevenM_conceded;
-    let tSevenMSavePct = tSevenMGkFaced > 0 ? Math.round((teamTotal.sevenM_saves / tSevenMGkFaced) * 100) + '%' : '-';
-    let tSevenMSaveFraction = `${teamTotal.sevenM_saves}/${tSevenMGkFaced}`;
+
+    let tShotDisplay = formatStat(teamTotal.goals, tRegularShotsTotal);
+    let tSevenMShotDisplay = formatStat(teamTotal.sevenM_goals, tSevenMShotsTotal);
+    let tSaveDisplay = formatStat(teamTotal.saves, tRegularGkFaced);
+    let tSevenMSaveDisplay = formatStat(teamTotal.sevenM_saves, tSevenMGkFaced);
 
     html += `<tr class="team-total-row">
       <td style="text-align:left;">【チーム合計】</td>
       <td>${tTotalGoals} <span style="font-size:10px; color:#555;">(${teamTotal.sevenM_goals})</span></td>
-      <td>${tShotFraction}</td>
-      <td>${tShotPct}</td>
-      <td>${tSevenMShotFraction}</td>
-      <td>${tSevenMShotPct}</td>
-      <td>${tSaveFraction}</td>
-      <td>${tSavePct}</td>
-      <td>${tSevenMSaveFraction}</td>
-      <td>${tSevenMSavePct}</td>
-      <td>${teamTotal.passMisses}</td>
-      <td>${teamTotal.catchMisses}</td>
-      <td>${teamTotal.dribbleMisses}</td>
+      <td>${tShotDisplay}</td>
+      <td>${tSevenMShotDisplay}</td>
+      <td>${tSaveDisplay}</td>
+      <td>${tSevenMSaveDisplay}</td>
+      <td>${teamTotal.ofMisses}</td>
+      <td>${teamTotal.ofFouls}</td>
+      <td>${teamTotal.dfFouls}</td>
     </tr>`;
 
     return html;
