@@ -967,17 +967,20 @@ function recordTimeout(team) {
 
 // ================= PDF変換時のファイル名変更機能（iPad Chrome最終対策） =================
 
-// ボタンを押す前から、1秒ごとに常に裏側でタイトルを最新状態に書き換え続ける
+// 裏側で1秒ごとにチェックするが、タイトルを変更するのは「スタート」が押された後だけにする
 setInterval(function() {
-  const matchTitle = document.querySelector('.match-info-title').value.trim() || "大会名未定";
-  let matchDate = document.querySelector('.match-info-text').value.trim() || "日付未定";
-  const matchUp = document.getElementById('matchUpDisplay').innerText.trim() || "対戦カード未定";
+  // タイマーが動いている、または1秒でも進んでいる、または試合終了している場合のみ実行
+  if (isRunning || elapsedSeconds > 0 || isEnded) {
+    const matchTitle = document.querySelector('.match-info-title').value.trim() || "大会名未定";
+    let matchDate = document.querySelector('.match-info-text').value.trim() || "日付未定";
+    const matchUp = document.getElementById('matchUpDisplay').innerText.trim() || "対戦カード未定";
 
-  // 日付のスラッシュをハイフンに変換
-  matchDate = matchDate.replace(/\//g, '-');
+    // 日付のスラッシュをハイフンに変換
+    matchDate = matchDate.replace(/\//g, '-');
 
-  // ブラウザのタイトルを更新
-  document.title = `${matchTitle}_${matchDate}_${matchUp}`;
+    // ブラウザのタイトルを更新
+    document.title = `${matchTitle}_${matchDate}_${matchUp}`;
+  }
 }, 1000);
 
 // ボタンが押されたときは、ただ印刷画面を呼び出すだけにする
