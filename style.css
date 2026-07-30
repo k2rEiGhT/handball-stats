@@ -135,9 +135,6 @@ body {
   font-size: 14px;
   font-weight: bold;
 }
-.load-team-btn:hover {
-  background-color: #001a7a;
-}
 
 /* ================= 左右入れ替えボタンのスタイル ================= */
 .swap-container {
@@ -181,16 +178,13 @@ body {
 .load-opponent-btn {
     flex: 1;
     padding: 8px 4px;
-    background-color: #198754; 
+    background-color: #146c43; 
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
     font-weight: bold;
-}
-.load-opponent-btn:hover {
-    background-color: #146c43;
 }
 
 /* コート選択チェックボックス */
