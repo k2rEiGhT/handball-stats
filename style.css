@@ -27,7 +27,8 @@ body {
 
 /* チームごとの入力エリアを枠で囲む */
 .team-setup { 
-    flex: 1; 
+    flex: 1;
+    min-width: 0; 
     background: #ffffff;
     border: 1px solid #ccc;
     padding: 15px;
