@@ -686,7 +686,9 @@ button, .starter-label, select {
 @media print {
   /* 1. 用紙を「横向き」に設定 */
   @page {
-    size: landscape;
+    size: A4 landscape;
+    size: 297mm 210mm;
+    margin 10mm
   }
 
   /* 背景色や網掛けを印刷時にも強制的に出力する設定 */
