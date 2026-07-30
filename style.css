@@ -545,38 +545,8 @@ td small { color: #555; font-weight: bold; }
     cursor: pointer; 
     background: #dc3545; 
 }
-/* ================= PDF変換・LINEボタン ================= */
-.footer-buttons {
-    display: flex;
-    gap: 15px; /* ★ボタンの間に隙間を空ける */
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 100%;
-}
-.print-btn { 
-    flex: 1; /* ★flex: 0.2から変更 */
-    padding: 15px; 
-    color: white; 
-    font-size: 18px; 
-    font-weight: bold;
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    background: #dc3545; 
-}
 
-/* ★追加：LINEボタンのスタイル */
-.line-btn {
-    flex: 1;
-    padding: 15px; 
-    color: white; 
-    font-size: 18px; 
-    font-weight: bold;
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    background: #05a546; 
-}
+
 
 /* スマホ表示の時はボタンを縦並びにする */
 @media (max-width: 850px) {
@@ -688,7 +658,7 @@ button, .starter-label, select {
   @page {
     size: A4 landscape;
     size: 297mm 210mm;
-    margin 10mm
+    margin: 10mm;
   }
 
   /* 背景色や網掛けを印刷時にも強制的に出力する設定 */
