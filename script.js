@@ -964,24 +964,23 @@ function recordTimeout(team) {
   document.getElementById('manualTime').value = '';
   renderButtons();
 }
-// ================= PDF変換時のファイル名変更機能（iPad Chrome対策版） =================
-function printToPDF() {
-  // 画面に入力・表示されている情報を取得する
+
+// ================= PDF変換時のファイル名変更機能（iPad Chrome最終対策） =================
+
+// ボタンを押す前から、1秒ごとに常に裏側でタイトルを最新状態に書き換え続ける
+setInterval(function() {
   const matchTitle = document.querySelector('.match-info-title').value.trim() || "大会名未定";
   let matchDate = document.querySelector('.match-info-text').value.trim() || "日付未定";
   const matchUp = document.getElementById('matchUpDisplay').innerText.trim() || "対戦カード未定";
 
-  // 日付に「/」が含まれているとファイル名エラーになるため「-」に置き換える
+  // 日付のスラッシュをハイフンに変換
   matchDate = matchDate.replace(/\//g, '-');
 
-  // PDFのファイル名にしたい文字列を作成
-  const newFilename = `${matchTitle}_${matchDate}_${matchUp}`;
+  // ブラウザのタイトルを更新
+  document.title = `${matchTitle}_${matchDate}_${matchUp}`;
+}, 1000);
 
-  // ブラウザのタイトルを書き換える
-  document.title = newFilename;
-
-  // 【重要】iPadのChromeが新しいタイトルを認識するまで0.5秒（500ミリ秒）待ってから印刷画面を開く
-  setTimeout(() => {
-    window.print();
-  }, 500);
+// ボタンが押されたときは、ただ印刷画面を呼び出すだけにする
+function printToPDF() {
+  window.print();
 }
