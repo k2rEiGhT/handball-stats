@@ -593,6 +593,28 @@ td small { color: #555; font-weight: bold; }
   color: #333;
 }
 
+/* 追加：対戦カードと点数のコンテナ */
+.match-up-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 追加：ヘッダーのスコア表示 */
+.header-score-text {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-top: 5px;
+  line-height: 1.2;
+}
+.header-score-sub {
+  font-size: 16px;
+  color: #555;
+  font-weight: normal;
+}
+
 /* ================= タブレット操作向けの最適化 ================= */
 button, .starter-label, select {
   touch-action: manipulation;
@@ -732,6 +754,20 @@ button, .starter-label, select {
     font-weight: bold;
     margin: 0;
     text-align: right;
+  }
+
+  .match-up-wrapper {
+    align-items: flex-end; /* 印刷時は右寄せにする */
+  }
+
+  .header-score-text {
+    font-size: 18px; /* 印刷用に少し小さく */
+    margin-top: 2px;
+    text-align: right;
+  }
+  
+  .header-score-sub {
+    font-size: 12px;
   }
 
   /* 入力されていない場合のヒント文字（プレースホルダー）は印刷しない */

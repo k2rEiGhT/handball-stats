@@ -23,6 +23,7 @@ let elapsedSeconds = 0;
 let timerInterval = null;
 let isRunning = false;
 let isEnded = false;
+let currentPeriod = 1;
 
 // 登録画面でコートチェックを監視し、GK選択肢を動的にアップデートする
 function limitCheckAndGkUpdate(checkbox, team) {
@@ -431,6 +432,7 @@ function halfTime() {
   
   // タイマーを00:00に戻す
   elapsedSeconds = 0;
+  currentPeriod = 2; //後半と記録
   document.getElementById('timer').innerText = formatTime(elapsedSeconds);
 }
 
@@ -454,9 +456,28 @@ function getRecordTime(actionName, isSub = false) {
 
 // ================= ログの記録・描画 =================
 function addLog(time, teamCode, playerName, actionText, points, playerId = null) {
-  matchLogs.unshift({
+  // ★「MM:SS」を秒数に変換（ソート用）
+  let parts = time.split(':');
+  let timeSec = 0;
+  if (parts.length === 2) {
+    timeSec = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  }
+
+  // ★ログが前半か後半かを判定
+  let logPeriod = currentPeriod;
+  
+  // 賢い判定：後半(2)なのに、現在のタイマーより2分以上未来の時間（例: 15:00）を手動入力した場合、
+  // それは「前半の入力漏れ」だと判断して自動的に前半(1)の適切な位置に挿入します。
+  if (logPeriod === 2 && timeSec > elapsedSeconds + 120) {
+      logPeriod = 1;
+  }
+
+  // ★先頭ではなく配列に追加し、その後全体を並び替える
+  matchLogs.push({
     id: Date.now() + Math.random(),
     time: time,
+    timeSec: timeSec,         // ソート用の秒数
+    period: logPeriod,        // ソート用のピリオド
     team: teamCode,
     playerId: playerId,       // 誰がアクションを起こしたかを記憶
     player: playerName,
@@ -465,6 +486,21 @@ function addLog(time, teamCode, playerName, actionText, points, playerId = null)
     gkIdA: roster.A.gkId,     // アクション当時のTeam AのGK
     gkIdB: roster.B.gkId      // アクション当時のTeam BのGK
   });
+
+  // ★時系列順（新しいものが上＝降順）にソート
+  matchLogs.sort((a, b) => {
+    // 1. まずピリオドを比較（後半=2 が 前半=1 より上に来る）
+    if (a.period !== b.period) {
+      return b.period - a.period;
+    }
+    // 2. 同じピリオドなら、時間が大きい（進んでいる）方が上
+    if (b.timeSec !== a.timeSec) {
+        return b.timeSec - a.timeSec;
+    }
+    // 3. 全く同じ時間なら、新しく入力された方（idが大きい方）を上
+    return b.id - a.id;
+  });
+
   renderLogs();
   renderStats(); // ログ追加時にスタッツ再計算
 }
@@ -473,9 +509,22 @@ function renderLogs() {
   let currentScoreA = 0;
   let currentScoreB = 0;
   
+  // ★追加：前半の点数を記憶する変数
+  let firstHalfA = 0;
+  let firstHalfB = 0;
+  let isFirstHalf = true;
+  
   // 古い記録から順に累計得点と表示用のスコアを計算
   for (let i = matchLogs.length - 1; i >= 0; i--) {
     let log = matchLogs[i];
+
+    // ★追加：前半終了のログを検知したら、そこまでの得点を前半スコアとして確定
+    if (log.team === 'System' && log.action === '前半終了／後半開始') {
+      isFirstHalf = false;
+      firstHalfA = currentScoreA;
+      firstHalfB = currentScoreB;
+    }
+
     let scoreChangedA = false;
     let scoreChangedB = false;
 
@@ -497,10 +546,22 @@ function renderLogs() {
     log.displayScoreB = scoreChangedB ? currentScoreB : '-';
   }
 
+  // ★追加：まだ前半（ハーフタイム前）の場合は、現在の点数をそのまま前半スコアにする
+  if (isFirstHalf) {
+    firstHalfA = currentScoreA;
+    firstHalfB = currentScoreB;
+  }
+
   scoreA = currentScoreA;
   scoreB = currentScoreB;
   document.getElementById('scoreA').innerText = scoreA;
   document.getElementById('scoreB').innerText = scoreB;
+
+  // ★追加：ヘッダーの対戦カード下部にスコアと前半スコアを表示
+  const headerScoreDisplay = document.getElementById('headerScoreDisplay');
+  if (headerScoreDisplay) {
+    headerScoreDisplay.innerHTML = `${scoreA} - ${scoreB}<br><span class="header-score-sub">（前半 ${firstHalfA} - ${firstHalfB}）</span>`;
+  }
 
   let tableHTML = '';
   for (let i = 0; i < matchLogs.length; i++) {
@@ -767,7 +828,7 @@ function loadOpponentTeam(index) {
 function renderStats() {
   let stats = { A: {}, B: {} };
   
-  // 初期化：新しい項目（OFミス、OFファウル、DFファウル）を追加
+  // 初期化：新しい項目を追加
   let initStats = (team) => {
     let allPlayers = [...roster[team].court, ...roster[team].bench];
     allPlayers.forEach(p => {
@@ -777,7 +838,9 @@ function renderStats() {
         saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0,
         ofMisses: 0, // パス・キャッチ・ドリブルミスの合算
         ofFouls: 0,  // ダブルドリブル、3sec、ラインクロス、キックボール、チャージング、OFファウル
-        dfFouls: 0   // DFファウル
+        dfFouls: 0,  // DFファウル
+        steals: 0,   // パスカット (Stl.)
+        blocks: 0    // ブロック (Bl.)
       };
     });
   };
@@ -809,12 +872,13 @@ function renderStats() {
                    log.action.startsWith('ラインクロス') || 
                    log.action.startsWith('キックボール') || 
                    log.action.startsWith('チャージング') || 
-                   log.action.startsWith('OFファウル');
                    
-    // DFファウル
+    // DFファウル・パスカット・ブロック
     let isDfFoul = log.action.startsWith('DFファウル');
+    let isSteal = log.action.startsWith('パスカット');
+    let isBlock = log.action.startsWith('ブロック');
     
-    if (isGoal || is7mGoal || isMiss || is7mMiss || isOfMiss || isOfFoul || isDfFoul) {
+    if (isGoal || is7mGoal || isMiss || is7mMiss || isOfMiss || isOfFoul || isDfFoul || isSteal || isBlock) {
       let team = log.team;
       let oppTeam = team === 'A' ? 'B' : 'A';
       
@@ -827,6 +891,8 @@ function renderStats() {
         if (isOfMiss) stats[team][log.playerId].ofMisses++;
         if (isOfFoul) stats[team][log.playerId].ofFouls++;
         if (isDfFoul) stats[team][log.playerId].dfFouls++;
+        if (isSteal) stats[team][log.playerId].steals++;
+        if (isBlock) stats[team][log.playerId].blocks++;
       }
       
       // 相手GKのスタッツ加算（ミス＝セーブとして扱う）
@@ -840,7 +906,7 @@ function renderStats() {
     }
   });
 
-  // HTML構築（指定されたフォーマットに変更）
+  // HTML構築
   function buildStatsHTML(team) {
     let html = '';
     let playerList = Object.values(stats[team]).sort((a, b) => a.num - b.num);
@@ -850,7 +916,8 @@ function renderStats() {
       misses: 0, sevenM_misses: 0,
       saves: 0, sevenM_saves: 0,
       conceded: 0, sevenM_conceded: 0,
-      ofMisses: 0, ofFouls: 0, dfFouls: 0
+      ofMisses: 0, ofFouls: 0, dfFouls: 0,
+      steals: 0, blocks: 0
     };
 
     // 数値から「成功数/試行数 (パーセンテージ)」の文字列を生成するヘルパー関数
@@ -884,6 +951,8 @@ function renderStats() {
         <td>${p.ofMisses}</td>
         <td>${p.ofFouls}</td>
         <td>${p.dfFouls}</td>
+        <td>${p.steals}</td>
+        <td>${p.blocks}</td>
       </tr>`;
 
       // チーム合計用に加算
@@ -898,6 +967,8 @@ function renderStats() {
       teamTotal.ofMisses += p.ofMisses;
       teamTotal.ofFouls += p.ofFouls;
       teamTotal.dfFouls += p.dfFouls;
+      teamTotal.steals += p.steals;
+      teamTotal.blocks += p.blocks;
     });
 
     // チーム合計行の計算と表示
@@ -922,6 +993,8 @@ function renderStats() {
       <td>${teamTotal.ofMisses}</td>
       <td>${teamTotal.ofFouls}</td>
       <td>${teamTotal.dfFouls}</td>
+      <td>${teamTotal.steals}</td>
+      <td>${teamTotal.blocks}</td>
     </tr>`;
 
     return html;

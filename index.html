@@ -153,8 +153,11 @@
             <input type="text" class="match-info-title" placeholder="大会名">
             <input type="text" class="match-info-text" placeholder="日付・会場など">
         </div>
-        <!-- 対戦カードは日付の下に独立して表示 -->
-        <div id="matchUpDisplay" class="match-up-text"></div>
+        <!-- 対戦カードと点数をグループ化して表示 -->
+        <div class="match-up-wrapper">
+            <div id="matchUpDisplay" class="match-up-text"></div>
+            <div id="headerScoreDisplay" class="header-score-text"></div>
+        </div>
     </div>
 
     <!-- ボタンを横並びにするための枠 -->
@@ -184,6 +187,8 @@
                             <th>OFミス</th>
                             <th>OFファウル</th>
                             <th>DFファウル</th>
+                            <th>Stl.</th>
+                            <th>Bl.</th>
                         </tr>
                     </thead>
                     <tbody id="statsBodyA"></tbody>
@@ -198,17 +203,15 @@
                         <tr>
                             <th>選手</th>
                             <th>総得点(内7m)</th>
-                            <th>シュート数</th>
-                            <th>シュート率</th>
-                            <th>7mシュート数</th>
-                            <th>7mシュート率</th>
-                            <th>GKセーブ数</th>
-                            <th>セーブ率</th>
-                            <th>7mセーブ数</th>
-                            <th>7mセーブ率</th>
-                            <th>パスミス</th>
-                            <th>キャッチミス</th>
-                            <th>ドリブルミス</th>
+                            <th>シュート</th>
+                            <th>7mシュート</th>
+                            <th>GKセーブ</th>
+                            <th>7mセーブ</th>
+                            <th>OFミス</th>
+                            <th>OFファウル</th>
+                            <th>DFファウル</th>
+                            <th>Stl.</th>
+                            <th>Bl.</th>
                         </tr>
                     </thead>
                     <tbody id="statsBodyB"></tbody>
