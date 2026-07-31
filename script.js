@@ -845,7 +845,7 @@ function loadOpponentTeam(index) {
 function renderStats() {
   let stats = { A: {}, B: {} };
   
-  // 初期化：新しい項目を追加
+  // 初期化：アシスト（assists）を追加
   let initStats = (team) => {
     let allPlayers = [...roster[team].court, ...roster[team].bench];
     allPlayers.forEach(p => {
@@ -853,11 +853,15 @@ function renderStats() {
         name: p.name, num: p.num, 
         goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0, 
         saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0,
-        ofMisses: 0, // パス・キャッチ・ドリブルミスの合算
-        ofFouls: 0,  // ダブルドリブル、3sec、ラインクロス、キックボール、チャージング、OFファウル
-        dfFouls: 0,  // DFファウル
-        steals: 0,   // パスカット (Stl.)
-        blocks: 0    // ブロック (Bl.)
+        ofMisses: 0, 
+        ofFouls: 0,  
+        dfFouls: 0,  
+        steals: 0,   
+        blocks: 0,   
+        warnings: 0, 
+        suspensions: 0, 
+        disqualifications: 0,
+        assists: 0   // ★アシストを追加
       };
     });
   };
@@ -878,24 +882,31 @@ function renderStats() {
     let isMiss = log.action.startsWith('ノーゴール');
     let is7mMiss = log.action.startsWith('7mノーゴール');
     
-    // OFミスにまとめるアクション
     let isOfMiss = log.action.startsWith('パスミス') || 
                    log.action.startsWith('キャッチミス') || 
                    log.action.startsWith('ドリブルミス');
                    
-    // OFファウルにまとめるアクション
     let isOfFoul = log.action.startsWith('ダブルドリブル') || 
                    log.action.startsWith('3sec') || 
                    log.action.startsWith('ラインクロス') || 
                    log.action.startsWith('キックボール') || 
-                   log.action.startsWith('チャージング') 
+                   log.action.startsWith('チャージング');
                    
-    // DFファウル・パスカット・ブロック
     let isDfFoul = log.action.startsWith('DFファウル');
     let isSteal = log.action.startsWith('パスカット');
     let isBlock = log.action.startsWith('ブロック');
+    let isWarning = log.action.startsWith('警告');
+    let isSuspension = log.action.startsWith('2分間退場');
+    let isDisqualification = log.action.startsWith('失格');
+
+    // ★アシストをした選手名をログのテキストから抽出
+    let assistPlayerName = null;
+    let assistMatch = log.action.match(/Ast: (.*?)<\/small>/);
+    if (assistMatch) {
+      assistPlayerName = assistMatch[1];
+    }
     
-    if (isGoal || is7mGoal || isMiss || is7mMiss || isOfMiss || isOfFoul || isDfFoul || isSteal || isBlock) {
+    if (isGoal || is7mGoal || isMiss || is7mMiss || isOfMiss || isOfFoul || isDfFoul || isSteal || isBlock || isWarning || isSuspension || isDisqualification || assistPlayerName) {
       let team = log.team;
       let oppTeam = team === 'A' ? 'B' : 'A';
       
@@ -910,6 +921,18 @@ function renderStats() {
         if (isDfFoul) stats[team][log.playerId].dfFouls++;
         if (isSteal) stats[team][log.playerId].steals++;
         if (isBlock) stats[team][log.playerId].blocks++;
+        if (isWarning) stats[team][log.playerId].warnings++;
+        if (isSuspension) stats[team][log.playerId].suspensions++;
+        if (isDisqualification) stats[team][log.playerId].disqualifications++;
+      }
+
+      // ★アシストを記録する処理（名前が一致する選手を探してカウント）
+      if (assistPlayerName) {
+        let allPlayers = [...roster[team].court, ...roster[team].bench];
+        let assistPlayer = allPlayers.find(p => p.name === assistPlayerName);
+        if (assistPlayer && stats[team][assistPlayer.id]) {
+            stats[team][assistPlayer.id].assists++;
+        }
       }
       
       // 相手GKのスタッツ加算（ミス＝セーブとして扱う）
@@ -934,7 +957,9 @@ function renderStats() {
       saves: 0, sevenM_saves: 0,
       conceded: 0, sevenM_conceded: 0,
       ofMisses: 0, ofFouls: 0, dfFouls: 0,
-      steals: 0, blocks: 0
+      steals: 0, blocks: 0,
+      warnings: 0, suspensions: 0, disqualifications: 0,
+      assists: 0 // ★追加
     };
 
     // 数値から「成功数/試行数 (パーセンテージ)」の文字列を生成するヘルパー関数
@@ -958,6 +983,7 @@ function renderStats() {
       let saveDisplay = formatStat(p.saves, regularGkFaced);
       let sevenMSaveDisplay = formatStat(p.sevenM_saves, sevenMGkFaced);
       
+      // ★ご指定の順番に合わせて並び替え、アシストを追加
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
         <td>${totalGoals} <span style="font-size:13px; color:#555;">(${p.sevenM_goals})</span></td>
@@ -965,11 +991,15 @@ function renderStats() {
         <td>${sevenMShotDisplay}</td>
         <td>${saveDisplay}</td>
         <td>${sevenMSaveDisplay}</td>
+        <td>${p.assists}</td>
+        <td>${p.steals}</td>
+        <td>${p.blocks}</td>
         <td>${p.ofMisses}</td>
         <td>${p.ofFouls}</td>
         <td>${p.dfFouls}</td>
-        <td>${p.steals}</td>
-        <td>${p.blocks}</td>
+        <td>${p.warnings}</td>
+        <td>${p.suspensions}</td>
+        <td>${p.disqualifications}</td>
       </tr>`;
 
       // チーム合計用に加算
@@ -986,6 +1016,10 @@ function renderStats() {
       teamTotal.dfFouls += p.dfFouls;
       teamTotal.steals += p.steals;
       teamTotal.blocks += p.blocks;
+      teamTotal.warnings += p.warnings;
+      teamTotal.suspensions += p.suspensions;
+      teamTotal.disqualifications += p.disqualifications;
+      teamTotal.assists += p.assists; // ★追加
     });
 
     // チーム合計行の計算と表示
@@ -1000,6 +1034,7 @@ function renderStats() {
     let tSaveDisplay = formatStat(teamTotal.saves, tRegularGkFaced);
     let tSevenMSaveDisplay = formatStat(teamTotal.sevenM_saves, tSevenMGkFaced);
 
+    // ★チーム合計も順番に合わせて出力
     html += `<tr class="team-total-row">
       <td style="text-align:left;">【チーム合計】</td>
       <td>${tTotalGoals} <span style="font-size:13px; color:#555;">(${teamTotal.sevenM_goals})</span></td>
@@ -1007,11 +1042,15 @@ function renderStats() {
       <td>${tSevenMShotDisplay}</td>
       <td>${tSaveDisplay}</td>
       <td>${tSevenMSaveDisplay}</td>
+      <td>${teamTotal.assists}</td>
+      <td>${teamTotal.steals}</td>
+      <td>${teamTotal.blocks}</td>
       <td>${teamTotal.ofMisses}</td>
       <td>${teamTotal.ofFouls}</td>
       <td>${teamTotal.dfFouls}</td>
-      <td>${teamTotal.steals}</td>
-      <td>${teamTotal.blocks}</td>
+      <td>${teamTotal.warnings}</td>
+      <td>${teamTotal.suspensions}</td>
+      <td>${teamTotal.disqualifications}</td>
     </tr>`;
 
     return html;
