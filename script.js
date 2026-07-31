@@ -741,10 +741,12 @@ const myTeamData = {
     { num: "2", name: "刈谷 匡志", isStarter: true },
     { num: "3", name: "宮下 優華", isStarter: true },
     { num: "4", name: "板東 慶晃", isStarter: true },
-    { num: "7", name: "馬場 美友", isStarter: false },
+    { num: "6", name: "馬場 美友", isStarter: false },
+    { num: "7", name: "堤 萌加", isStarter: false },
     { num: "8", name: "山本 峻也", isStarter: true },
     { num: "10", name: "馬場 康二朗", isStarter: true },
     { num: "11", name: "堤 史土", isStarter: false },
+    { num: "12", name: "村岡 沙耶", isStarter: false },
     { num: "15", name: "福田 あかね", isStarter: false }
   ]
 };
