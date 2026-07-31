@@ -222,7 +222,13 @@ function updateRoster() {
   // 大会名の横に対戦カードを自動表示
   const matchUpDisplay = document.getElementById('matchUpDisplay');
   if (matchUpDisplay) {
-    matchUpDisplay.innerText = `${customTeamA} vs. ${customTeamB}`;
+    matchUpDisplay.innerHTML = `
+      <div class="match-row">
+        <div class="align-left">${customTeamA}</div>
+        <div class="align-center">vs.</div>
+        <div class="align-right">${customTeamB}</div>
+      </div>
+    `;
   }
 
   const gkValA = document.getElementById('gkSelectA').value;
@@ -560,7 +566,18 @@ function renderLogs() {
   // ★追加：ヘッダーの対戦カード下部にスコアと前半スコアを表示
   const headerScoreDisplay = document.getElementById('headerScoreDisplay');
   if (headerScoreDisplay) {
-    headerScoreDisplay.innerHTML = `${scoreA} - ${scoreB}<br><span class="header-score-sub">（前半 ${firstHalfA} - ${firstHalfB}）</span>`;
+    headerScoreDisplay.innerHTML = `
+      <div class="match-row header-score-text">
+        <div class="align-left">${scoreA}</div>
+        <div class="align-center">-</div>
+        <div class="align-right">${scoreB}</div>
+      </div>
+      <div class="match-row header-score-sub">
+        <div class="align-left">${firstHalfA}</div>
+        <div class="align-center">-</div>
+        <div class="align-right">${firstHalfB}</div>
+      </div>
+    `;
   }
 
   let tableHTML = '';
@@ -871,7 +888,7 @@ function renderStats() {
                    log.action.startsWith('3sec') || 
                    log.action.startsWith('ラインクロス') || 
                    log.action.startsWith('キックボール') || 
-                   log.action.startsWith('チャージング') || 
+                   log.action.startsWith('チャージング') 
                    
     // DFファウル・パスカット・ブロック
     let isDfFoul = log.action.startsWith('DFファウル');
@@ -943,7 +960,7 @@ function renderStats() {
       
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
-        <td>${totalGoals} <span style="font-size:10px; color:#555;">(${p.sevenM_goals})</span></td>
+        <td>${totalGoals} <span style="font-size:13px; color:#555;">(${p.sevenM_goals})</span></td>
         <td>${shotDisplay}</td>
         <td>${sevenMShotDisplay}</td>
         <td>${saveDisplay}</td>
@@ -985,7 +1002,7 @@ function renderStats() {
 
     html += `<tr class="team-total-row">
       <td style="text-align:left;">【チーム合計】</td>
-      <td>${tTotalGoals} <span style="font-size:10px; color:#555;">(${teamTotal.sevenM_goals})</span></td>
+      <td>${tTotalGoals} <span style="font-size:13px; color:#555;">(${teamTotal.sevenM_goals})</span></td>
       <td>${tShotDisplay}</td>
       <td>${tSevenMShotDisplay}</td>
       <td>${tSaveDisplay}</td>
@@ -1034,7 +1051,8 @@ setInterval(function() {
   // タイマーが動いている、または1秒でも進んでいる、または試合終了している場合のみ実行
   if (isRunning || elapsedSeconds > 0 || isEnded) {
     const matchTitle = document.querySelector('.match-info-title').value.trim() || "大会名未定";
-    const matchUp = document.getElementById('matchUpDisplay').innerText.trim() || "対戦カード未定";
+    // 画面のテキストではなく、変数から直接対戦カードを組み立てる
+    const matchUp = (customTeamA && customTeamB) ? `${customTeamA} vs. ${customTeamB}` : "対戦カード未定";
 
     // ブラウザのタイトル（PDFの保存ファイル名）を「大会名 対戦カード」に更新（間に半角スペース）
     document.title = `${matchTitle} ${matchUp}`;

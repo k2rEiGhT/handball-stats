@@ -579,13 +579,16 @@ td small { color: #555; font-weight: bold; }
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  text-align: center;
 }
 .match-info-text {
   flex: 1;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: bold;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  text-align: center;
 }
 .match-up-text {
   font-size: 18px; 
@@ -593,11 +596,46 @@ td small { color: #555; font-weight: bold; }
   color: #333;
 }
 
+
 /* 追加：対戦カードと点数のコンテナ */
 .match-up-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+}
+.match-up-wrapper > div {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+/* 追加：縦揃え用のFlexbox行 */
+.match-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 300px; /* ★400pxから縮めて、左右の文字が離れすぎないようにする */
+}
+.match-row .align-left {
+  flex: 1; 
+  text-align: center; /* ★右寄せから中央揃えに変更 */
+  padding-right: 0;   /* ★余白をなくす */
+  white-space: nowrap;
+}
+.match-row .align-center {
+  width: 30px; 
+  text-align: center;
+  flex-shrink: 0;
+}
+.match-row .align-right {
+  flex: 1; 
+  text-align: center; /* ★左寄せから中央揃えに変更 */
+  padding-left: 0;    /* ★余白をなくす */
+  white-space: nowrap;
 }
 
 /* 追加：ヘッダーのスコア表示 */
@@ -605,7 +643,6 @@ td small { color: #555; font-weight: bold; }
   font-size: 28px;
   font-weight: bold;
   color: #333;
-  text-align: center;
   margin-top: 5px;
   line-height: 1.2;
 }
@@ -732,8 +769,9 @@ button, .starter-label, select {
   }
 
   .match-info-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
+    text-align: left;
     width: 600px;
     border: none;
     background: transparent;
@@ -741,7 +779,8 @@ button, .starter-label, select {
   }
   
   .match-info-text {
-    font-size: 15px;
+    font-size: 16px;
+    font-weight: bold;
     text-align: left;
     border: none;
     background: transparent;
@@ -757,13 +796,16 @@ button, .starter-label, select {
   }
 
   .match-up-wrapper {
-    align-items: flex-end; /* 印刷時は右寄せにする */
+    align-items: flex-end; /* 印刷時は全体を右寄せにする */
+  }
+
+  .match-row {
+    max-width: 300px; /* 印刷時は横幅を狭めてコンパクトにする */
   }
 
   .header-score-text {
     font-size: 18px; /* 印刷用に少し小さく */
     margin-top: 2px;
-    text-align: right;
   }
   
   .header-score-sub {
