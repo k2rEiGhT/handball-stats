@@ -608,13 +608,33 @@ function renderLogs() {
     `;
   }
   document.getElementById('logTableBody').innerHTML = tableHTML;
+  
+  const latestLogText = document.getElementById('latestLogText');
+  if (latestLogText) {
+    if (matchLogs.length > 0) {
+      // ログは新しいものが[0]に来るように並んでいるので、先頭を取得
+      let latest = matchLogs[0];
+      
+      if (latest.team === 'System') {
+        // システムメッセージ（前半終了など）
+        latestLogText.innerHTML = `${latest.time} ｜ ${latest.action}`;
+      } else {
+        // 通常のプレイログ
+        let teamStr = latest.team === 'A' ? customTeamA : customTeamB;
+        let playerStr = latest.player && latest.player !== "-" ? ` ${latest.player}` : "";
+        latestLogText.innerHTML = `${latest.time} [${teamStr}]${playerStr} <span class="latest-log-action">${latest.action}</span>`;
+      }
+    } else {
+      latestLogText.innerText = "なし";
+    }
+  }
 }
 
 function deleteLog(id) {
   if (!confirm('この記録を削除しますか？\n※以降の累計得点も自動的に修正されます。')) return;
   matchLogs = matchLogs.filter(log => log.id !== id);
   renderLogs();
-  renderStats(); // ログ削除時にスタッツ再計算
+  renderStats(); 
 }
 
 // ================= アクションの記録 =================

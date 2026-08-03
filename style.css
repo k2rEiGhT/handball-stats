@@ -841,3 +841,26 @@ button, .starter-label, select {
     font-size: 1.1em;
     vertical-align: baseline;
 }
+
+/* ================= 最新ログ速報バー ================= */
+.latest-log-bar {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+}
+.latest-log-bar strong {
+    margin-right: 10px;
+}
+.latest-log-action {
+    font-weight: bold;
+    color: #dc3545; /* アクション内容を赤字で強調 */
+}
+/* 印刷時は不要なので非表示にする */
+@media print {
+    .latest-log-bar { display: none !important; }
+}
