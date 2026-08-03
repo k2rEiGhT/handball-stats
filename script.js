@@ -319,7 +319,9 @@ function renderButtons() {
     return roster[team][type].map(p => {
       const isSelected = activeSelection[team][type] === p.id ? 'selected' : '';
       const isGk = roster[team].gkId === p.id ? ' <span class="gk-label">[GK]</span>' : '';
-      return `<button class="player-btn ${isSelected}" onclick="selectPlayer('${team}', '${type}', '${p.id}', '${p.name}')">${p.name}${isGk}</button>`;
+      // 追加：先頭の「数字.」を装飾用タグで囲む
+      const formattedName = p.name.replace(/^(\d+)\.\s*/, '<span class="player-num-display">$1.</span> ');
+      return `<button class="player-btn ${isSelected}" onclick="selectPlayer('${team}', '${type}', '${p.id}', '${p.name}')">${formattedName}${isGk}</button>`;
     }).join('');
   }
 

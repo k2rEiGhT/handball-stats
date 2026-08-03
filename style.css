@@ -714,7 +714,12 @@ button, .starter-label, select {
   @page {
     size: A4 landscape;
     size: 297mm 210mm;
-    margin: 10mm;
+    margin: 0;
+  }
+
+  body {
+    padding: 10mm; 
+    box-sizing: border-box; 
   }
 
   /* 背景色や網掛けを印刷時にも強制的に出力する設定 */
@@ -822,4 +827,18 @@ button, .starter-label, select {
   .match-info-text::-moz-placeholder { color: transparent; }
   .match-info-text:-ms-input-placeholder { color: transparent; }
   .match-info-text::-ms-input-placeholder { color: transparent; }
+
+
+/* ================= 背番号の強調表示 ================= */
+.player-num-display {
+    font-size: 1.3em;
+    font-weight: 900;
+    margin-right: 4px;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; /* 数字が視認しやすいフォント */
+}
+
+/* 選手ボタン内での微調整（より数字を目立たせる） */
+.player-btn .player-num-display {
+    font-size: 1.5em;
+    vertical-align: baseline;
 }
