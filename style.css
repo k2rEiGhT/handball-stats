@@ -827,8 +827,7 @@ button, .starter-label, select {
   .match-info-text::-moz-placeholder { color: transparent; }
   .match-info-text:-ms-input-placeholder { color: transparent; }
   .match-info-text::-ms-input-placeholder { color: transparent; }
-
-
+}
 /* ================= 背番号の強調表示 ================= */
 .player-num-display {
     font-size: 1.3em;
