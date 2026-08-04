@@ -620,12 +620,12 @@ function renderLogs() {
         latestLogText.innerHTML = `${latest.time} ｜ ${latest.action}`;
       } else {
         // 通常のプレイログ
-        let teamStr = latest.team === 'A' ? customTeamA : customTeamB;
+        //let teamStr = latest.team === 'A' ? customTeamA : customTeamB;
         let playerStr = latest.player && latest.player !== "-" ? ` ${latest.player}` : "";
-        latestLogText.innerHTML = `${latest.time} [${teamStr}]${playerStr} <span class="latest-log-action">${latest.action}</span>`;
+        latestLogText.innerHTML = `${latest.time} 　　${playerStr} <span class="latest-log-action">　　${latest.action}</span>`;
       }
     } else {
-      latestLogText.innerText = "なし";
+      latestLogText.innerText = "最新のログなし";
     }
   }
 }
