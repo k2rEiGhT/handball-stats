@@ -714,11 +714,10 @@ button, .starter-label, select {
   @page {
     size: A4 landscape;
     size: 297mm 210mm;
-    margin: 0;
+    margin: 10mm;
   }
 
   body {
-    padding: 10mm; 
     box-sizing: border-box; 
   }
 
