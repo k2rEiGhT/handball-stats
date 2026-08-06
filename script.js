@@ -69,7 +69,7 @@ function updateGkDropdown(team) {
   let html = '<option value="">選択してください</option>';
   checkedCheckboxes.forEach(cb => {
     let index = cb.value;
-    let nameVal = document.getElementById(`name${team}_${index}`).value.trim() || `選手${index}`;
+    let nameVal = document.getElementById(`name${team}_${index}`).value.trim() || "-";
     // 1〜16まですべて入力欄から背番号を取得する仕様
     let numVal = document.getElementById(`num${team}_${index}`).value.trim() || index;
     html += `<option value="${team}_${index}">${numVal}. ${nameVal}</option>`;
@@ -259,12 +259,19 @@ function updateRoster() {
 
   // Team A
   for (let i = 1; i <= 16; i++) {
-    let nameInput = document.getElementById(`nameA_${i}`).value.trim();
+    let nameElem = document.getElementById(`nameA_${i}`);
+    let nameInput = nameElem.value.trim();
+    let numVal = document.getElementById(`numA_${i}`).value.trim();
     let isCourt = document.querySelector(`.starter-check-A[value="${i}"]`).checked;
     let isExcluded = document.querySelector(`.exclude-check-A[value="${i}"]`).checked;
     
+    // 背番号がある、またはコートチェックが入っている場合で、氏名が空欄なら「-」を自動入力
+    if (!nameInput && (numVal !== "" || isCourt)) {
+      nameInput = "-";
+      nameElem.value = "-"; // 画面上の入力ボックスにも「-」を表示
+    }
+
     if (nameInput && !isExcluded) {
-      let numVal = document.getElementById(`numA_${i}`).value.trim();
       let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
       
       // ソート用に背番号を数値化（空欄や文字列の場合は9999にして末尾へ）
@@ -279,12 +286,19 @@ function updateRoster() {
 
   // Team B
   for (let i = 1; i <= 16; i++) {
-    let nameInput = document.getElementById(`nameB_${i}`).value.trim();
+    let nameElem = document.getElementById(`nameB_${i}`);
+    let nameInput = nameElem.value.trim();
+    let numVal = document.getElementById(`numB_${i}`).value.trim();
     let isCourt = document.querySelector(`.starter-check-B[value="${i}"]`).checked;
     let isExcluded = document.querySelector(`.exclude-check-B[value="${i}"]`).checked;
     
+    // 背番号がある、またはコートチェックが入っている場合で、氏名が空欄なら「-」を自動入力
+    if (!nameInput && (numVal !== "" || isCourt)) {
+      nameInput = "-";
+      nameElem.value = "-"; // 画面上の入力ボックスにも「-」を表示
+    }
+
     if (nameInput && !isExcluded) {
-      let numVal = document.getElementById(`numB_${i}`).value.trim();
       let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
       
       // ソート用に背番号を数値化
