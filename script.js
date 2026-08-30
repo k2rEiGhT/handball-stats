@@ -848,8 +848,12 @@ const opponentTeams = [
   {
     name: "未登録",
     players: [
-      { num: "1", name: "A", isStarter: true },
-      { num: "2", name: "B", isStarter: true }
+      { num: "1", name: "", isStarter: true },
+      { num: "2", name: "", isStarter: true },
+      { num: "3", name: "", isStarter: true },
+      { num: "4", name: "", isStarter: true },
+      { num: "5", name: "", isStarter: true },
+      { num: "6", name: "", isStarter: true },
     ]
   }
 ];
