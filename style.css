@@ -35,6 +35,11 @@ body {
     border-radius: 8px;
     box-sizing: border-box;
 }
+
+.player-inputs {
+    margin-top: auto;
+}
+
 .team-setup h3 { margin-top: 0; }
 .team-setup h3 input {
     width: 100%;
@@ -173,24 +178,21 @@ body {
 
 /* 相手チーム入力ボタン用のコンテナとスタイル */
 .opponent-buttons-container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 均等に5列配置 */
+    display: flex;
     gap: 5px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 .load-opponent-btn {
-    width: 100%;
-    padding: 8px 2px; /* 文字がはみ出ないように左右の余白を少し調整 */
+    flex: 1;
+    padding: 8px 4px;
     background-color: #146c43; 
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 11px; /* 5列だと幅が狭くなるため文字サイズを少し縮小 */
+    font-size: 12px;
     font-weight: bold;
-    white-space: nowrap; /* テキストの折り返しを防ぐ */
-    overflow: hidden;
-    text-overflow: ellipsis; /* はみ出る場合は「...」にする */
 }
 
 /* コート選択チェックボックス */
