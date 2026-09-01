@@ -184,13 +184,13 @@ body {
 
 /* 相手チーム入力ボタン用のコンテナとスタイル */
 .opponent-buttons-container {
-    display: flex;
+    display: grid; /* flex から grid に変更 */
+    grid-template-columns: repeat(5, 1fr); /* 横に5つ均等に並べる設定 */
     gap: 5px;
     margin-bottom: 10px;
-    flex-wrap: wrap;
 }
 .load-opponent-btn {
-    flex: 1;
+    width: 100%; /* flex: 1; を削除して width: 100%; に変更 */
     padding: 8px 4px;
     background-color: #146c43; 
     color: white;
