@@ -473,10 +473,16 @@ td small { color: #555; font-weight: bold; }
     background: #dc3545;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 0 6px;         /* ★ブックマークボタンと余白を合わせる */
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 16px;        /* ★アイコンのサイズを16pxに拡大 */
+    height: 28px;           /* ★高さを固定 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: background 0.2s;
 }
 .delete-btn:hover { background: #c82333; }
 
@@ -861,4 +867,96 @@ button, .starter-label, select {
 /* 印刷時は不要なので非表示にする */
 @media print {
     .latest-log-bar { display: none !important; }
+}
+
+/* ================= ブックマーク機能のスタイル ================= */
+/* SVGアイコンの基本スタイル（線画） */
+.bm-icon {
+    width: 1em;
+    height: 1em;
+    fill: none;               /* 普段は中を塗りつぶさない（線画） */
+    stroke: currentColor;     /* 文字色と同じ色の線にする */
+    stroke-width: 2;          /* 線の太さ */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+}
+/* アクティブ（ブックマーク状態）の時は中を塗りつぶす */
+.active .bm-icon {
+    fill: currentColor;
+}
+
+/* ゴミ箱アイコンのスタイル（線画） */
+.trash-icon {
+    width: 1.1em;
+    height: 1.1em;
+    fill: none;
+    stroke: currentColor;     /* 白色の線にする */
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+}
+
+/* 最新ログのブックマークボタン */
+.latest-bm-btn {
+    background: transparent;
+    border: none;
+    font-size: 26px; /* アイコンの大きさ */
+    cursor: pointer;
+    margin-right: 15px;
+    vertical-align: middle;
+    color: #999; /* 未選択時はグレー */
+    padding: 0;
+    transition: color 0.2s, transform 0.1s;
+}
+.latest-bm-btn.active {
+    color: #ffc107; /* 選択時は黄色（またはお好みの色） */
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+}
+.latest-bm-btn:active {
+    transform: scale(0.9);
+}
+
+/* ================= ログの操作ボタン（統一デザイン） ================= */
+/* ブックマーク・削除ボタンの共通スタイル */
+.toggle-bm-btn, .delete-btn {
+    width: 30px;            /* 幅を固定して正方形に */
+    height: 30px;           /* 高さを固定 */
+    padding: 0;
+    background: #fff;       /* 背景色を白で統一 */
+    border: 1px solid #ccc; /* 枠線を統一 */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;        /* アイコンの大きさ */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+/* ブックマークボタンの個別設定 */
+.toggle-bm-btn {
+    color: #999;            /* 未選択時はグレーのアイコン */
+}
+.toggle-bm-btn:hover {
+    background: #f8f9fa;
+}
+.toggle-bm-btn.active {
+    background: #ffeeba;    /* 選択時は黄色背景 */
+    border-color: #ffc107;
+    color: #d39e00;
+}
+.toggle-bm-btn.active:hover {
+    background: #ffdf7e;
+}
+
+/* 削除（ゴミ箱）ボタンの個別設定 */
+.delete-btn {
+    color: #dc3545;         /* ゴミ箱アイコンは赤色 */
+}
+.delete-btn:hover {
+    background: #f8d7da;    /* ホバー時は薄い赤色背景 */
+    border-color: #dc3545;  /* ホバー時は枠線も赤くする */
 }

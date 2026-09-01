@@ -467,7 +467,9 @@ function getRecordTime(actionName, isSub = false) {
   if (manualTimeInput.value.trim() !== '') {
     return manualTimeInput.value.trim();
   }
-  const noAlertActions = ['警告', '2分間退場', '失格', 'ダブルドリブル', 'キックボール', '3sec', 'ラインクロス', 'ターンオーバー', 'リバウンド', 'チャージング', 'ノーゴール', 'パスミス', 'パスカット', 'キャッチミス', 'ドリブルミス', 'GK交代', 'タイムアウト'];
+  
+    const noAlertActions = []; 
+  
   if (!isRunning && (!isSub && !noAlertActions.includes(actionName))) {
     if (!confirm('タイマーが停止中または開始前ですが、現在の表示時間で記録しますか？')) {
       return null;
@@ -506,7 +508,8 @@ function addLog(time, teamCode, playerName, actionText, points, playerId = null)
     action: actionText,
     points: points,
     gkIdA: roster.A.gkId,     // アクション当時のTeam AのGK
-    gkIdB: roster.B.gkId      // アクション当時のTeam BのGK
+    gkIdB: roster.B.gkId,     // アクション当時のTeam BのGK
+    bookmarked: false
   });
 
   // ★時系列順（新しいものが上＝降順）にソート
@@ -596,27 +599,41 @@ function renderLogs() {
     `;
   }
 
+  const bookmarkSvg = `<svg class="bm-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`;
+  const trashSvg = `<svg class="trash-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+
   let tableHTML = '';
   for (let i = 0; i < matchLogs.length; i++) {
     let log = matchLogs[i];
     
-    // チームAのアクションなら左側に、チームBなら右側にデータを配置
     let aPlayer = log.team === 'A' ? log.player : '';
     let aAction = log.team === 'A' ? log.action : (log.team === 'System' ? log.action : '');
     let bPlayer = log.team === 'B' ? log.player : '';
     let bAction = log.team === 'B' ? log.action : (log.team === 'System' ? log.action : '');
 
+    let bgA = (log.bookmarked && log.team === 'A') ? 'background-color: #fff9e6;' : '';
+    let bgB = (log.bookmarked && log.team === 'B') ? 'background-color: #fff9e6;' : '';
+    
+    // ※システム（前半終了など）をブックマークした場合は両サイドを薄黄色にする
+    if (log.bookmarked && log.team === 'System') {
+      bgA = 'background-color: #fff9e6;';
+      bgB = 'background-color: #fff9e6;';
+    }
+
+    // ▼ 時間の背景色(timeBg)に関する行を削除し、時間のマスはデフォルトの #f8f9fa 固定にします
     tableHTML += `
     <tr>
-      <td>${aPlayer}</td>
-      <td>${aAction}</td>
+      <td style="${bgA}">${aPlayer}</td>
+      <td style="${bgA}">${aAction}</td>
       <td class="score-col">${log.displayScoreA}</td>
       <td style="font-weight: bold; background: #f8f9fa;">${log.time}</td>
       <td class="score-col">${log.displayScoreB}</td>
-      <td>${bAction}</td>
-      <td>${bPlayer}</td>
-      <td class="noprint">
-        <button class="delete-btn" onclick="deleteLog(${log.id})">削除</button>
+      <td style="${bgB}">${bAction}</td>
+      <td style="${bgB}">${bPlayer}</td>
+      <td class="noprint" style="display: flex; gap: 4px; justify-content: center; align-items: center; background: transparent;">
+        <button class="toggle-bm-btn ${log.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${log.id})">${bookmarkSvg}</button>
+        <!-- ▼ 「削除」の文字を trashSvg に置き換え -->
+        <button class="delete-btn" onclick="deleteLog(${log.id})">${trashSvg}</button>
       </td>
     </tr>
     `;
@@ -626,17 +643,16 @@ function renderLogs() {
   const latestLogText = document.getElementById('latestLogText');
   if (latestLogText) {
     if (matchLogs.length > 0) {
-      // ログは新しいものが[0]に来るように並んでいるので、先頭を取得
       let latest = matchLogs[0];
       
+      // ▼ ここも 🔖の代わりに bookmarkSvg を埋め込む
+      let bmBtn = `<button class="latest-bm-btn ${latest.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${latest.id})">${bookmarkSvg}</button>`;
+      
       if (latest.team === 'System') {
-        // システムメッセージ（前半終了など）
-        latestLogText.innerHTML = `${latest.time} ｜ ${latest.action}`;
+        latestLogText.innerHTML = `${bmBtn} <span style="vertical-align:middle;">${latest.time} ｜ ${latest.action}</span>`;
       } else {
-        // 通常のプレイログ
-        //let teamStr = latest.team === 'A' ? customTeamA : customTeamB;
         let playerStr = latest.player && latest.player !== "-" ? ` ${latest.player}` : "";
-        latestLogText.innerHTML = `${latest.time} 　　${playerStr} <span class="latest-log-action">　　${latest.action}</span>`;
+        latestLogText.innerHTML = `${bmBtn} <span style="vertical-align:middle;">${latest.time}   ${playerStr}</span> <span class="latest-log-action" style="vertical-align:middle;">  ${latest.action}</span>`;
       }
     } else {
       latestLogText.innerText = "最新のログなし";
@@ -1144,4 +1160,13 @@ setInterval(function() {
 // ボタンが押されたときは、ただ印刷画面を呼び出すだけにする
 function printToPDF() {
   window.print();
+}
+
+// ================= ブックマーク機能 =================
+function toggleBookmark(id) {
+  let log = matchLogs.find(l => l.id === id);
+  if (log) {
+    log.bookmarked = !log.bookmarked; // true/false を反転
+    renderLogs(); // 画面を再描画
+  }
 }
