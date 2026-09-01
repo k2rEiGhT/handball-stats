@@ -734,7 +734,7 @@ button, .starter-label, select {
   }
 
   /* 操作パネルやフッターの送信ボタンなどは印刷時に非表示 */
-  .setup-section, .main-layout, .footer-buttons, .noprint { display: none; }
+  .setup-section, .main-layout, .footer-buttons, .noprint { display: none !important; }
   body { padding: 0; margin: 0; max-width: none; }
 
   /* 印刷時は画面の順序入れ替えを解除し、HTMLの記述順（スタッツA→B→ログ）に戻す */
