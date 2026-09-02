@@ -971,3 +971,80 @@ button, .starter-label, select {
     background: #f8d7da;    /* ホバー時は薄い赤色背景 */
     border-color: #dc3545;  /* ホバー時は枠線も赤くする */
 }
+
+/* ================= シュートチャート用ポップアップ ================= */
+.court-modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.court-modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 95%;
+    max-width: 500px;
+    position: relative;
+    text-align: center;
+}
+.court-modal-close {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #555;
+}
+.court-grid-container {
+    background-color: #dcedc8; /* コートの床をイメージした薄い緑 */
+    border: 3px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    position: relative;
+}
+/* 6mラインをイメージした半円状の装飾 */
+.court-grid-container::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    width: 70%;
+    height: 40%;
+    border: 2px dashed rgba(0,0,0,0.3);
+    border-bottom: none;
+    border-radius: 100px 100px 0 0;
+    pointer-events: none;
+}
+.court-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 70px);
+    gap: 5px;
+    position: relative;
+    z-index: 1;
+}
+.zone-btn {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #999;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.zone-btn:hover {
+    background: #ffeeba;
+    border: 2px solid #333;
+}

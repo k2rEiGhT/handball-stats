@@ -86,8 +86,9 @@
 
                 <div class="action-buttons">
                     <button onclick="recordAction('得点', 1)">得点</button>
-                    <button class="black-btn" onclick="recordAction('ノーゴール', 0)">ノーゴール</button>
-                    <button disabled></button>
+                    <button class="black-btn" onclick="openCourtPopup('ノーゴール(セーブ)', 0)">ノーゴール<br>(セーブ)</button>
+                    <button class="black-btn" onclick="openCourtPopup('ノーゴール(枠外)', 0)">ノーゴール<br>(枠外)</button>
+                    
                     <button class="yellow-btn" onclick="recordAction('パスミス', 0)">パスミス</button>
                     <button class="yellow-btn" onclick="recordAction('キャッチミス', 0)">キャッチミス</button>
                     <button class="yellow-btn" onclick="recordAction('ドリブルミス', 0)">ドリブルミス</button>
@@ -254,5 +255,26 @@
     </div>
 
     <script src="script.js"></script>
+    <div id="courtModal" class="court-modal" style="display: none;">
+        <div class="court-modal-content">
+            <span class="court-modal-close" onclick="closeCourtPopup()">&times;</span>
+            <h3 style="margin-top: 0;">シュート位置を選択</h3>
+          <div class="court-grid-container">
+            <div class="court-grid">
+              <button class="zone-btn" onclick="recordShotWithZone('左サイドミドル')">左サイド<br>ミドル</button>
+              <button class="zone-btn" onclick="recordShotWithZone('左45度ミドル')">左45度<br>ミドル</button>
+              <button class="zone-btn" onclick="recordShotWithZone('センターミドル')">センター<br>ミドル</button>
+              <button class="zone-btn" onclick="recordShotWithZone('右45度ミドル')">右45度<br>ミドル</button>
+              <button class="zone-btn" onclick="recordShotWithZone('右サイドミドル')">右サイド<br>ミドル</button>
+                
+              <button class="zone-btn" onclick="recordShotWithZone('左サイド')">左サイド</button>
+              <button class="zone-btn" onclick="recordShotWithZone('左45度')">左45度</button>
+              <button class="zone-btn" onclick="recordShotWithZone('センター')">センター</button>
+              <button class="zone-btn" onclick="recordShotWithZone('右45度')">右45度</button>
+              <button class="zone-btn" onclick="recordShotWithZone('右サイド')">右サイド</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

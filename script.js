@@ -884,7 +884,8 @@ function renderStats() {
         warnings: 0, 
         suspensions: 0, 
         disqualifications: 0,
-        assists: 0   // ★アシストを追加
+        assists: 0,
+        gk_out: 0    // ★追加：GK目線での「相手の枠外」をカウント
       };
     });
   };
@@ -963,12 +964,22 @@ function renderStats() {
       if (oppGkId && stats[oppTeam][oppGkId]) {
         if (isGoal) stats[oppTeam][oppGkId].conceded++;
         if (is7mGoal) stats[oppTeam][oppGkId].sevenM_conceded++;
-        if (isMiss) stats[oppTeam][oppGkId].saves++;
+        
+        // ★修正：枠外と実セーブを分けて記録する
+        if (isMiss) {
+          if (log.action.includes('枠外')) {
+            stats[oppTeam][oppGkId].gk_out++; // 枠外
+          } else {
+            stats[oppTeam][oppGkId].saves++;  // 実セーブ
+          }
+        }
+        
         if (is7mMiss) stats[oppTeam][oppGkId].sevenM_saves++;
       }
     }
   });
 
+  // HTML構築
   // HTML構築
   function buildStatsHTML(team) {
     let html = '';
@@ -982,10 +993,10 @@ function renderStats() {
       ofMisses: 0, ofFouls: 0, dfFouls: 0,
       steals: 0, blocks: 0,
       warnings: 0, suspensions: 0, disqualifications: 0,
-      assists: 0 // ★追加
+      assists: 0,
+      gk_out: 0 // ★追加
     };
 
-    // 数値から「成功数/試行数 (パーセンテージ)」の文字列を生成するヘルパー関数
     const formatStat = (success, attempt) => {
       if (attempt === 0) return '-';
       let pct = Math.round((success / attempt) * 100);
@@ -993,19 +1004,26 @@ function renderStats() {
     };
 
     playerList.forEach(p => {
-      // 合計の計算
       let totalGoals = p.goals + p.sevenM_goals;
       let regularShotsTotal = p.goals + p.misses;
       let sevenMShotsTotal = p.sevenM_goals + p.sevenM_misses;
-      let regularGkFaced = p.saves + p.conceded;
+      
+      // ★修正：GKの計算（実セーブ＋枠外 を成功数とする）
+      let totalGkSuccess = p.saves + p.gk_out;
+      let regularGkFaced = totalGkSuccess + p.conceded;
       let sevenMGkFaced = p.sevenM_saves + p.sevenM_conceded;
 
-      // フォーマット済みの文字列を取得
       let shotDisplay = formatStat(p.goals, regularShotsTotal);
       let sevenMShotDisplay = formatStat(p.sevenM_goals, sevenMShotsTotal);
-      let saveDisplay = formatStat(p.saves, regularGkFaced);
       let sevenMSaveDisplay = formatStat(p.sevenM_saves, sevenMGkFaced);
       
+      // ★新規：GKセーブの専用表示（実セーブ数(外〇) / 被シュート数）
+      let saveDisplay = '-';
+      if (regularGkFaced > 0) {
+        let pct = Math.round((totalGkSuccess / regularGkFaced) * 100);
+        saveDisplay = `${p.saves} <span style="font-size:11px; color:#555;">(外${p.gk_out})</span> / ${regularGkFaced}（${pct}％）`;
+      }
+            
       // ★ご指定の順番に合わせて並び替え、アシストを追加
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
@@ -1049,13 +1067,22 @@ function renderStats() {
     let tTotalGoals = teamTotal.goals + teamTotal.sevenM_goals;
     let tRegularShotsTotal = teamTotal.goals + teamTotal.misses;
     let tSevenMShotsTotal = teamTotal.sevenM_goals + teamTotal.sevenM_misses;
-    let tRegularGkFaced = teamTotal.saves + teamTotal.conceded;
+    
+    // ★修正：チーム合計のGK計算
+    let tTotalGkSuccess = teamTotal.saves + teamTotal.gk_out;
+    let tRegularGkFaced = tTotalGkSuccess + teamTotal.conceded;
     let tSevenMGkFaced = teamTotal.sevenM_saves + teamTotal.sevenM_conceded;
 
     let tShotDisplay = formatStat(teamTotal.goals, tRegularShotsTotal);
     let tSevenMShotDisplay = formatStat(teamTotal.sevenM_goals, tSevenMShotsTotal);
-    let tSaveDisplay = formatStat(teamTotal.saves, tRegularGkFaced);
     let tSevenMSaveDisplay = formatStat(teamTotal.sevenM_saves, tSevenMGkFaced);
+
+    // ★新規：チーム合計のGK専用表示
+    let tSaveDisplay = '-';
+    if (tRegularGkFaced > 0) {
+      let pct = Math.round((tTotalGkSuccess / tRegularGkFaced) * 100);
+      tSaveDisplay = `${teamTotal.saves} <span style="font-size:11px; color:#555;">(外${teamTotal.gk_out})</span> / ${tRegularGkFaced}（${pct}％）`;
+    }
 
     // ★チーム合計も順番に合わせて出力
     html += `<tr class="team-total-row">
@@ -1133,4 +1160,34 @@ function toggleBookmark(id) {
     log.bookmarked = !log.bookmarked; // true/false を反転
     renderLogs(); // 画面を再描画
   }
+}
+
+// ================= シュートチャート機能 =================
+let pendingActionName = "";
+let pendingActionPoints = 0;
+
+function openCourtPopup(actionName, points) {
+  let team = activeSelection.A.court || activeSelection.A.bench ? 'A' : 
+             activeSelection.B.court || activeSelection.B.bench ? 'B' : null;
+
+  if (!team) {
+    alert('先に左右のチームから選手を選択してください！');
+    return;
+  }
+  
+  // アクション名と点数を一時保存してモーダルを表示
+  pendingActionName = actionName;
+  pendingActionPoints = points;
+  document.getElementById('courtModal').style.display = 'flex';
+}
+
+function closeCourtPopup() {
+  document.getElementById('courtModal').style.display = 'none';
+}
+
+function recordShotWithZone(zoneName) {
+  closeCourtPopup();
+  // 「得点 [左45度]」のような形式で記録を渡す
+  let combinedActionName = `${pendingActionName} [${zoneName}]`;
+  recordAction(combinedActionName, pendingActionPoints);
 }
