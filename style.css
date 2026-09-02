@@ -1006,10 +1006,10 @@ button, .starter-label, select {
 
 /* コートの床（青色）と外枠（白色） */
 .court-grid-container {
-    background-color: #0d5ca6; /* 画像に合わせたハンドボールコートの青 */
-    border: 4px solid #fff; /* アウターゴールライン等 */
+    background-color: #0d5ca6;
+    border: 4px solid #fff; 
     border-bottom: none;
-    padding: 30px 10px 50px 10px; /* ボタン周りの余白 */
+    padding: 30px 10px 50px 10px; 
     position: relative;
     overflow: hidden;
     border-radius: 4px 4px 0 0;
@@ -1023,7 +1023,7 @@ button, .starter-label, select {
     left: 15%;
     width: 70%;
     height: 42%;
-    border: 3px solid #e60012; /* 画像に合わせた赤色 */
+    border: 3px solid #fff; 
     border-bottom: none;
     border-radius: 200px 200px 0 0;
     pointer-events: none;
@@ -1038,7 +1038,7 @@ button, .starter-label, select {
     left: 2%;
     width: 96%;
     height: 70%;
-    border: 3px dashed #ffffff; /* 画像に合わせた赤色 */
+    border: 3px dashed #fff; 
     border-bottom: none;
     border-radius: 300px 300px 0 0;
     pointer-events: none;
@@ -1048,7 +1048,7 @@ button, .starter-label, select {
 /* 7mライン（白色実線） */
 .seven-meter-line {
     position: absolute;
-    bottom: 48%; /* 6mラインの少し外側 */
+    bottom: 48%; 
     left: 50%;
     transform: translateX(-50%);
     width: 12%;
