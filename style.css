@@ -1006,26 +1006,26 @@ button, .starter-label, select {
 
 /* コートの床（青色）と外枠（白色） */
 .court-grid-container {
-    background-color: #0d5ca6;
+    background-color: #0d5ca6; /* 画像に合わせたハンドボールコートの青 */
     border: 4px solid #fff; 
-    border-bottom: none;
-    padding: 30px 10px 50px 10px; 
+    border-top: none; /* ▼ ゴール側（上）を空ける */
+    padding: 50px 10px 30px 10px; /* ▼ 上部の余白を大きくする */
     position: relative;
     overflow: hidden;
-    border-radius: 4px 4px 0 0;
+    border-radius: 0 0 4px 4px; /* ▼ 下の角を丸める */
 }
 
 /* 6mライン（ゴールエリアライン・赤色実線） */
 .court-grid-container::before {
     content: "";
     position: absolute;
-    bottom: 0;
+    top: 0; /* ▼ 下から上に変更 */
     left: 15%;
     width: 70%;
     height: 42%;
     border: 3px solid #fff; 
-    border-bottom: none;
-    border-radius: 200px 200px 0 0;
+    border-top: none; /* ▼ 上の線を消す */
+    border-radius: 0 0 200px 200px; /* ▼ 下に膨らむように反転 */
     pointer-events: none;
     z-index: 1;
 }
@@ -1034,13 +1034,13 @@ button, .starter-label, select {
 .court-grid-container::after {
     content: "";
     position: absolute;
-    bottom: 0;
+    top: 0; /* ▼ 下から上に変更 */
     left: 2%;
     width: 96%;
     height: 70%;
     border: 3px dashed #fff; 
-    border-bottom: none;
-    border-radius: 300px 300px 0 0;
+    border-top: none; /* ▼ 上の線を消す */
+    border-radius: 0 0 300px 300px; /* ▼ 下に膨らむように反転 */
     pointer-events: none;
     z-index: 1;
 }
@@ -1048,7 +1048,7 @@ button, .starter-label, select {
 /* 7mライン（白色実線） */
 .seven-meter-line {
     position: absolute;
-    bottom: 48%; 
+    top: 48%; /* ▼ ゴール（上）からの距離に変更 */
     left: 50%;
     transform: translateX(-50%);
     width: 12%;
@@ -1060,7 +1060,7 @@ button, .starter-label, select {
 /* ゴール（白黒） */
 .court-goal {
     position: absolute;
-    bottom: 0;
+    top: 0; /* ▼ 下から上に変更 */
     left: 50%;
     transform: translateX(-50%);
     width: 15%;
@@ -1071,9 +1071,9 @@ button, .starter-label, select {
       #000 10px,
       #fff 10px,
       #fff 20px
-    ); /* 白黒ストライプでゴールネットを表現 */
+    ); 
     border: 2px solid #fff;
-    border-bottom: none;
+    border-top: none; /* ▼ 上の線を消す */
     z-index: 1;
 }
 
@@ -1084,12 +1084,12 @@ button, .starter-label, select {
     grid-template-rows: repeat(2, 70px);
     gap: 5px;
     position: relative;
-    z-index: 10; /* ラインより手前にボタンを置く */
+    z-index: 10;
 }
 
 /* 位置選択ボタンのデザイン */
 .zone-btn {
-    background: rgba(255, 255, 255, 0.85); /* 半透明にして下のコートを少し透かす */
+    background: rgba(255, 255, 255, 0.85); 
     border: 2px solid #fff;
     border-radius: 6px;
     cursor: pointer;
@@ -1103,7 +1103,7 @@ button, .starter-label, select {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 .zone-btn:hover {
-    background: #ffeb3b; /* マウスを乗せたら黄色に */
+    background: #ffeb3b; 
     border-color: #333;
     color: #000;
 }
