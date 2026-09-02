@@ -1008,39 +1008,42 @@ button, .starter-label, select {
 .court-grid-container {
     background-color: #0d5ca6; /* 画像に合わせたハンドボールコートの青 */
     border: 4px solid #fff; 
-    border-top: none; /* ▼ ゴール側（上）を空ける */
-    padding: 50px 10px 30px 10px; /* ▼ 上部の余白を大きくする */
+    border-top: none; 
+    /* ▼ 変更：上部の余白を130pxに広げ、ボタンを6mラインの外に押し出す */
+    padding: 130px 10px 30px 10px; 
     position: relative;
     overflow: hidden;
-    border-radius: 0 0 4px 4px; /* ▼ 下の角を丸める */
+    border-radius: 0 0 4px 4px; 
 }
 
-/* 6mライン（ゴールエリアライン・赤色実線） */
+/* 6mライン（ゴールエリアライン・白色実線） */
 .court-grid-container::before {
     content: "";
     position: absolute;
-    top: 0; /* ▼ 下から上に変更 */
+    top: 0; 
     left: 15%;
     width: 70%;
-    height: 42%;
+    /* ▼ 変更：高さを固定(110px)し、ボタンに被らないように調整 */
+    height: 110px; 
     border: 3px solid #fff; 
-    border-top: none; /* ▼ 上の線を消す */
-    border-radius: 0 0 200px 200px; /* ▼ 下に膨らむように反転 */
+    border-top: none; 
+    border-radius: 0 0 200px 200px; 
     pointer-events: none;
     z-index: 1;
 }
 
-/* 9mライン（フリースローライン・赤色破線） */
+/* 9mライン（フリースローライン・白色破線） */
 .court-grid-container::after {
     content: "";
     position: absolute;
-    top: 0; /* ▼ 下から上に変更 */
+    top: 0; 
     left: 2%;
     width: 96%;
-    height: 70%;
+    /* ▼ 変更：近距離ボタン(内側)とミドルボタン(外側)の間を通る高さ(195px)に設定 */
+    height: 195px; 
     border: 3px dashed #fff; 
-    border-top: none; /* ▼ 上の線を消す */
-    border-radius: 0 0 300px 300px; /* ▼ 下に膨らむように反転 */
+    border-top: none; 
+    border-radius: 0 0 300px 300px; 
     pointer-events: none;
     z-index: 1;
 }
@@ -1048,7 +1051,8 @@ button, .starter-label, select {
 /* 7mライン（白色実線） */
 .seven-meter-line {
     position: absolute;
-    top: 48%; /* ▼ ゴール（上）からの距離に変更 */
+    /* ▼ 変更：6mラインのすぐ外側（近距離ボタンの真上）に配置 */
+    top: 120px; 
     left: 50%;
     transform: translateX(-50%);
     width: 12%;
@@ -1058,24 +1062,27 @@ button, .starter-label, select {
 }
 
 
-/* ゴール（赤白ストライプ） */
+/* ゴール（リアルなネット風） */
 .court-goal {
     position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 15%;
-    height: 12px;
-    /* 赤と白を交互に繰り返すグラデーション */
-    background: repeating-linear-gradient(
-      90deg,
-      #e60012,
-      #e60012 12px,
-      #fff 12px,
-      #fff 24px
-    ); 
-    border: 2px solid #fff;
-    border-top: none;
+    height: 18px; /* 少し奥行き（高さ）を出す */
+    
+    /* 白いポストとバーの表現 */
+    border-left: 3px solid #fff;
+    border-right: 3px solid #fff;
+    border-bottom: 3px solid #fff;
+    
+    /* 網目（ネット）の表現 */
+    background-color: rgba(255, 255, 255, 0.15); /* ネットの背景を少し白く */
+    background-image: 
+      linear-gradient(45deg, rgba(255,255,255,0.5) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.5)),
+      linear-gradient(45deg, rgba(255,255,255,0.5) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.5));
+    background-size: 6px 6px;
+    background-position: 0 0, 3px 3px;
     z-index: 1;
 }
 
