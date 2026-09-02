@@ -1057,23 +1057,25 @@ button, .starter-label, select {
     z-index: 1;
 }
 
-/* ゴール（白黒） */
+
+/* ゴール（赤白ストライプ） */
 .court-goal {
     position: absolute;
-    top: 0; /* ▼ 下から上に変更 */
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 15%;
     height: 12px;
+    /* 赤と白を交互に繰り返すグラデーション */
     background: repeating-linear-gradient(
       90deg,
-      #000,
-      #000 10px,
-      #fff 10px,
-      #fff 20px
+      #e60012,
+      #e60012 12px,
+      #fff 12px,
+      #fff 24px
     ); 
     border: 2px solid #fff;
-    border-top: none; /* ▼ 上の線を消す */
+    border-top: none;
     z-index: 1;
 }
 
