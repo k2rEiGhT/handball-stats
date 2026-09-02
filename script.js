@@ -77,6 +77,52 @@ function updateGkDropdown(team) {
   gkSelect.innerHTML = html;
 }
 
+
+const API_URL = "https://script.google.com/macros/s/AKfycbzU3AOoiPm-XiY8Zf1DU58VK6ylfKudFO_ReJ9hJtCnD7vEVmIn1r5jNFIVxLAQQgUQ/exec";
+
+let allTeamData = []; 
+let myTeamData = { name: "未設定", players: [] }; // 自チーム用
+
+// 既存の window.onload の中身の一番下に、読み込み処理を追加します
+window.onload = async function() {
+  const setupA = document.getElementById('setupA');
+  const setupB = document.getElementById('setupB');
+  
+  /* ...(既存の buildInputs やタイマーの処理などはそのまま残す)... */
+
+  // ★追加：スプレッドシートからデータを取得
+  try {
+    const response = await fetch(API_URL);
+    allTeamData = await response.json();
+    generateTeamButtons();
+  } catch (error) {
+    console.error("データの読み込みに失敗しました", error);
+    document.getElementById('opponentButtons').innerHTML = '<p>データの読み込みに失敗しました</p>';
+  }
+}
+
+// 取得したデータからボタンを自動生成する関数
+function generateTeamButtons() {
+  const container = document.getElementById('opponentButtons');
+  container.innerHTML = ''; // 「読み込み中...」の文字を消す
+  
+  allTeamData.forEach((team, index) => {
+    // シート名が「すわろ〜ず」の場合は自チーム用データとして保存
+    if (team.name === "すわろ〜ず") {
+      myTeamData = team;
+    } else {
+      // 相手チーム用のボタンを生成
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'load-opponent-btn';
+      // 文字が長すぎる場合は最初の4文字だけにするなどの調整（任意）
+      btn.textContent = team.name.length > 6 ? team.name.substring(0, 5) + '…' : team.name; 
+      btn.onclick = () => loadOpponentTeam(index);
+      container.appendChild(btn);
+    }
+  });
+}
+
 // 初期化：入力欄とチェックボックスの生成 (16名まで)、およびタイマー編集イベントの登録
 window.onload = function() {
   const setupA = document.getElementById('setupA');
@@ -788,24 +834,7 @@ function toggleGkRole() {
   renderButtons();
 }
 
-// ================= マイチームの自動入力機能 =================
-const myTeamData = {
-  name: "すわろ〜ず",
-  players: [
-    { num: "1", name: "大久保 裕章", isStarter: true },
-    { num: "2", name: "刈谷 匡志", isStarter: true },
-    { num: "3", name: "宮下 優華", isStarter: true },
-    { num: "4", name: "板東 慶晃", isStarter: true },
-    { num: "5", name: "堤 萌加", isStarter: false },
-    { num: "6", name: "村岡 沙耶", isStarter: false },
-    { num: "7", name: "馬場 美友", isStarter: false },
-    { num: "8", name: "山本 峻也", isStarter: true },
-    { num: "10", name: "馬場 康二朗", isStarter: true },
-    { num: "11", name: "堤 史土", isStarter: false },
-    { num: "12", name: "馬場 美那", isStarter: false },
-    { num: "15", name: "福田 あかね", isStarter: false }
-  ]
-};
+
 
 function loadMyTeam() {
   document.getElementById('teamNameA').value = myTeamData.name;
@@ -829,148 +858,10 @@ function loadMyTeam() {
   updateGkDropdown('A');
 }
 
-// =================相手チームの自動入力機能 =================
-const opponentTeams = [
-  {
-    name: "Acro",
-    players: [
-      { num: "1", name: "歴舎 望", isStarter: false },
-      { num: "3", name: "松本 爽", isStarter: false },
-      { num: "5", name: "齋藤 克弥", isStarter: false },
-      { num: "13", name: "足立 麻弥", isStarter: false },
-      { num: "14", name: "大濵 佑輔", isStarter: false },
-      { num: "30", name: "歴舎 敦輝", isStarter: false },
-      { num: "31", name: "深谷 直輝", isStarter: false },
-      { num: "56", name: "上中 大輔", isStarter: false },
-      { num: "99", name: "岸場 郁子", isStarter: false }
-    ]
-  },
-  {
-    name: "Liberta",
-    players: [
-      { num: "1", name: "横井 遥紀", isStarter: false },
-      { num: "2", name: "中屋 穂俊", isStarter: false },
-      { num: "7", name: "松本 彩音", isStarter: false },
-      { num: "8", name: "河田 紘孝", isStarter: false },
-      { num: "17", name: "福塚 美海", isStarter: false },
-      { num: "32", name: "戸上 佳映", isStarter: false },
-      { num: "39", name: "吉本 匠吾", isStarter: false },
-      { num: "56", name: "森下 皓介", isStarter: false }      
-    ]
-  },
-  {
-    name: "B-Loup",
-    players: [
-      { num: "2", name: "伊與田 裕司", isStarter: false },
-      { num: "7", name: "長谷川 結人", isStarter: false },
-      { num: "10", name: "小川 得至", isStarter: false },
-      { num: "11", name: "今井 陸翔", isStarter: false },
-      { num: "17", name: "山口 萌菜", isStarter: false },
-      { num: "27", name: "鍵和田 胤", isStarter: false },
-      { num: "37", name: "辻澤 佑太", isStarter: false },
-      { num: "39", name: "福坂 美空", isStarter: false },
-      { num: "77", name: "中川 夕聖", isStarter: false },
-      { num: "81", name: "安藤 天海", isStarter: false }
-    ]
-  },
-  {
-    name: "LBH",
-    players: [
-      { num: "2", name: "安田 孝志", isStarter: false },
-      { num: "3", name: "東出 修弥", isStarter: false },
-      { num: "4", name: "東 武志", isStarter: false },
-      { num: "5", name: "田中 大樹", isStarter: false },
-      { num: "7", name: "木村 正也", isStarter: false },
-      { num: "8", name: "佐藤 璃恵子", isStarter: false },
-      { num: "21", name: "佐藤 克輝", isStarter: false },
-      { num: "38", name: "友田 幸作", isStarter: false },
-      { num: "51", name: "磯井 秀人", isStarter: false },
-      { num: "70", name: "北野 尚人", isStarter: false },
-      { num: "73", name: "八橋 龍二", isStarter: false },
-      { num: "84", name: "橋口 勇喜", isStarter: false },
-      { num: "88", name: "廣田 琢磨", isStarter: false },
-      { num: "99", name: "大石 亜木菜", isStarter: false }
-    ]
-  },
-  {
-    name: "KnockuA",
-    players: [
-      { num: "2", name: "永田 裕幸", isStarter: false },
-      { num: "6", name: "森谷 幸生", isStarter: false },
-      { num: "7", name: "松本 賢", isStarter: false },
-      { num: "8", name: "伊藤 優也", isStarter: false },
-      { num: "9", name: "小貫 怜央", isStarter: false },
-      { num: "10", name: "諸岡 晋之助", isStarter: false },
-      { num: "15", name: "堀口 誠史", isStarter: false }
-    ]
-  },
-  {
-    name: "KnockuB",
-    players: [
-      { num: "1", name: "阿部 武蔵", isStarter: false },
-      { num: "3", name: "大谷 颯", isStarter: false },
-      { num: "4", name: "古矢 千尋", isStarter: false },
-      { num: "11", name: "吾妻 龍冬", isStarter: false },
-      { num: "12", name: "大和田洋平", isStarter: false },
-      { num: "16", name: "山島 花音", isStarter: false },
-      { num: "17", name: "矢原 里夏", isStarter: false },
-      { num: "18", name: "岡田 美優", isStarter: false }
-    ]
-  },
-  {
-    name: "TOPS",
-    players: [
-      { num: "1", name: "井上 太郎", isStarter: false },
-      { num: "2", name: "末継 真也", isStarter: false },
-      { num: "3", name: "宇野 春陽", isStarter: false },
-      { num: "5", name: "兼光 夏帆", isStarter: false },
-      { num: "6", name: "桜井 瑠唯", isStarter: false },
-      { num: "7", name: "畠 温陽", isStarter: false },
-      { num: "8", name: "安田 南", isStarter: false },
-      { num: "12", name: "中島 嘉威", isStarter: false }
-    ]
-  },
-  {
-    name: "鷹飛車",
-    players: [
-      { num: "1", name: "大西 満", isStarter: false },
-      { num: "2", name: "小島 蒼翔", isStarter: false },
-      { num: "3", name: "間島 琉日", isStarter: false },
-      { num: "4", name: "吉野つぐみ", isStarter: false },
-      { num: "5", name: "水野 郁菜", isStarter: false },
-      { num: "6", name: "勝見 陽斗", isStarter: false },
-      { num: "7", name: "城所 翔太", isStarter: false },
-      { num: "8", name: "大岡 優斗", isStarter: false }
-    ]
-  },  
-  {
-    name: "GOAT",
-    players: [
-      { num: "3", name: "斉藤 広之介", isStarter: false },
-      { num: "7", name: "源代 丞佑", isStarter: false },
-      { num: "11", name: "新木 康介", isStarter: false },
-      { num: "18", name: "福田 尚叶", isStarter: false },
-      { num: "21", name: "斉藤 梨桜", isStarter: false },
-      { num: "26", name: "宮原 惇", isStarter: false },
-      { num: "27", name: "川嶋 世羅", isStarter: false },
-      { num: "28", name: "安樂 拓真", isStarter: false }
-    ]
-  },
-  {
-    name: "未登録",
-    players: [
-      { num: "1", name: "", isStarter: false },
-      { num: "2", name: "", isStarter: false },
-      { num: "3", name: "", isStarter: false },
-      { num: "4", name: "", isStarter: false },
-      { num: "5", name: "", isStarter: false },
-      { num: "6", name: "", isStarter: false }
-    ]
-  }
-];
+
 
 function loadOpponentTeam(index) {
-  const teamData = opponentTeams[index];
+  const teamData = allTeamData[index];
   document.getElementById('teamNameB').value = teamData.name;
   
   // 一度Team Bのすべての入力をクリアする
