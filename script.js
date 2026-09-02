@@ -175,6 +175,30 @@ window.onload = async function() {
     // エラーの正体をそのまま画面に表示させる
     document.getElementById('opponentButtons').innerHTML = `<p style="color:red; font-weight:bold;">エラー: ${error.message}</p>`;
   }
+  
+  function generateTeamButtons() {
+  const container = document.getElementById('opponentButtons');
+  container.innerHTML = ''; // 「読み込み中...」の文字を消す
+  
+  allTeamData.forEach((team, index) => {
+    // 1枚目のシート（index === 0）は自チーム用データとして保存
+    if (index === 0) {
+      myTeamData = team;
+      // 画面左上の自チームボタンの文字もシート名に合わせる
+      let teamBtn = document.querySelector('.load-team-btn');
+      if(teamBtn) teamBtn.textContent = team.name;
+    } else {
+      // 2枚目以降のシートは相手チーム用のボタンを生成
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'load-opponent-btn';
+      // 文字が長すぎる場合は最初の5文字だけにする
+      btn.textContent = team.name.length > 6 ? team.name.substring(0, 5) + '…' : team.name; 
+      btn.onclick = () => loadOpponentTeam(index);
+      container.appendChild(btn);
+    }
+  });
+}
 }
 
 // ================= 矢印キー・Enterキーで入力欄を移動する機能 =================
