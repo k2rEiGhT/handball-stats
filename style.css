@@ -1120,15 +1120,15 @@ button, .starter-label, select {
 /* ================= コートの曲線に合わせてボタンを扇状に配置 ================= */
 
 /* 1段目：近距離（6m付近）の調整 */
-.court-grid .zone-btn:nth-child(1) { transform: translate(-10px, -45px); } /* 左サイド（少し内側へ調整） */
+.court-grid .zone-btn:nth-child(1) { transform: translate(-8px, -45px); } /* 左サイド（少し内側へ調整） */
 .court-grid .zone-btn:nth-child(2) { transform: translate(-4px, -8px); }    /* 左45度 */
 .court-grid .zone-btn:nth-child(3) { transform: translate(0px, 0px); }     /* センター */
 .court-grid .zone-btn:nth-child(4) { transform: translate(4px, -8px); }     /* 右45度 */
-.court-grid .zone-btn:nth-child(5) { transform: translate(10px, -45px); }  /* 右サイド（少し内側へ調整） */
+.court-grid .zone-btn:nth-child(5) { transform: translate(8px, -45px); }  /* 右サイド（少し内側へ調整） */
 
 /* 2段目：ミドル（遠距離）の調整 */
-.court-grid .zone-btn:nth-child(6) { transform: translate(-10px, -45px); } /* 左サイドミドル */
+.court-grid .zone-btn:nth-child(6) { transform: translate(-8px, -45px); } /* 左サイドミドル */
 .court-grid .zone-btn:nth-child(7) { transform: translate(-4px, -8px); }    /* 左45度ミドル */
 .court-grid .zone-btn:nth-child(8) { transform: translate(0px, 0px); }     /* センターミドル */
 .court-grid .zone-btn:nth-child(9) { transform: translate(4px, -8px); }     /* 右45度ミドル */
-.court-grid .zone-btn:nth-child(10){ transform: translate(10px, -45px); }  /* 右サイドミドル */
+.court-grid .zone-btn:nth-child(10){ transform: translate(8px, -45px); }  /* 右サイドミドル */
