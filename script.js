@@ -83,51 +83,12 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzU3AOoiPm-XiY8Zf1DU58V
 let allTeamData = []; 
 let myTeamData = { name: "未設定", players: [] }; // 自チーム用
 
-// 既存の window.onload の中身の一番下に、読み込み処理を追加します
+// ↓ ★ここから書き換え
 window.onload = async function() {
   const setupA = document.getElementById('setupA');
   const setupB = document.getElementById('setupB');
   
-  /* ...(既存の buildInputs やタイマーの処理などはそのまま残す)... */
-
-  // ★追加：スプレッドシートからデータを取得
-  try {
-    const response = await fetch(API_URL);
-    allTeamData = await response.json();
-    generateTeamButtons();
-  } catch (error) {
-    console.error("データの読み込みに失敗しました", error);
-    document.getElementById('opponentButtons').innerHTML = '<p>データの読み込みに失敗しました</p>';
-  }
-}
-
-// 取得したデータからボタンを自動生成する関数
-function generateTeamButtons() {
-  const container = document.getElementById('opponentButtons');
-  container.innerHTML = ''; // 「読み込み中...」の文字を消す
-  
-  allTeamData.forEach((team, index) => {
-    // シート名が「すわろ〜ず」の場合は自チーム用データとして保存
-    if (team.name === "すわろ〜ず") {
-      myTeamData = team;
-    } else {
-      // 相手チーム用のボタンを生成
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'load-opponent-btn';
-      // 文字が長すぎる場合は最初の4文字だけにするなどの調整（任意）
-      btn.textContent = team.name.length > 6 ? team.name.substring(0, 5) + '…' : team.name; 
-      btn.onclick = () => loadOpponentTeam(index);
-      container.appendChild(btn);
-    }
-  });
-}
-
-// 初期化：入力欄とチェックボックスの生成 (16名まで)、およびタイマー編集イベントの登録
-window.onload = function() {
-  const setupA = document.getElementById('setupA');
-  const setupB = document.getElementById('setupB');
-  
+  // 1. 入力欄の構築関数
   function buildInputs(teamPrefix) {
     let html = `
     <div class="setup-header">
@@ -137,10 +98,8 @@ window.onload = function() {
     <div class="input-grid">
       <div class="input-col">`;
     
-    // 1から16まですべて背番号と名前の自由入力にする
     for (let i = 1; i <= 16; i++) {
       if (i === 9) html += `</div><div class="input-col">`;
-      
       html += `
       <div class="player-input-row">
         <input type="text" id="num${teamPrefix}_${i}" class="player-num-input" placeholder="No." oninput="updateGkDropdown('${teamPrefix}')">
@@ -153,61 +112,47 @@ window.onload = function() {
         </label>
       </div>`;
     }
-    
     html += `</div></div>`;
     return html;
   }
 
+  // 2. 入力欄を画面にセット
   setupA.innerHTML = buildInputs('A');
   setupB.innerHTML = buildInputs('B');
 
-  // ★追加：タイマーを画面のまま直接修正する機能
+  // 3. タイマー直接編集機能のセットアップ
   const timerElement = document.getElementById('timer');
   if (timerElement) {
     timerElement.title = "クリックして時間を直接修正";
     timerElement.style.cursor = "pointer";
-    
-    // クリックで編集モード（直接入力可能）にする
     timerElement.addEventListener('click', function() {
       if (isEnded) return;
-      if (isRunning) stopTimer(); // タイマーが動いていたら止める
-      
-      this.contentEditable = true; // 直接編集を許可
+      if (isRunning) stopTimer(); 
+      this.contentEditable = true; 
       this.focus();
-      
-      // テキストを全選択状態にして、すぐ上書き入力できるようにする
       const range = document.createRange();
       range.selectNodeContents(this);
       const sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(range);
     });
-
-    // エンターキーを押したときに編集を完了する
     timerElement.addEventListener('keydown', function(e) {
-      // 変換中（日本語入力中）のEnterキーは無視
       if (e.isComposing) return; 
       if (e.key === 'Enter') {
         e.preventDefault();
-        this.blur(); // フォーカスを外して、すぐ下の blur イベントを強制発火
+        this.blur(); 
       }
     });
-
-    // 画面の別の場所をクリック（フォーカスが外れた）したときに時間を確定・反映する
     timerElement.addEventListener('blur', function() {
-      this.contentEditable = false; // 編集モードを終了
+      this.contentEditable = false; 
       let inputTime = this.innerText.trim();
-      
-      // スマホ入力対策：全角数字や全角コロン（１２：３０）を半角に変換する
       inputTime = inputTime.replace(/[０-９：]/g, function(s) {
         return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
       });
-      
       let parts = inputTime.split(':');
       if (parts.length === 2) {
         let m = parseInt(parts[0], 10);
         let s = parseInt(parts[1], 10);
-        
         if (!isNaN(m) && !isNaN(s) && m >= 0 && s >= 0 && s < 60) {
           elapsedSeconds = m * 60 + s;
         } else {
@@ -216,10 +161,18 @@ window.onload = function() {
       } else {
         alert("正しい形式（例: 05:30）で入力してください。");
       }
-      
-      // 最終的な正しい時間（または間違っていた場合は元の時間）を再表示
       this.innerText = formatTime(elapsedSeconds);
     });
+  }
+
+  // 4. スプレッドシートからデータを取得
+  try {
+    const response = await fetch(API_URL);
+    allTeamData = await response.json();
+    generateTeamButtons();
+  } catch (error) {
+    console.error("データの読み込みに失敗しました", error);
+    document.getElementById('opponentButtons').innerHTML = '<p>データの読み込みに失敗しました</p>';
   }
 }
 
@@ -506,6 +459,7 @@ function halfTime() {
 
 function endTimer() {
   stopTimer();
+  isEnded = true;
 }
 
 function getRecordTime(actionName, isSub = false) {
@@ -679,7 +633,7 @@ function renderLogs() {
       <td class="noprint" style="display: flex; gap: 4px; justify-content: center; align-items: center; background: transparent;">
         <button class="toggle-bm-btn ${log.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${log.id})">${bookmarkSvg}</button>
         <!-- ▼ 「削除」の文字を trashSvg に置き換え -->
-        <button class="delete-btn" onclick="deleteLog(${log.id})">${trashSvg}</button>
+        ${log.team === 'System' ? '' : `<button class="delete-btn" onclick="deleteLog(${log.id})">${trashSvg}</button>`}
       </td>
     </tr>
     `;
