@@ -885,7 +885,8 @@ function renderStats() {
         suspensions: 0, 
         disqualifications: 0,
         assists: 0,
-        gk_out: 0    // ★追加：GK目線での「相手の枠外」をカウント
+        gk_out: 0,
+        sevenM_gk_out: 0
       };
     });
   };
@@ -974,7 +975,13 @@ function renderStats() {
           }
         }
         
-        if (is7mMiss) stats[oppTeam][oppGkId].sevenM_saves++;
+        if (is7mMiss) {
+          if (log.action.includes('枠外')) {
+          stats[oppTeam][oppGkId].sevenM_gk_out++; // 枠外
+          } else {
+            stats[oppTeam][oppGkId].sevenM_saves++;  // 実セーブ
+          }
+        }
       }
     }
   });
@@ -994,7 +1001,8 @@ function renderStats() {
       steals: 0, blocks: 0,
       warnings: 0, suspensions: 0, disqualifications: 0,
       assists: 0,
-      gk_out: 0 // ★追加
+      gk_out: 0,
+      sevenM_gk_out: 0
     };
 
     const formatStat = (success, attempt) => {
@@ -1011,11 +1019,14 @@ function renderStats() {
       // ★修正：GKの計算（実セーブ＋枠外 を成功数とする）
       let totalGkSuccess = p.saves + p.gk_out;
       let regularGkFaced = totalGkSuccess + p.conceded;
-      let sevenMGkFaced = p.sevenM_saves + p.sevenM_conceded;
-
       let shotDisplay = formatStat(p.goals, regularShotsTotal);
-      let sevenMShotDisplay = formatStat(p.sevenM_goals, sevenMShotsTotal);
-      let sevenMSaveDisplay = formatStat(p.sevenM_saves, sevenMGkFaced);
+      let sevenMGkFaced = p.sevenM_saves + p.sevenM_gk_out + p.sevenM_conceded;
+      let total7mGkSuccess = p.sevenM_saves + p.sevenM_gk_out;
+      let sevenMSaveDisplay = '-';
+      if (sevenMGkFaced > 0) {
+        let pct = Math.round((total7mGkSuccess / sevenMGkFaced) * 100);
+        sevenMSaveDisplay = `${p.sevenM_saves} <span style="font-size:11px; color:#555;">(外${p.sevenM_gk_out})</span> / ${sevenMGkFaced}（${pct}％）`;
+      }
       
       // ★新規：GKセーブの専用表示（実セーブ数(外〇) / 被シュート数）
       let saveDisplay = '-';
@@ -1060,7 +1071,8 @@ function renderStats() {
       teamTotal.warnings += p.warnings;
       teamTotal.suspensions += p.suspensions;
       teamTotal.disqualifications += p.disqualifications;
-      teamTotal.assists += p.assists; // ★追加
+      teamTotal.assists += p.assists;
+      teamTotal.sevenM_gk_out += p.sevenM_gk_out;
     });
 
     // チーム合計行の計算と表示
@@ -1071,11 +1083,16 @@ function renderStats() {
     // ★修正：チーム合計のGK計算
     let tTotalGkSuccess = teamTotal.saves + teamTotal.gk_out;
     let tRegularGkFaced = tTotalGkSuccess + teamTotal.conceded;
-    let tSevenMGkFaced = teamTotal.sevenM_saves + teamTotal.sevenM_conceded;
 
     let tShotDisplay = formatStat(teamTotal.goals, tRegularShotsTotal);
     let tSevenMShotDisplay = formatStat(teamTotal.sevenM_goals, tSevenMShotsTotal);
-    let tSevenMSaveDisplay = formatStat(teamTotal.sevenM_saves, tSevenMGkFaced);
+    let tSevenMGkFaced = teamTotal.sevenM_saves + teamTotal.sevenM_gk_out + teamTotal.sevenM_conceded;
+    let tTotal7mGkSuccess = teamTotal.sevenM_saves + teamTotal.sevenM_gk_out;
+    let tSevenMSaveDisplay = '-';
+    if (tSevenMGkFaced > 0) {
+      let pct = Math.round((tTotal7mGkSuccess / tSevenMGkFaced) * 100);
+      tSevenMSaveDisplay = `${teamTotal.sevenM_saves} <span style="font-size:11px; color:#555;">(外${teamTotal.sevenM_gk_out})</span> / ${tSevenMGkFaced}（${pct}％）`;
+    }
 
     // ★新規：チーム合計のGK専用表示
     let tSaveDisplay = '-';
