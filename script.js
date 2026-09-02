@@ -172,7 +172,8 @@ window.onload = async function() {
     generateTeamButtons();
   } catch (error) {
     console.error("データの読み込みに失敗しました", error);
-    document.getElementById('opponentButtons').innerHTML = '<p>データの読み込みに失敗しました</p>';
+    // エラーの正体をそのまま画面に表示させる
+    document.getElementById('opponentButtons').innerHTML = `<p style="color:red; font-weight:bold;">エラー: ${error.message}</p>`;
   }
 }
 
@@ -620,7 +621,6 @@ function renderLogs() {
       bgB = 'background-color: #fff9e6;';
     }
 
-    // ▼ 時間の背景色(timeBg)に関する行を削除し、時間のマスはデフォルトの #f8f9fa 固定にします
     tableHTML += `
     <tr>
       <td style="${bgA}">${aPlayer}</td>
