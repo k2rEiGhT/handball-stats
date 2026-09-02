@@ -740,6 +740,9 @@ function recordSubstitution() {
   roster[team].court[cIndex] = bPlayer;
   roster[team].bench[bIndex] = cPlayer;
 
+  roster[team].court.sort((a, b) => a.num - b.num);
+  roster[team].bench.sort((a, b) => a.num - b.num);
+
   activeSelection[team].court = null;
   activeSelection[team].bench = null;
   document.getElementById('manualTime').value = '';
@@ -890,7 +893,7 @@ const opponentTeams = [
     ]
   },
   {
-    name: "KnockuSC新宿A",
+    name: "KnockuA",
     players: [
       { num: "2", name: "永田 裕幸", isStarter: true },
       { num: "6", name: "森谷 幸生", isStarter: true },
@@ -902,7 +905,7 @@ const opponentTeams = [
     ]
   },
   {
-    name: "KnockuSC新宿B",
+    name: "KnockuB",
     players: [
       { num: "1", name: "阿部 武蔵", isStarter: true },
       { num: "3", name: "大谷 颯", isStarter: true },
@@ -939,8 +942,7 @@ const opponentTeams = [
       { num: "7", name: "城所 翔太", isStarter: true },
       { num: "8", name: "大岡 優斗", isStarter: true }
     ]
-  },
-  
+  },  
   {
     name: "GOAT",
     players: [
