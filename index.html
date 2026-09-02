@@ -85,9 +85,9 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button onclick="recordAction('得点', 1)">得点</button>
-                    <button class="black-btn" onclick="openCourtPopup('ノーゴール(セーブ)', 0)">ノーゴール<br>(セーブ)</button>
-                    <button class="black-btn" onclick="openCourtPopup('ノーゴール(枠外)', 0)">ノーゴール<br>(枠外)</button>
+                    <<button onclick="openCourtPopup('得点', 1)">得点</button>
+                    <button class="black-btn" onclick="openCourtPopup('ノーゴール(セーブ)', 0)">セーブ</button>
+                    <button class="black-btn" onclick="openCourtPopup('ノーゴール(枠外)', 0)">枠外</button>
                     
                     <button class="yellow-btn" onclick="recordAction('パスミス', 0)">パスミス</button>
                     <button class="yellow-btn" onclick="recordAction('キャッチミス', 0)">キャッチミス</button>
@@ -260,6 +260,8 @@
             <span class="court-modal-close" onclick="closeCourtPopup()">&times;</span>
             <h3 style="margin-top: 0;">シュート位置を選択</h3>
           <div class="court-grid-container">
+            <div class="seven-meter-line"></div>
+            <div class="court-goal"></div>
             <div class="court-grid">
               <button class="zone-btn" onclick="recordShotWithZone('左サイドミドル')">左サイド<br>ミドル</button>
               <button class="zone-btn" onclick="recordShotWithZone('左45度ミドル')">左45度<br>ミドル</button>

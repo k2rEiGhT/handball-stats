@@ -972,7 +972,7 @@ button, .starter-label, select {
     border-color: #dc3545;  /* ホバー時は枠線も赤くする */
 }
 
-/* ================= シュートチャート用ポップアップ ================= */
+/* ================= シュートチャート用ポップアップ（リアルコート版） ================= */
 .court-modal {
     position: fixed;
     z-index: 1000;
@@ -980,14 +980,14 @@ button, .starter-label, select {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.6);
+    background-color: rgba(0,0,0,0.7); /* 背景を少し暗く */
     display: flex;
     justify-content: center;
     align-items: center;
 }
 .court-modal-content {
     background-color: #fff;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     width: 95%;
     max-width: 500px;
@@ -996,44 +996,102 @@ button, .starter-label, select {
 }
 .court-modal-close {
     position: absolute;
-    top: 5px;
+    top: 0px;
     right: 15px;
-    font-size: 28px;
+    font-size: 32px;
     cursor: pointer;
     color: #555;
+    z-index: 100;
 }
+
+/* コートの床（青色）と外枠（白色） */
 .court-grid-container {
-    background-color: #dcedc8; /* コートの床をイメージした薄い緑 */
-    border: 3px solid #333;
-    border-radius: 4px;
-    padding: 10px;
+    background-color: #0d5ca6; /* 画像に合わせたハンドボールコートの青 */
+    border: 4px solid #fff; /* アウターゴールライン等 */
+    border-bottom: none;
+    padding: 30px 10px 50px 10px; /* ボタン周りの余白 */
     position: relative;
+    overflow: hidden;
+    border-radius: 4px 4px 0 0;
 }
-/* 6mラインをイメージした半円状の装飾 */
+
+/* 6mライン（ゴールエリアライン・赤色実線） */
 .court-grid-container::before {
     content: "";
     position: absolute;
     bottom: 0;
     left: 15%;
     width: 70%;
-    height: 40%;
-    border: 2px dashed rgba(0,0,0,0.3);
+    height: 42%;
+    border: 3px solid #e60012; /* 画像に合わせた赤色 */
     border-bottom: none;
-    border-radius: 100px 100px 0 0;
+    border-radius: 200px 200px 0 0;
     pointer-events: none;
+    z-index: 1;
 }
+
+/* 9mライン（フリースローライン・赤色破線） */
+.court-grid-container::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 2%;
+    width: 96%;
+    height: 70%;
+    border: 3px dashed #ffffff; /* 画像に合わせた赤色 */
+    border-bottom: none;
+    border-radius: 300px 300px 0 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 7mライン（白色実線） */
+.seven-meter-line {
+    position: absolute;
+    bottom: 48%; /* 6mラインの少し外側 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12%;
+    height: 3px;
+    background-color: #fff;
+    z-index: 1;
+}
+
+/* ゴール（白黒） */
+.court-goal {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15%;
+    height: 12px;
+    background: repeating-linear-gradient(
+      90deg,
+      #000,
+      #000 10px,
+      #fff 10px,
+      #fff 20px
+    ); /* 白黒ストライプでゴールネットを表現 */
+    border: 2px solid #fff;
+    border-bottom: none;
+    z-index: 1;
+}
+
+/* ボタン群の配置レイアウト */
 .court-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(2, 70px);
     gap: 5px;
     position: relative;
-    z-index: 1;
+    z-index: 10; /* ラインより手前にボタンを置く */
 }
+
+/* 位置選択ボタンのデザイン */
 .zone-btn {
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid #999;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.85); /* 半透明にして下のコートを少し透かす */
+    border: 2px solid #fff;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 11px;
     font-weight: bold;
@@ -1042,9 +1100,10 @@ button, .starter-label, select {
     align-items: center;
     justify-content: center;
     transition: 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 .zone-btn:hover {
-    background: #ffeeba;
-    border: 2px solid #333;
+    background: #ffeb3b; /* マウスを乗せたら黄色に */
+    border-color: #333;
+    color: #000;
 }
