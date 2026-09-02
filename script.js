@@ -843,6 +843,34 @@ const opponentTeams = [
     ]
   },
   {
+    name: "Liberta",
+    players: [
+      { num: "1", name: "横井 遥紀", isStarter: true },
+      { num: "2", name: "中屋 穂俊", isStarter: true },
+      { num: "7", name: "松本 彩音", isStarter: true },
+      { num: "8", name: "河田 紘孝", isStarter: true },
+      { num: "17", name: "福塚 美海", isStarter: true },
+      { num: "32", name: "戸上 佳映", isStarter: true },
+      { num: "39", name: "吉本 匠吾", isStarter: true },
+      { num: "56", name: "森下 皓介", isStarter: true }      
+    ]
+  },
+  {
+    name: "B-Loup",
+    players: [
+      { num: "2", name: "伊與田 裕司", isStarter: true },
+      { num: "7", name: "長谷川 結人", isStarter: true },
+      { num: "10", name: "小川 得至", isStarter: true },
+      { num: "11", name: "今井 陸翔", isStarter: true },
+      { num: "17", name: "山口 萌菜", isStarter: true },
+      { num: "27", name: "鍵和田 胤", isStarter: true },
+      { num: "37", name: "辻澤 佑太", isStarter: true },
+      { num: "39", name: "福坂 美空", isStarter: true },
+      { num: "77", name: "中川 夕聖", isStarter: true },
+      { num: "81", name: "安藤 天海", isStarter: true }
+    ]
+  },
+  {
     name: "LBH",
     players: [
       { num: "2", name: "安田 孝志", isStarter: true },
@@ -862,14 +890,68 @@ const opponentTeams = [
     ]
   },
   {
-    name: "未登録",
+    name: "KnockuSC新宿A",
     players: [
-      { num: "1", name: "", isStarter: true },
-      { num: "2", name: "", isStarter: true },
-      { num: "3", name: "", isStarter: true },
-      { num: "4", name: "", isStarter: true },
-      { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
+      { num: "2", name: "永田 裕幸", isStarter: true },
+      { num: "6", name: "森谷 幸生", isStarter: true },
+      { num: "7", name: "松本 賢", isStarter: true },
+      { num: "8", name: "伊藤 優也", isStarter: true },
+      { num: "9", name: "小貫 怜央", isStarter: true },
+      { num: "10", name: "諸岡 晋之助", isStarter: true },
+      { num: "15", name: "堀口 誠史", isStarter: true }
+    ]
+  },
+  {
+    name: "KnockuSC新宿B",
+    players: [
+      { num: "1", name: "阿部 武蔵", isStarter: true },
+      { num: "3", name: "大谷 颯", isStarter: true },
+      { num: "4", name: "古矢 千尋", isStarter: true },
+      { num: "11", name: "吾妻 龍冬", isStarter: true },
+      { num: "12", name: "大和田洋平", isStarter: true },
+      { num: "16", name: "山島 花音", isStarter: true },
+      { num: "17", name: "矢原 里夏", isStarter: true },
+      { num: "18", name: "岡田 美優", isStarter: true }
+    ]
+  },
+  {
+    name: "TOPS",
+    players: [
+      { num: "1", name: "井上 太郎", isStarter: true },
+      { num: "2", name: "末継 真也", isStarter: true },
+      { num: "3", name: "宇野 春陽", isStarter: true },
+      { num: "5", name: "兼光 夏帆", isStarter: true },
+      { num: "6", name: "桜井 瑠唯", isStarter: true },
+      { num: "7", name: "畠 温陽", isStarter: true },
+      { num: "8", name: "安田 南", isStarter: true },
+      { num: "12", name: "中島 嘉威", isStarter: true }
+    ]
+  },
+  {
+    name: "鷹飛車",
+    players: [
+      { num: "1", name: "大西 満", isStarter: true },
+      { num: "2", name: "小島 蒼翔", isStarter: true },
+      { num: "3", name: "間島 琉日", isStarter: true },
+      { num: "4", name: "吉野つぐみ", isStarter: true },
+      { num: "5", name: "水野 郁菜", isStarter: true },
+      { num: "6", name: "勝見 陽斗", isStarter: true },
+      { num: "7", name: "城所 翔太", isStarter: true },
+      { num: "8", name: "大岡 優斗", isStarter: true }
+    ]
+  },
+  
+  {
+    name: "GOAT",
+    players: [
+      { num: "3", name: "斉藤 広之介", isStarter: true },
+      { num: "7", name: "源代 丞佑", isStarter: true },
+      { num: "11", name: "新木 康介", isStarter: true },
+      { num: "18", name: "福田 尚叶", isStarter: true },
+      { num: "21", name: "斉藤 梨桜", isStarter: true },
+      { num: "26", name: "宮原 惇", isStarter: true },
+      { num: "27", name: "川嶋 世羅", isStarter: true },
+      { num: "28", name: "安樂 拓真", isStarter: true }
     ]
   },
   {
@@ -880,73 +962,7 @@ const opponentTeams = [
       { num: "3", name: "", isStarter: true },
       { num: "4", name: "", isStarter: true },
       { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
-    ]
-  },
-  {
-    name: "未登録",
-    players: [
-      { num: "1", name: "", isStarter: true },
-      { num: "2", name: "", isStarter: true },
-      { num: "3", name: "", isStarter: true },
-      { num: "4", name: "", isStarter: true },
-      { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
-    ]
-  },
-  {
-    name: "未登録",
-    players: [
-      { num: "1", name: "", isStarter: true },
-      { num: "2", name: "", isStarter: true },
-      { num: "3", name: "", isStarter: true },
-      { num: "4", name: "", isStarter: true },
-      { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
-    ]
-  },
-  {
-    name: "未登録",
-    players: [
-      { num: "1", name: "", isStarter: true },
-      { num: "2", name: "", isStarter: true },
-      { num: "3", name: "", isStarter: true },
-      { num: "4", name: "", isStarter: true },
-      { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
-    ]
-  },
-  {
-    name: "未登録",
-    players: [
-      { num: "1", name: "", isStarter: true },
-      { num: "2", name: "", isStarter: true },
-      { num: "3", name: "", isStarter: true },
-      { num: "4", name: "", isStarter: true },
-      { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
-    ]
-  },
-  {
-    name: "未登録",
-    players: [
-      { num: "1", name: "", isStarter: true },
-      { num: "2", name: "", isStarter: true },
-      { num: "3", name: "", isStarter: true },
-      { num: "4", name: "", isStarter: true },
-      { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
-    ]
-  },
-  {
-    name: "未登録",
-    players: [
-      { num: "1", name: "", isStarter: true },
-      { num: "2", name: "", isStarter: true },
-      { num: "3", name: "", isStarter: true },
-      { num: "4", name: "", isStarter: true },
-      { num: "5", name: "", isStarter: true },
-      { num: "6", name: "", isStarter: true },
+      { num: "6", name: "", isStarter: true }
     ]
   }
 ];
