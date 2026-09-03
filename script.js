@@ -669,7 +669,6 @@ function renderLogs() {
     if (matchLogs.length > 0) {
       let latest = matchLogs[0];
       
-      // ▼ ここも 🔖の代わりに bookmarkSvg を埋め込む
       let bmBtn = `<button class="latest-bm-btn ${latest.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${latest.id})">${bookmarkSvg}</button>`;
       
       if (latest.team === 'System') {
@@ -1016,10 +1015,10 @@ function renderStats() {
       let regularShotsTotal = p.goals + p.misses;
       let sevenMShotsTotal = p.sevenM_goals + p.sevenM_misses;
       
-      // ★修正：GKの計算（実セーブ＋枠外 を成功数とする）
       let totalGkSuccess = p.saves + p.gk_out;
       let regularGkFaced = totalGkSuccess + p.conceded;
       let shotDisplay = formatStat(p.goals, regularShotsTotal);
+      let sevenMShotDisplay = formatStat(p.sevenM_goals, sevenMShotsTotal);
       let sevenMGkFaced = p.sevenM_saves + p.sevenM_gk_out + p.sevenM_conceded;
       let total7mGkSuccess = p.sevenM_saves + p.sevenM_gk_out;
       let sevenMSaveDisplay = '-';
