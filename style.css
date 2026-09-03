@@ -932,14 +932,14 @@ button, .starter-label, select {
 /* ================= ログの操作ボタン（統一デザイン） ================= */
 /* ブックマーク・削除ボタンの共通スタイル */
 .toggle-bm-btn, .delete-btn {
-    width: 30px;            /* 幅を固定して正方形に */
-    height: 30px;           /* 高さを固定 */
+    width: 30px;
+    height: 30px;
     padding: 0;
-    background: #fff;       /* 背景色を白で統一 */
-    border: 1px solid #ccc; /* 枠線を統一 */
+    background: #fff;
+    border: 1px solid #ccc;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;        /* アイコンの大きさ */
+    font-size: 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -949,15 +949,15 @@ button, .starter-label, select {
 
 /* ブックマークボタンの個別設定 */
 .toggle-bm-btn {
-    color: #999;            /* 未選択時はグレーのアイコン */
+    color: #999;
 }
 .toggle-bm-btn:hover {
     background: #f8f9fa;
 }
 .toggle-bm-btn.active {
-    background: #ffeeba;    /* 選択時は黄色背景 */
+    background: #ffeeba;
     border-color: #ffc107;
-    color: #d39e00;
+    color: #ffc107;
 }
 .toggle-bm-btn.active:hover {
     background: #ffdf7e;
@@ -965,11 +965,11 @@ button, .starter-label, select {
 
 /* 削除（ゴミ箱）ボタンの個別設定 */
 .delete-btn {
-    color: #dc3545;         /* ゴミ箱アイコンは赤色 */
+    color: #dc3545;
 }
 .delete-btn:hover {
-    background: #f8d7da;    /* ホバー時は薄い赤色背景 */
-    border-color: #dc3545;  /* ホバー時は枠線も赤くする */
+    background: #f8d7da;
+    border-color: #dc3545;
 }
 
 /* ================= シュートチャート用ポップアップ（リアルコート版） ================= */
