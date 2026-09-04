@@ -1024,14 +1024,14 @@ function renderStats() {
       let sevenMSaveDisplay = '-';
       if (sevenMGkFaced > 0) {
         let pct = Math.round((total7mGkSuccess / sevenMGkFaced) * 100);
-        sevenMSaveDisplay = `${p.sevenM_saves} <span style="font-size:11px; color:#555;">(外${p.sevenM_gk_out})</span> / ${sevenMGkFaced}（${pct}％）`;
+        sevenMSaveDisplay = `${p.sevenM_saves} <span style="font-size:11px; color:#555;">(${p.sevenM_gk_out})</span> / ${sevenMGkFaced}（${pct}％）`;
       }
       
       // ★新規：GKセーブの専用表示（実セーブ数(外〇) / 被シュート数）
       let saveDisplay = '-';
       if (regularGkFaced > 0) {
         let pct = Math.round((totalGkSuccess / regularGkFaced) * 100);
-        saveDisplay = `${p.saves} <span style="font-size:11px; color:#555;">(外${p.gk_out})</span> / ${regularGkFaced}（${pct}％）`;
+        saveDisplay = `${p.saves} <span style="font-size:11px; color:#555;">(${p.gk_out})</span> / ${regularGkFaced}（${pct}％）`;
       }
             
       // ★ご指定の順番に合わせて並び替え、アシストを追加
@@ -1090,14 +1090,14 @@ function renderStats() {
     let tSevenMSaveDisplay = '-';
     if (tSevenMGkFaced > 0) {
       let pct = Math.round((tTotal7mGkSuccess / tSevenMGkFaced) * 100);
-      tSevenMSaveDisplay = `${teamTotal.sevenM_saves} <span style="font-size:11px; color:#555;">(外${teamTotal.sevenM_gk_out})</span> / ${tSevenMGkFaced}（${pct}％）`;
+      tSevenMSaveDisplay = `${teamTotal.sevenM_saves} <span style="font-size:11px; color:#555;">(${teamTotal.sevenM_gk_out})</span> / ${tSevenMGkFaced}（${pct}％）`;
     }
 
     // ★新規：チーム合計のGK専用表示
     let tSaveDisplay = '-';
     if (tRegularGkFaced > 0) {
       let pct = Math.round((tTotalGkSuccess / tRegularGkFaced) * 100);
-      tSaveDisplay = `${teamTotal.saves} <span style="font-size:11px; color:#555;">(外${teamTotal.gk_out})</span> / ${tRegularGkFaced}（${pct}％）`;
+      tSaveDisplay = `${teamTotal.saves} <span style="font-size:11px; color:#555;">(${teamTotal.gk_out})</span> / ${tRegularGkFaced}（${pct}％）`;
     }
 
     // ★チーム合計も順番に合わせて出力
