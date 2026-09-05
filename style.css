@@ -1156,11 +1156,11 @@ button, .starter-label, select {
     background-color: #0d5ca6; 
     border: 3px solid #fff; 
     border-top: none; 
-    padding: 110px 5px 20px 5px; 
+    padding: 110px 5px 20px 15px; 
     position: relative;
     overflow: hidden;
     border-radius: 0 0 4px 4px;
-    width: 320px;
+    width: 350px;
     margin: 0 auto;
     box-sizing: border-box;
 }
