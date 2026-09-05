@@ -1138,7 +1138,7 @@ button, .starter-label, select {
 .chart-wrapper {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 40px;
     margin-top: 20px;
     page-break-inside: avoid; /* 印刷時にテーブルとチャートが分割されるのを防ぐ */
 }
