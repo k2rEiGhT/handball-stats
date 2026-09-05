@@ -1259,8 +1259,8 @@ function drawCharts(team, shootContainerId, saveContainerId) {
             let success = stats.success;
             
             let pct = attempts > 0 ? Math.round((success / attempts) * 100) : 0;
-            let displayStr = attempts > 0 ? `${success}/${attempts}` : "-/-";
-            let pctStr = attempts > 0 ? `${pct}%` : "-%";
+            let displayStr = attempts > 0 ? `${success}/${attempts}` : "";
+            let pctStr = attempts > 0 ? `${pct}%` : "";
             let extraClass = isSave ? "save-stat" : ""; // セーブ時は文字を青くするクラスを追加
 
             html += `
