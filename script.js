@@ -1126,6 +1126,9 @@ function renderStats() {
   document.getElementById('statsTeamNameB').innerText = customTeamB;
   document.getElementById('statsBodyA').innerHTML = buildStatsHTML('A');
   document.getElementById('statsBodyB').innerHTML = buildStatsHTML('B');
+
+  drawCharts('A', 'shootChartA', 'saveChartA');
+  drawCharts('B', 'shootChartB', 'saveChartB');
 }
 
 // ================= タイムアウトの記録と処理 =================
@@ -1206,4 +1209,73 @@ function recordShotWithZone(zoneName) {
   // 「得点 [左45度]」のような形式で記録を渡す
   let combinedActionName = `${pendingActionName} [${zoneName}]`;
   recordAction(combinedActionName, pendingActionPoints);
+}
+
+// ================= 埋め込みシュートチャート集計・描画 =================
+function drawCharts(team, shootContainerId, saveContainerId) {
+    const zones = [
+        "左サイド", "左45度", "センター", "右45度", "右サイド",
+        "左サイドミドル", "左45度ミドル", "センターミドル", "右45度ミドル", "右サイドミドル"
+    ];
+    
+    let shootStats = {};
+    let saveStats = {};
+    zones.forEach(z => {
+        shootStats[z] = { attempts: 0, success: 0 };
+        saveStats[z] = { faced: 0, success: 0 }; 
+    });
+
+    let oppTeam = team === 'A' ? 'B' : 'A';
+
+    matchLogs.forEach(log => {
+        let match = log.action.match(/\[(.*?)\]/);
+        if (match) {
+            let zoneName = match[1];
+            
+            // チームのシュート（オフェンス）の集計
+            if (log.team === team && shootStats[zoneName]) {
+                shootStats[zoneName].attempts++;
+                if (log.action.includes("得点")) {
+                    shootStats[zoneName].success++;
+                }
+            }
+            
+            // 相手チームのシュート（自チームのディフェンス/GKセーブ）の集計
+            if (log.team === oppTeam && saveStats[zoneName]) {
+                saveStats[zoneName].faced++;
+                // 枠外やセーブなど、ノーゴールになったものは阻止(success)としてカウント
+                if (log.action.includes("ノーゴール")) {
+                    saveStats[zoneName].success++;
+                }
+            }
+        }
+    });
+
+    function buildHtml(statsObj, isSave) {
+        let html = '';
+        zones.forEach(zone => {
+            let stats = statsObj[zone];
+            let attempts = isSave ? stats.faced : stats.attempts;
+            let success = stats.success;
+            
+            let pct = attempts > 0 ? Math.round((success / attempts) * 100) : 0;
+            let displayStr = attempts > 0 ? `${success}/${attempts}` : "-/-";
+            let pctStr = attempts > 0 ? `${pct}%` : "-%";
+            let extraClass = isSave ? "save-stat" : ""; // セーブ時は文字を青くするクラスを追加
+
+            html += `
+                <div class="stat-box ${extraClass}">
+                    <span class="zone-name">${zone}</span>
+                    <span>${displayStr}</span>
+                    <span class="pct">${pctStr}</span>
+                </div>
+            `;
+        });
+        return html;
+    }
+
+    let shootContainer = document.getElementById(shootContainerId);
+    let saveContainer = document.getElementById(saveContainerId);
+    if (shootContainer) shootContainer.innerHTML = buildHtml(shootStats, false);
+    if (saveContainer) saveContainer.innerHTML = buildHtml(saveStats, true);
 }
