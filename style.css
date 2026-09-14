@@ -730,12 +730,12 @@ button, .starter-label, select {
   /* 1. 用紙を「横向き」に設定 */
   @page {
     size: A4 landscape;
-    size: 297mm 210mm;
     margin: 10mm;
   }
 
   body {
-    box-sizing: border-box; 
+    box-sizing: border-box;
+    zoom: 0.75;
   }
 
   /* 背景色や網掛けを印刷時にも強制的に出力する設定 */
@@ -842,6 +842,14 @@ button, .starter-label, select {
   .match-info-text::-moz-placeholder { color: transparent; }
   .match-info-text:-ms-input-placeholder { color: transparent; }
   .match-info-text::-ms-input-placeholder { color: transparent; }
+
+  /* 印刷時：スタッツ表の折り返しを禁止し、コンパクトに収める */
+  .stats-table th, 
+  .stats-table td {
+    white-space: nowrap !important; /* 改行を禁止 */
+    padding: 4px 2px !important;    /* セル内の余白を極力小さく */
+    font-size: 11px !important;     /* 文字サイズを縮小 */
+  }
 }
 /* ================= 背番号の強調表示 ================= */
 .player-num-display {
