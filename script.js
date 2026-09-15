@@ -1072,6 +1072,7 @@ function renderStats() {
       teamTotal.disqualifications += p.disqualifications;
       teamTotal.assists += p.assists;
       teamTotal.sevenM_gk_out += p.sevenM_gk_out;
+      teamTotal.gk_out += p.gk_out;
     });
 
     // チーム合計行の計算と表示
