@@ -735,9 +735,11 @@ button, .starter-label, select {
 
   body {
     box-sizing: border-box;
-    zoom: 0.75;
   }
-
+  
+  .log-container { overflow: visible !important; }
+  
+  
   /* 背景色や網掛けを印刷時にも強制的に出力する設定 */
   * {
     -webkit-print-color-adjust: exact !important;

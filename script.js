@@ -830,9 +830,45 @@ function loadMyTeam() {
     document.getElementById(`numA_${i}`).value = p.num;
     document.getElementById(`nameA_${i}`).value = p.name;
     document.querySelector(`.starter-check-A[value="${i}"]`).checked = p.isStarter;
+    
+    // ▼ 追加：除外データの反映（データが存在する場合のみ）
+    if (p.isExcluded !== undefined) {
+      document.querySelector(`.exclude-check-A[value="${i}"]`).checked = p.isExcluded;
+    }
   });
 
   updateGkDropdown('A');
+}
+
+function loadOpponentTeam(index) {
+  const teamData = allTeamData[index];
+  document.getElementById('teamNameB').value = teamData.name;
+  
+  // 一度Team Bのすべての入力をクリアする
+  for (let i = 1; i <= 16; i++) {
+    document.getElementById(`numB_${i}`).value = '';
+    document.getElementById(`nameB_${i}`).value = '';
+    document.querySelector(`.starter-check-B[value="${i}"]`).checked = false;
+    document.querySelector(`.exclude-check-B[value="${i}"]`).checked = false;
+  }
+
+  // データを順番にTeam Bの入力枠に埋める
+  teamData.players.forEach((p, idx) => {
+    let i = idx + 1;
+    if (i > 16) return; // 最大16人まで
+    
+    document.getElementById(`numB_${i}`).value = p.num;
+    document.getElementById(`nameB_${i}`).value = p.name;
+    document.querySelector(`.starter-check-B[value="${i}"]`).checked = p.isStarter;
+    
+    // ▼ 追加：除外データの反映（データが存在する場合のみ）
+    if (p.isExcluded !== undefined) {
+      document.querySelector(`.exclude-check-B[value="${i}"]`).checked = p.isExcluded;
+    }
+  });
+
+  // GKのドロップダウンを更新
+  updateGkDropdown('B');
 }
 
 
