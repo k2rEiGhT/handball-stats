@@ -1,3 +1,9 @@
+// ================= 設定・定数 (Config) =================
+const CONFIG = {
+  MAX_PLAYERS_TOTAL: 16, // ベンチ入り最大人数
+  MAX_PLAYERS_COURT: 6   // コート上の最大人数
+};
+
 // ================= 状態管理 (State) =================
 let scoreA = 0;
 let scoreB = 0;
@@ -37,6 +43,9 @@ window.onload = async function() {
   setupB.innerHTML = buildInputs('B');
 
   setupTimerEdit();
+  
+  // PDFタイトル用のイベントリスナー設定
+  document.querySelector('.match-info-title').addEventListener('input', updateDocumentTitle);
 
   // スプレッドシートからデータを取得
   try {
@@ -58,7 +67,8 @@ function buildInputs(teamPrefix) {
   <div class="input-grid">
     <div class="input-col">`;
   
-  for (let i = 1; i <= 16; i++) {
+  // ★ 16ではなく定数を使用
+  for (let i = 1; i <= CONFIG.MAX_PLAYERS_TOTAL; i++) {
     if (i === 9) html += `</div><div class="input-col">`;
     html += `
     <div class="player-input-row">
@@ -148,7 +158,7 @@ function generateTeamButtons() {
 function applyTeamDataToInputs(team, teamData) {
   document.getElementById(`teamName${team}`).value = teamData.name;
   
-  for (let i = 1; i <= 16; i++) {
+  for (let i = 1; i <= CONFIG.MAX_PLAYERS_TOTAL; i++) {
     document.getElementById(`num${team}_${i}`).value = '';
     document.getElementById(`name${team}_${i}`).value = '';
     document.querySelector(`.starter-check-${team}[value="${i}"]`).checked = false;
@@ -158,7 +168,7 @@ function applyTeamDataToInputs(team, teamData) {
 
   teamData.players.forEach((p, idx) => {
     let i = idx + 1;
-    if (i > 16) return;
+    if (i > CONFIG.MAX_PLAYERS_TOTAL) return;
     document.getElementById(`num${team}_${i}`).value = p.num;
     document.getElementById(`name${team}_${i}`).value = p.name;
     document.querySelector(`.starter-check-${team}[value="${i}"]`).checked = !!p.isStarter;
@@ -185,9 +195,10 @@ function limitCheckAndGkUpdate(checkbox, team) {
     if (excludeCheck) excludeCheck.checked = false;
   }
   let checkedCount = document.querySelectorAll(`.starter-check-${team}:checked`).length;
-  if (checkedCount > 6) {
+  // ★ 6ではなく定数を使用
+  if (checkedCount > CONFIG.MAX_PLAYERS_COURT) {
     checkbox.checked = false;
-    alert("コートメンバーは6人までです。");
+    alert(`コートメンバーは${CONFIG.MAX_PLAYERS_COURT}人までです。`);
     return;
   }
   updateGkDropdown(team);
@@ -239,7 +250,7 @@ document.addEventListener('keydown', function(e) {
       if (e.key === 'ArrowDown' || e.key === 'Enter') idx++;
       else if (e.key === 'ArrowUp') idx--;
       
-      if (idx >= 1 && idx <= 16) {
+      if (idx >= 1 && idx <= CONFIG.MAX_PLAYERS_TOTAL) {
         const nextInput = document.getElementById(`${type}${team}_${idx}`);
         if (nextInput) {
           nextInput.focus();
@@ -290,6 +301,9 @@ function updateRoster() {
 
   activeSelection = { A: { court: null, bench: null }, B: { court: null, bench: null } };
 
+  // 登録時にタイトルを更新（イベント駆動）
+  updateDocumentTitle();
+
   renderButtons();
   renderLogs();
   
@@ -304,7 +318,7 @@ function processTeamRoster(team, gkVal) {
   roster[team].bench = [];
   roster[team].gkId = gkVal;
 
-  for (let i = 1; i <= 16; i++) {
+  for (let i = 1; i <= CONFIG.MAX_PLAYERS_TOTAL; i++) {
     let nameElem = document.getElementById(`name${team}_${i}`);
     let nameInput = nameElem.value.trim();
     let numVal = document.getElementById(`num${team}_${i}`).value.trim();
@@ -335,7 +349,7 @@ function swapTeams() {
   document.getElementById('teamNameA').value = document.getElementById('teamNameB').value;
   document.getElementById('teamNameB').value = tempTeamName;
 
-  for (let i = 1; i <= 16; i++) {
+  for (let i = 1; i <= CONFIG.MAX_PLAYERS_TOTAL; i++) {
     let fields = ['num', 'name'];
     let checks = ['starter-check-', 'exclude-check-'];
     
@@ -693,10 +707,16 @@ function openCourtPopup(actionName, points) {
   pendingActionName = actionName;
   pendingActionPoints = points;
   document.getElementById('courtModal').style.display = 'flex';
+  
+  // ★ モーダル展開時に背景のスクロールを止める
+  document.body.classList.add('modal-open');
 }
 
 function closeCourtPopup() {
   document.getElementById('courtModal').style.display = 'none';
+  
+  // ★ モーダルを閉じたら背景のスクロールを復旧
+  document.body.classList.remove('modal-open');
 }
 
 function recordShotWithZone(zoneName) {
@@ -854,12 +874,11 @@ function drawCharts(team, shootId, saveId) {
 }
 
 // ================= PDFタイトル監視・印刷 =================
-setInterval(() => {
-  if (isRunning || elapsedSeconds > 0 || isEnded) {
-    const title = document.querySelector('.match-info-title').value.trim() || "大会名未定";
-    const matchUp = (customTeamA && customTeamB) ? `${customTeamA} vs. ${customTeamB}` : "対戦カード未定";
-    document.title = `${title} ${matchUp}`;
-  }
-}, 1000);
+// ★ イベント駆動型に変更 (setIntervalを廃止)
+function updateDocumentTitle() {
+  const title = document.querySelector('.match-info-title').value.trim() || "大会名未定";
+  const matchUp = (customTeamA && customTeamB) ? `${customTeamA} vs. ${customTeamB}` : "対戦カード未定";
+  document.title = `${title} ${matchUp}`;
+}
 
 function printToPDF() { window.print(); }
