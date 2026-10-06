@@ -563,9 +563,46 @@ td small { color: #555; font-weight: bold; }
     
     .setup-section, .main-layout, .footer-buttons, .noprint, .latest-log-bar { display: none !important; }
     .print-layout { display: block; }
+    
+    /* ログとTeam Bのスタッツは改ページ */
     .log-container { overflow: visible !important; page-break-before: always; break-before: page; }
     .stats-team-b { page-break-before: always; break-before: page; }
     
+    /* ▼▼▼ 追加・修正箇所：1ページに収めるための設定 ▼▼▼ */
+    /* スタッツ表と画像がページをまたいで泣き別れるのを防ぐ */
+    .stats-team-a,
+    .stats-team-b {
+        page-break-inside: avoid;
+    }
+
+    /* チーム名の見出し下の隙間を詰める */
+    .stats-team-a h4, 
+    .stats-team-b h4 {
+        margin-bottom: 5px !important;
+    }
+
+    /* テーブルの高さ（上下の余白）と文字サイズを限界まで詰める */
+    .stats-table th, 
+    .stats-table td { 
+        white-space: nowrap !important; 
+        padding: 2px 1px !important; /* 4pxから2pxに極小化 */
+        font-size: 10px !important;  /* 11pxから10pxに縮小 */
+        line-height: 1.1 !important; /* 行間を詰める */
+    }
+    
+    /* チャート（画像）部分を85%に縮小し、隙間を詰める */
+    .chart-wrapper { 
+        display: flex !important; 
+        justify-content: center !important; 
+        margin-top: 5px !important;
+        gap: 20px !important;            /* 2枚の画像の隙間を寄せる（元80px） */
+        transform: scale(0.85);          /* 画像自体を85%サイズに縮小 */
+        transform-origin: top center;    /* 上辺を基準に縮小させる */
+        margin-bottom: -30px !important; /* 縮小して余った下の空間を相殺する */
+    }
+    /* ▲▲▲ 追加・修正箇所ここまで ▲▲▲ */
+
+    /* 試合情報（ヘッダー部分）の印刷レイアウト */
     .match-info-container {
         display: flex; flex-direction: row; justify-content: space-between; align-items: flex-end;
         margin-bottom: 15px; padding-bottom: 8px; border-bottom: 4px double var(--color-dark);
@@ -583,7 +620,4 @@ td small { color: #555; font-weight: bold; }
     .match-info-title::-webkit-input-placeholder, .match-info-text::-webkit-input-placeholder { color: transparent; }
     .match-info-title::-moz-placeholder, .match-info-text::-moz-placeholder { color: transparent; }
     .match-info-title:-ms-input-placeholder, .match-info-text:-ms-input-placeholder { color: transparent; }
-    
-    .stats-table th, .stats-table td { white-space: nowrap !important; padding: 4px 2px !important; font-size: 11px !important; }
-    .chart-wrapper { display: flex !important; justify-content: center !important; }
 }
