@@ -11,45 +11,61 @@
 </head>
 <body>
 
-    <details class="setup-section" open>
-        <summary>チーム名・選手名入力</summary>
-        <div class="setup-container">
-            <div class="team-setup">
-                <h3><input type="text" id="teamNameA" placeholder="チーム名"></h3>
-                <button type="button" class="load-team-btn" onclick="loadMyTeam()">すわろ〜ず</button>
-                <div id="setupA" class="player-inputs"></div>
-                <div class="gk-setup-row">
-                    <label for="gkSelectA"><strong>GK：</strong></label>
-                    <select id="gkSelectA"><option value="">選択してください</option></select>
-                </div>
-            </div>
-
-            <div class="swap-container">
-                <button type="button" class="swap-btn" onclick="swapTeams()">⇄</button>
+    <!-- ==========================================
+         初期設定セクション（チーム名・選手名入力）
+    =========================================== -->
+    <header>
+        <details class="setup-section" open>
+            <summary>チーム名・選手名入力</summary>
             
-            </div>
-            <div class="team-setup">
-                <h3><input type="text" id="teamNameB" placeholder="チーム名"></h3>
-                <div class="opponent-buttons-container" id="opponentButtons">
-                    <p style="grid-column: span 5; font-size: 12px; text-align: center; color: #555;">データを読み込み中...</p>
-                </div>
-                <div id="setupB" class="player-inputs"></div>
-                <div class="gk-setup-row">
-                    <label for="gkSelectB"><strong>GK：</strong></label>
-                    <select id="gkSelectB"><option value="">選択してください</option></select>
-                </div>
-            </div>
-        </div>
-        <button class="update-btn" onclick="updateRoster()">チーム名・選手を登録して記録画面へ</button>
-    </details>
+            <div class="setup-container">
+                <!-- Team A 設定 -->
+                <section class="team-setup">
+                    <h3><input type="text" id="teamNameA" placeholder="チーム名"></h3>
+                    <button type="button" class="load-team-btn" onclick="loadMyTeam()">すわろ〜ず</button>
+                    <div id="setupA" class="player-inputs"></div>
+                    <div class="gk-setup-row">
+                        <label for="gkSelectA"><strong>GK：</strong></label>
+                        <select id="gkSelectA"><option value="">選択してください</option></select>
+                    </div>
+                </section>
 
+                <!-- チーム入れ替えボタン -->
+                <div class="swap-container">
+                    <button type="button" class="swap-btn" onclick="swapTeams()">⇄</button>
+                </div>
+                
+                <!-- Team B 設定 -->
+                <section class="team-setup">
+                    <h3><input type="text" id="teamNameB" placeholder="チーム名"></h3>
+                    <div class="opponent-buttons-container" id="opponentButtons">
+                        <!-- JSでデータが読み込まれるまでのプレースホルダー -->
+                        <p style="grid-column: span 5; font-size: 12px; text-align: center; color: #555;">データを読み込み中...</p>
+                    </div>
+                    <div id="setupB" class="player-inputs"></div>
+                    <div class="gk-setup-row">
+                        <label for="gkSelectB"><strong>GK：</strong></label>
+                        <select id="gkSelectB"><option value="">選択してください</option></select>
+                    </div>
+                </section>
+            </div>
+            
+            <button class="update-btn" onclick="updateRoster()">チーム名・選手を登録して記録画面へ</button>
+        </details>
+    </header>
+
+    <!-- 最新ログ速報バー -->
     <div class="latest-log-bar">
         <span id="latestLogText">最新のログ：なし</span>
     </div>
 
-    <div class="main-layout">
+    <!-- ==========================================
+         メイン操作セクション
+    =========================================== -->
+    <main class="main-layout">
         
-        <div class="team-column left-team">
+        <!-- 左カラム：Team A -->
+        <section class="team-column left-team">
             <h2 id="displayTeamNameA">Team A</h2>
             <div class="score" id="scoreA">0</div>
             
@@ -60,9 +76,11 @@
 
             <h4 class="area-title bench-title">ベンチ</h4>
             <div id="teamA-bench-buttons" class="player-grid bench-grid"></div>
-        </div>
+        </section>
 
-        <div class="center-column">
+        <!-- 中央カラム：タイマー＆アクション操作 -->
+        <section class="center-column">
+            
             <div class="timer-container">
                 <div id="timer">00:00</div>
                 <div class="timer-controls">
@@ -76,7 +94,7 @@
             <hr class="divider">
 
             <div class="action-section">
-
+                <!-- アシスト選択 -->
                 <div class="assist-container">
                     <label for="assistSelect">アシスト：</label>
                     <select id="assistSelect">
@@ -84,6 +102,7 @@
                     </select>
                 </div>
 
+                <!-- アクションボタン群 -->
                 <div class="action-buttons">
                     <button onclick="openCourtPopup('得点', 1)">得点</button>
                     <button class="black-btn" onclick="openCourtPopup('ノーゴール(セーブ)', 0)">セーブ</button>
@@ -92,7 +111,6 @@
                     <button class="yellow-btn" onclick="recordAction('パスミス', 0)">パスミス</button>
                     <button class="yellow-btn" onclick="recordAction('キャッチミス', 0)">キャッチミス</button>
                     <button class="yellow-btn" onclick="recordAction('ドリブルミス', 0)">ドリブルミス</button>
-
 
                     <button class="neutral-btn" onclick="recordAction('パスカット', 0)">パスカット</button>
                     <button class="neutral-btn" onclick="recordAction('ブロック', 0)">ブロック</button>
@@ -113,9 +131,9 @@
                     <button class="red-btn" onclick="recordAction('2分間退場', 0)">2分間退場</button>
                     <button class="red-btn" onclick="recordAction('失格', 0)">失格</button>
 
-                    <!-- 区切り線 -->
                     <hr class="divider" style="width: 100%; margin: 10px 0;">
 
+                    <!-- 交代・タイムアウト関連 -->
                     <div class="sub-button-group" style="display: flex; gap: 5px; width: 100%;">
                         <button class="sub-btn" style="flex: 1;" onclick="recordSubstitution()">交代</button>
                         <button class="sub-btn" style="flex: 1; background: #17a2b8; border-color: #117a8b; color: white;" onclick="toggleGkRole()">GK交代</button>
@@ -128,15 +146,17 @@
 
                     <hr class="divider" style="width: 100%; margin: 10px 0;">
 
+                    <!-- 手動時間入力 -->
                     <div class="manual-time-container" style="width: 100%;">
                         <label for="manualTime">過去の時間を追加：</label>
                         <input type="text" id="manualTime" placeholder="例: 04:30">
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="team-column right-team">
+        <!-- 右カラム：Team B -->
+        <section class="team-column right-team">
             <h2 id="displayTeamNameB">Team B</h2>
             <div class="score" id="scoreB">0</div>
             
@@ -147,36 +167,39 @@
 
             <h4 class="area-title bench-title">ベンチ</h4>
             <div id="teamB-bench-buttons" class="player-grid bench-grid"></div>
-        </div>
+        </section>
 
-    </div>
+    </main>
 
-    <!-- 試合情報入力エリア（印刷時は一番上に出ます） -->
-    <div class="match-info-container">
+    <!-- ==========================================
+         印刷＆表示用セクション（試合情報・スタッツ・ログ）
+    =========================================== -->
+    
+    <!-- 試合情報（印刷時はヘッダーに配置） -->
+    <section class="match-info-container">
         <div class="match-info-inputs">
             <input type="text" class="match-info-title" placeholder="大会名">
             <input type="text" class="match-info-text" placeholder="20xx年x月">
         </div>
-        <!-- 対戦カードと点数をグループ化して表示 -->
         <div class="match-up-wrapper">
             <div id="matchUpDisplay" class="match-up-text"></div>
             <div id="headerScoreDisplay" class="header-score-text"></div>
         </div>
-    </div>
+    </section>
 
-    <!-- ボタンを横並びにするための枠 -->
+    <!-- PDF変換ボタン -->
     <div class="footer-buttons">
         <button class="print-btn" onclick="printToPDF()">PDFに変換する</button>
     </div>
 
-    <!-- 印刷と画面の表示順をコントロールする枠 -->
+    <!-- 印刷レイアウト制御枠 -->
     <div class="print-layout">
         
-        <!-- 試合スタッツ（印刷時は先に配置、画面ではCSSで下に移動） -->
-        <div class="stats-container" id="statsContainer" style="display: none;">
+        <!-- 試合スタッツ -->
+        <section class="stats-container" id="statsContainer" style="display: none;">
             <h3 class="section-main-title noprint">試合スタッツ</h3>
             
-            <!-- Team Aのスタッツ -->
+            <!-- Team A スタッツ -->
             <div class="stats-team-a" style="margin-bottom: 20px;">
                 <h4 id="statsTeamNameA">Team A</h4>
                 <table class="stats-table">
@@ -222,7 +245,7 @@
                 </div>
             </div>
             
-            <!-- Team Bのスタッツ -->
+            <!-- Team B スタッツ -->
             <div class="stats-team-b">
                 <h4 id="statsTeamNameB">Team B</h4>
                 <table class="stats-table">
@@ -266,10 +289,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 試合のログ（印刷時はここで改ページして3ページ目へ、画面ではCSSで上に移動） -->
-        <div class="log-container">
+        <!-- 試合ログ -->
+        <section class="log-container">
             <h3 class="section-main-title">試合ログ</h3>
             <table>
                 <thead>
@@ -287,35 +310,39 @@
                 <tbody id="logTableBody">
                 </tbody>
             </table>
-        </div>
+        </section>
 
     </div>
 
-    <script src="script.js"></script>
+    <!-- ==========================================
+         シュート位置選択用モーダル（ポップアップ）
+    =========================================== -->
     <div id="courtModal" class="court-modal" style="display: none;">
         <div class="court-modal-content">
             <span class="court-modal-close" onclick="closeCourtPopup()">&times;</span>
             <h3 style="margin-top: 0;">シュート位置を選択</h3>
-          <div class="court-grid-container">
-            <div class="seven-meter-line"></div>
-            <div class="court-goal"></div>
-            <div class="court-grid">
-              <button class="zone-btn" onclick="recordShotWithZone('左サイド')">左サイド</button>
-              <button class="zone-btn" onclick="recordShotWithZone('左45度')">左45度</button>
-              <button class="zone-btn" onclick="recordShotWithZone('センター')">センター</button>
-              <button class="zone-btn" onclick="recordShotWithZone('右45度')">右45度</button>
-              <button class="zone-btn" onclick="recordShotWithZone('右サイド')">右サイド</button>
+            <div class="court-grid-container">
+                <div class="seven-meter-line"></div>
+                <div class="court-goal"></div>
+                <div class="court-grid">
+                    <button class="zone-btn" onclick="recordShotWithZone('左サイド')">左サイド</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('左45度')">左45度</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('センター')">センター</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('右45度')">右45度</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('右サイド')">右サイド</button>
 
-              <button class="zone-btn" onclick="recordShotWithZone('左サイドミドル')">左サイド<br>ミドル</button>
-              <button class="zone-btn" onclick="recordShotWithZone('左45度ミドル')">左45度<br>ミドル</button>
-              <button class="zone-btn" onclick="recordShotWithZone('センターミドル')">センター<br>ミドル</button>
-              <button class="zone-btn" onclick="recordShotWithZone('右45度ミドル')">右45度<br>ミドル</button>
-              <button class="zone-btn" onclick="recordShotWithZone('右サイドミドル')">右サイド<br>ミドル</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('左サイドミドル')">左サイド<br>ミドル</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('左45度ミドル')">左45度<br>ミドル</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('センターミドル')">センター<br>ミドル</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('右45度ミドル')">右45度<br>ミドル</button>
+                    <button class="zone-btn" onclick="recordShotWithZone('右サイドミドル')">右サイド<br>ミドル</button>
+                </div>
             </div>
         </div>
     </div>
 
-    
-</div>
+    <!-- JavaScriptの読み込み -->
+    <script src="script.js"></script>
+
 </body>
 </html>
