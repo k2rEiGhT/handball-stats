@@ -650,7 +650,7 @@ function recordSubstitution() {
   let outLabel = (roster[team].gkId === cId) ? `${cPlayer.name}(GK)` : cPlayer.name;
   let inLabel = (roster[team].gkId === cId) ? `${bPlayer.name}(GK)` : bPlayer.name;
 
-  addLog(recordTime, team, "-", `OUT: ${outLabel}\nIN: ${inLabel}`, 0);
+  addLog(recordTime, team, "-", `OUT: ${outLabel}<br>IN: ${inLabel}`, 0);
 
   if (roster[team].gkId === cId) roster[team].gkId = bId;
 
