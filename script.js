@@ -1,16 +1,13 @@
+// ================= 状態管理 (State) =================
 let scoreA = 0;
 let scoreB = 0;
-
-// 試合の全ログを管理する配列
 let matchLogs = [];
 
-// データ構造：チームごとにコート(6名、うち1名がGK)とベンチを管理
 let roster = {
   A: { court: [], bench: [], gkId: null },
   B: { court: [], bench: [], gkId: null }
 };
 
-// 選択状態の管理
 let activeSelection = {
   A: { court: null, bench: null },
   B: { court: null, bench: null }
@@ -25,15 +22,168 @@ let isRunning = false;
 let isEnded = false;
 let currentPeriod = 1;
 
-// 登録画面でコートチェックを監視し、GK選択肢を動的にアップデートする
+let allTeamData = []; 
+let myTeamData = { name: "未設定", players: [] };
+
+const API_URL = "https://script.google.com/macros/s/AKfycbzU3AOoiPm-XiY8Zf1DU58VK6ylfKudFO_ReJ9hJtCnD7vEVmIn1r5jNFIVxLAQQgUQ/exec";
+
+// ================= 初期化・セットアップ (Initialization) =================
+window.onload = async function() {
+  const setupA = document.getElementById('setupA');
+  const setupB = document.getElementById('setupB');
+  
+  // 入力欄の構築
+  setupA.innerHTML = buildInputs('A');
+  setupB.innerHTML = buildInputs('B');
+
+  setupTimerEdit();
+
+  // スプレッドシートからデータを取得
+  try {
+    const response = await fetch(API_URL);
+    allTeamData = await response.json();
+    generateTeamButtons();
+  } catch (error) {
+    console.error("データの読み込みに失敗しました", error);
+    document.getElementById('opponentButtons').innerHTML = `<p style="color:red; font-weight:bold;">エラー: ${error.message}</p>`;
+  }
+};
+
+function buildInputs(teamPrefix) {
+  let html = `
+  <div class="setup-header">
+    <div class="setup-header-col">コート/除外</div>
+    <div class="setup-header-col">コート/除外</div>
+  </div>
+  <div class="input-grid">
+    <div class="input-col">`;
+  
+  for (let i = 1; i <= 16; i++) {
+    if (i === 9) html += `</div><div class="input-col">`;
+    html += `
+    <div class="player-input-row">
+      <input type="text" id="num${teamPrefix}_${i}" class="player-num-input" placeholder="No." oninput="updateGkDropdown('${teamPrefix}')">
+      <input type="text" id="name${teamPrefix}_${i}" class="player-name-input" placeholder="名前" oninput="updateGkDropdown('${teamPrefix}')">
+      <label class="starter-label" title="コート">
+        <input type="checkbox" class="starter-check-${teamPrefix}" value="${i}" onclick="limitCheckAndGkUpdate(this, '${teamPrefix}')">
+      </label>
+      <label class="exclude-label" title="除外">
+        <input type="checkbox" class="exclude-check-${teamPrefix}" value="${i}" onclick="handleExcludeCheck(this, '${teamPrefix}')">
+      </label>
+    </div>`;
+  }
+  html += `</div></div>`;
+  return html;
+}
+
+function setupTimerEdit() {
+  const timerElement = document.getElementById('timer');
+  if (!timerElement) return;
+
+  timerElement.title = "クリックして時間を直接修正";
+  timerElement.style.cursor = "pointer";
+  
+  timerElement.addEventListener('click', function() {
+    if (isEnded) return;
+    if (isRunning) stopTimer(); 
+    this.contentEditable = true; 
+    this.focus();
+    const range = document.createRange();
+    range.selectNodeContents(this);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+  
+  timerElement.addEventListener('keydown', function(e) {
+    if (e.isComposing) return; 
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.blur(); 
+    }
+  });
+  
+  timerElement.addEventListener('blur', function() {
+    this.contentEditable = false; 
+    let inputTime = this.innerText.trim();
+    inputTime = inputTime.replace(/[０-９：]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    let parts = inputTime.split(':');
+    
+    if (parts.length === 2) {
+      let m = parseInt(parts[0], 10);
+      let s = parseInt(parts[1], 10);
+      if (!isNaN(m) && !isNaN(s) && m >= 0 && s >= 0 && s < 60) {
+        elapsedSeconds = m * 60 + s;
+      } else {
+        alert("正しい形式（例: 05:30）で入力してください。秒数は0〜59である必要があります。");
+      }
+    } else {
+      alert("正しい形式（例: 05:30）で入力してください。");
+    }
+    this.innerText = formatTime(elapsedSeconds);
+  });
+}
+
+function generateTeamButtons() {
+  const container = document.getElementById('opponentButtons');
+  container.innerHTML = ''; 
+  
+  allTeamData.forEach((team, index) => {
+    if (index === 0) {
+      myTeamData = team;
+      let teamBtn = document.querySelector('.load-team-btn');
+      if (teamBtn) teamBtn.textContent = team.name;
+    } else {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'load-opponent-btn';
+      btn.textContent = team.name.length > 6 ? team.name.substring(0, 5) + '…' : team.name; 
+      btn.onclick = () => loadOpponentTeam(index);
+      container.appendChild(btn);
+    }
+  });
+}
+
+// ================= データ読み込み・UIヘルパー =================
+function applyTeamDataToInputs(team, teamData) {
+  document.getElementById(`teamName${team}`).value = teamData.name;
+  
+  for (let i = 1; i <= 16; i++) {
+    document.getElementById(`num${team}_${i}`).value = '';
+    document.getElementById(`name${team}_${i}`).value = '';
+    document.querySelector(`.starter-check-${team}[value="${i}"]`).checked = false;
+    let excludeCheck = document.querySelector(`.exclude-check-${team}[value="${i}"]`);
+    if (excludeCheck) excludeCheck.checked = false;
+  }
+
+  teamData.players.forEach((p, idx) => {
+    let i = idx + 1;
+    if (i > 16) return;
+    document.getElementById(`num${team}_${i}`).value = p.num;
+    document.getElementById(`name${team}_${i}`).value = p.name;
+    document.querySelector(`.starter-check-${team}[value="${i}"]`).checked = !!p.isStarter;
+    if (p.isExcluded !== undefined) {
+      let excludeCheck = document.querySelector(`.exclude-check-${team}[value="${i}"]`);
+      if (excludeCheck) excludeCheck.checked = p.isExcluded;
+    }
+  });
+  updateGkDropdown(team);
+}
+
+function loadMyTeam() {
+  applyTeamDataToInputs('A', myTeamData);
+}
+
+function loadOpponentTeam(index) {
+  applyTeamDataToInputs('B', allTeamData[index]);
+}
+
 function limitCheckAndGkUpdate(checkbox, team) {
   let index = checkbox.value;
-  // ★追加：コートにチェックを入れたら除外チェックを外す
   if (checkbox.checked) {
     let excludeCheck = document.querySelector(`.exclude-check-${team}[value="${index}"]`);
     if (excludeCheck) excludeCheck.checked = false;
   }
-
   let checkedCount = document.querySelectorAll(`.starter-check-${team}:checked`).length;
   if (checkedCount > 6) {
     checkbox.checked = false;
@@ -43,11 +193,9 @@ function limitCheckAndGkUpdate(checkbox, team) {
   updateGkDropdown(team);
 }
 
-// ★新規追加：除外チェックの挙動
 function handleExcludeCheck(checkbox, team) {
   let index = checkbox.value;
   if (checkbox.checked) {
-    // 除外をチェックしたらコートのチェックを外す
     let courtCheck = document.querySelector(`.starter-check-${team}[value="${index}"]`);
     if (courtCheck && courtCheck.checked) {
       courtCheck.checked = false;
@@ -56,7 +204,6 @@ function handleExcludeCheck(checkbox, team) {
   }
 }
 
-// 登録画面のGKセレクトボックスを構築
 function updateGkDropdown(team) {
   const gkSelect = document.getElementById(`gkSelect${team}`);
   const checkedCheckboxes = document.querySelectorAll(`.starter-check-${team}:checked`);
@@ -70,180 +217,44 @@ function updateGkDropdown(team) {
   checkedCheckboxes.forEach(cb => {
     let index = cb.value;
     let nameVal = document.getElementById(`name${team}_${index}`).value.trim() || "-";
-    // 1〜16まですべて入力欄から背番号を取得する仕様
     let numVal = document.getElementById(`num${team}_${index}`).value.trim() || index;
     html += `<option value="${team}_${index}">${numVal}. ${nameVal}</option>`;
   });
   gkSelect.innerHTML = html;
 }
 
-
-const API_URL = "https://script.google.com/macros/s/AKfycbzU3AOoiPm-XiY8Zf1DU58VK6ylfKudFO_ReJ9hJtCnD7vEVmIn1r5jNFIVxLAQQgUQ/exec";
-
-let allTeamData = []; 
-let myTeamData = { name: "未設定", players: [] }; // 自チーム用
-
-// ↓ ★ここから書き換え
-window.onload = async function() {
-  const setupA = document.getElementById('setupA');
-  const setupB = document.getElementById('setupB');
-  
-  // 1. 入力欄の構築関数
-  function buildInputs(teamPrefix) {
-    let html = `
-    <div class="setup-header">
-      <div class="setup-header-col">コート/除外</div>
-      <div class="setup-header-col">コート/除外</div>
-    </div>
-    <div class="input-grid">
-      <div class="input-col">`;
-    
-    for (let i = 1; i <= 16; i++) {
-      if (i === 9) html += `</div><div class="input-col">`;
-      html += `
-      <div class="player-input-row">
-        <input type="text" id="num${teamPrefix}_${i}" class="player-num-input" placeholder="No." oninput="updateGkDropdown('${teamPrefix}')">
-        <input type="text" id="name${teamPrefix}_${i}" class="player-name-input" placeholder="名前" oninput="updateGkDropdown('${teamPrefix}')">
-        <label class="starter-label" title="コート">
-          <input type="checkbox" class="starter-check-${teamPrefix}" value="${i}" onclick="limitCheckAndGkUpdate(this, '${teamPrefix}')">
-        </label>
-        <label class="exclude-label" title="除外">
-          <input type="checkbox" class="exclude-check-${teamPrefix}" value="${i}" onclick="handleExcludeCheck(this, '${teamPrefix}')">
-        </label>
-      </div>`;
-    }
-    html += `</div></div>`;
-    return html;
-  }
-
-  // 2. 入力欄を画面にセット
-  setupA.innerHTML = buildInputs('A');
-  setupB.innerHTML = buildInputs('B');
-
-  // 3. タイマー直接編集機能のセットアップ
-  const timerElement = document.getElementById('timer');
-  if (timerElement) {
-    timerElement.title = "クリックして時間を直接修正";
-    timerElement.style.cursor = "pointer";
-    timerElement.addEventListener('click', function() {
-      if (isEnded) return;
-      if (isRunning) stopTimer(); 
-      this.contentEditable = true; 
-      this.focus();
-      const range = document.createRange();
-      range.selectNodeContents(this);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    });
-    timerElement.addEventListener('keydown', function(e) {
-      if (e.isComposing) return; 
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        this.blur(); 
-      }
-    });
-    timerElement.addEventListener('blur', function() {
-      this.contentEditable = false; 
-      let inputTime = this.innerText.trim();
-      inputTime = inputTime.replace(/[０-９：]/g, function(s) {
-        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-      });
-      let parts = inputTime.split(':');
-      if (parts.length === 2) {
-        let m = parseInt(parts[0], 10);
-        let s = parseInt(parts[1], 10);
-        if (!isNaN(m) && !isNaN(s) && m >= 0 && s >= 0 && s < 60) {
-          elapsedSeconds = m * 60 + s;
-        } else {
-          alert("正しい形式（例: 05:30）で入力してください。秒数は0〜59である必要があります。");
-        }
-      } else {
-        alert("正しい形式（例: 05:30）で入力してください。");
-      }
-      this.innerText = formatTime(elapsedSeconds);
-    });
-  }
-
-  // 4. スプレッドシートからデータを取得
-  try {
-    const response = await fetch(API_URL);
-    allTeamData = await response.json();
-    generateTeamButtons();
-  } catch (error) {
-    console.error("データの読み込みに失敗しました", error);
-    // エラーの正体をそのまま画面に表示させる
-    document.getElementById('opponentButtons').innerHTML = `<p style="color:red; font-weight:bold;">エラー: ${error.message}</p>`;
-  }
-  
-  function generateTeamButtons() {
-  const container = document.getElementById('opponentButtons');
-  container.innerHTML = ''; // 「読み込み中...」の文字を消す
-  
-  allTeamData.forEach((team, index) => {
-    // 1枚目のシート（index === 0）は自チーム用データとして保存
-    if (index === 0) {
-      myTeamData = team;
-      // 画面左上の自チームボタンの文字もシート名に合わせる
-      let teamBtn = document.querySelector('.load-team-btn');
-      if(teamBtn) teamBtn.textContent = team.name;
-    } else {
-      // 2枚目以降のシートは相手チーム用のボタンを生成
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'load-opponent-btn';
-      // 文字が長すぎる場合は最初の5文字だけにする
-      btn.textContent = team.name.length > 6 ? team.name.substring(0, 5) + '…' : team.name; 
-      btn.onclick = () => loadOpponentTeam(index);
-      container.appendChild(btn);
-    }
-  });
-}
-}
-
-// ================= 矢印キー・Enterキーで入力欄を移動する機能 =================
+// ================= キーボード操作 =================
 document.addEventListener('keydown', function(e) {
-  // ↑(ArrowUp), ↓(ArrowDown), Enterキーのみ処理
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter') {
     const active = document.activeElement;
-    
-    // 現在フォーカスされているのが、背番号か名前の入力欄かチェック
     const match = active.id ? active.id.match(/^(num|name)(A|B)_(\d+)$/) : null;
     if (match) {
-      // 変換中（日本語入力中）のEnterキーは無視する
       if (e.isComposing) return;
-      
-      e.preventDefault(); // デフォルトの動き（画面スクロールなど）を止める
+      e.preventDefault(); 
       
       const type = match[1];
       const team = match[2];
       let idx = parseInt(match[3], 10);
       
-      // ↓またはEnterなら次の番号へ、↑なら前の番号へ
-      if (e.key === 'ArrowDown' || e.key === 'Enter') {
-        idx++;
-      } else if (e.key === 'ArrowUp') {
-        idx--;
-      }
+      if (e.key === 'ArrowDown' || e.key === 'Enter') idx++;
+      else if (e.key === 'ArrowUp') idx--;
       
-      // 1〜16の範囲内ならフォーカスを移動
       if (idx >= 1 && idx <= 16) {
         const nextInput = document.getElementById(`${type}${team}_${idx}`);
         if (nextInput) {
           nextInput.focus();
-          nextInput.select(); // 連続入力しやすいように文字を選択状態にする
+          nextInput.select(); 
         }
       }
     }
   }
 });
 
-// 選手リストの登録
+// ================= ロスター（選手登録）処理 =================
 function updateRoster() {
   customTeamA = document.getElementById('teamNameA').value.trim() || "Team A";
   customTeamB = document.getElementById('teamNameB').value.trim() || "Team B";
 
-  // 大会名の横に対戦カードを自動表示
   const matchUpDisplay = document.getElementById('matchUpDisplay');
   if (matchUpDisplay) {
     matchUpDisplay.innerHTML = `
@@ -258,7 +269,6 @@ function updateRoster() {
   const gkValA = document.getElementById('gkSelectA').value;
   const gkValB = document.getElementById('gkSelectB').value;
 
-  // GKの初期選択必須チェック
   if (!gkValA || !gkValB) {
     alert("両チームとも、コート上から1名ゴールキーパー(GK)を指定してください。");
     return;
@@ -267,218 +277,164 @@ function updateRoster() {
   document.getElementById('displayTeamNameA').innerText = customTeamA;
   document.getElementById('displayTeamNameB').innerText = customTeamB;
   
-  // タイムアウトボタンのチーム名も更新
   const btnToA = document.getElementById('btnTimeoutA');
   const btnToB = document.getElementById('btnTimeoutB');
   if (btnToA) btnToA.innerText = customTeamA + ' T.O.';
   if (btnToB) btnToB.innerText = customTeamB + ' T.O.';
 
-  // ログテーブルのヘッダー更新（左右のチーム名）
   document.getElementById('thPlayerA').innerText = customTeamA;
   document.getElementById('thPlayerB').innerText = customTeamB;
 
-  roster.A.court = []; roster.A.bench = []; roster.A.gkId = gkValA;
-  roster.B.court = []; roster.B.bench = []; roster.B.gkId = gkValB;
+  processTeamRoster('A', gkValA);
+  processTeamRoster('B', gkValB);
+
   activeSelection = { A: { court: null, bench: null }, B: { court: null, bench: null } };
-
-  // Team A
-  for (let i = 1; i <= 16; i++) {
-    let nameElem = document.getElementById(`nameA_${i}`);
-    let nameInput = nameElem.value.trim();
-    let numVal = document.getElementById(`numA_${i}`).value.trim();
-    let isCourt = document.querySelector(`.starter-check-A[value="${i}"]`).checked;
-    let isExcluded = document.querySelector(`.exclude-check-A[value="${i}"]`).checked;
-    
-    // 背番号がある、またはコートチェックが入っている場合で、氏名が空欄なら「-」を自動入力
-    if (!nameInput && (numVal !== "" || isCourt)) {
-      nameInput = "-";
-      nameElem.value = "-"; // 画面上の入力ボックスにも「-」を表示
-    }
-
-    if (nameInput && !isExcluded) {
-      let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
-      
-      // ソート用に背番号を数値化（空欄や文字列の場合は9999にして末尾へ）
-      let numInt = parseInt(numVal, 10);
-      if (isNaN(numInt)) numInt = 9999;
-
-      let p = { id: `A_${i}`, name: displayName, num: numInt };
-      if (isCourt) roster.A.court.push(p);
-      else roster.A.bench.push(p);
-    }
-  }
-
-  // Team B
-  for (let i = 1; i <= 16; i++) {
-    let nameElem = document.getElementById(`nameB_${i}`);
-    let nameInput = nameElem.value.trim();
-    let numVal = document.getElementById(`numB_${i}`).value.trim();
-    let isCourt = document.querySelector(`.starter-check-B[value="${i}"]`).checked;
-    let isExcluded = document.querySelector(`.exclude-check-B[value="${i}"]`).checked;
-    
-    // 背番号がある、またはコートチェックが入っている場合で、氏名が空欄なら「-」を自動入力
-    if (!nameInput && (numVal !== "" || isCourt)) {
-      nameInput = "-";
-      nameElem.value = "-"; // 画面上の入力ボックスにも「-」を表示
-    }
-
-    if (nameInput && !isExcluded) {
-      let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
-      
-      // ソート用に背番号を数値化
-      let numInt = parseInt(numVal, 10);
-      if (isNaN(numInt)) numInt = 9999;
-
-      let p = { id: `B_${i}`, name: displayName, num: numInt };
-      if (isCourt) roster.B.court.push(p);
-      else roster.B.bench.push(p);
-    }
-  }
-
-  // 両チームのコート・ベンチを背番号順（昇順）に並べ替え
-  roster.A.court.sort((a, b) => a.num - b.num);
-  roster.A.bench.sort((a, b) => a.num - b.num);
-  roster.B.court.sort((a, b) => a.num - b.num);
-  roster.B.bench.sort((a, b) => a.num - b.num);
 
   renderButtons();
   renderLogs();
   
-  // スタッツ画面の表示と初期計算
   document.getElementById('statsContainer').style.display = 'block';
   renderStats();
-  
   document.querySelector('.setup-section').removeAttribute('open');
 }
 
-// 選手ボタンの描画
+// 登録処理の共通化
+function processTeamRoster(team, gkVal) {
+  roster[team].court = [];
+  roster[team].bench = [];
+  roster[team].gkId = gkVal;
+
+  for (let i = 1; i <= 16; i++) {
+    let nameElem = document.getElementById(`name${team}_${i}`);
+    let nameInput = nameElem.value.trim();
+    let numVal = document.getElementById(`num${team}_${i}`).value.trim();
+    let isCourt = document.querySelector(`.starter-check-${team}[value="${i}"]`).checked;
+    let isExcluded = document.querySelector(`.exclude-check-${team}[value="${i}"]`).checked;
+    
+    if (!nameInput && (numVal !== "" || isCourt)) {
+      nameInput = "-";
+      nameElem.value = "-";
+    }
+
+    if (nameInput && !isExcluded) {
+      let displayName = numVal ? `${numVal}. ${nameInput}` : nameInput;
+      let numInt = parseInt(numVal, 10);
+      if (isNaN(numInt)) numInt = 9999;
+
+      let p = { id: `${team}_${i}`, name: displayName, num: numInt };
+      if (isCourt) roster[team].court.push(p);
+      else roster[team].bench.push(p);
+    }
+  }
+  roster[team].court.sort((a, b) => a.num - b.num);
+  roster[team].bench.sort((a, b) => a.num - b.num);
+}
+
+function swapTeams() {
+  let tempTeamName = document.getElementById('teamNameA').value;
+  document.getElementById('teamNameA').value = document.getElementById('teamNameB').value;
+  document.getElementById('teamNameB').value = tempTeamName;
+
+  for (let i = 1; i <= 16; i++) {
+    let fields = ['num', 'name'];
+    let checks = ['starter-check-', 'exclude-check-'];
+    
+    // 入力欄の入れ替え
+    fields.forEach(f => {
+      let a = document.getElementById(`${f}A_${i}`);
+      let b = document.getElementById(`${f}B_${i}`);
+      let temp = a.value;
+      a.value = b.value;
+      b.value = temp;
+    });
+
+    // チェックボックスの入れ替え
+    checks.forEach(c => {
+      let a = document.querySelector(`.${c}A[value="${i}"]`);
+      let b = document.querySelector(`.${c}B[value="${i}"]`);
+      if (a && b) {
+        let temp = a.checked;
+        a.checked = b.checked;
+        b.checked = temp;
+      }
+    });
+  }
+  updateGkDropdown('A');
+  updateGkDropdown('B');
+}
+
+// ================= UIレンダリング (画面更新) =================
 function renderButtons() {
-  function generateHtml(team, type) {
+  const generateHtml = (team, type) => {
     return roster[team][type].map(p => {
       const isSelected = activeSelection[team][type] === p.id ? 'selected' : '';
       const isGk = roster[team].gkId === p.id ? ' <span class="gk-label">[GK]</span>' : '';
-      // 追加：先頭の「数字.」を装飾用タグで囲む
       const formattedName = p.name.replace(/^(\d+)\.\s*/, '<span class="player-num-display">$1.</span> ');
       return `<button class="player-btn ${isSelected}" onclick="selectPlayer('${team}', '${type}', '${p.id}', '${p.name}')">${formattedName}${isGk}</button>`;
     }).join('');
-  }
+  };
 
-  document.getElementById('teamA-court-buttons').innerHTML = generateHtml('A', 'court') || '<p class="placeholder-text">なし</p>';
-  document.getElementById('teamA-bench-buttons').innerHTML = generateHtml('A', 'bench') || '<p class="placeholder-text">なし</p>';
-  document.getElementById('teamB-court-buttons').innerHTML = generateHtml('B', 'court') || '<p class="placeholder-text">なし</p>';
-  document.getElementById('teamB-bench-buttons').innerHTML = generateHtml('B', 'bench') || '<p class="placeholder-text">なし</p>';
+  ['A', 'B'].forEach(team => {
+    document.getElementById(`team${team}-court-buttons`).innerHTML = generateHtml(team, 'court') || '<p class="placeholder-text">なし</p>';
+    document.getElementById(`team${team}-bench-buttons`).innerHTML = generateHtml(team, 'bench') || '<p class="placeholder-text">なし</p>';
+  });
 }
 
-// 選手の選択
 function selectPlayer(team, type, id, name) {
   const otherTeam = team === 'A' ? 'B' : 'A';
   activeSelection[otherTeam].court = null;
   activeSelection[otherTeam].bench = null;
 
-  if (activeSelection[team][type] === id) {
-    activeSelection[team][type] = null;
-  } else {
-    activeSelection[team][type] = id;
-  }
-
+  activeSelection[team][type] = (activeSelection[team][type] === id) ? null : id;
   renderButtons();
 
   const assistSelect = document.getElementById('assistSelect');
   assistSelect.innerHTML = '<option value="">-- なし --</option>';
   
-  const targetPlayerName = activeSelection[team].court ? 
-    roster[team].court.find(p => p.id === activeSelection[team].court).name : 
-    activeSelection[team].bench ? roster[team].bench.find(p => p.id === activeSelection[team].bench).name : null;
+  const targetId = activeSelection[team].court || activeSelection[team].bench;
+  const targetPlayer = targetId ? [...roster[team].court, ...roster[team].bench].find(p => p.id === targetId) : null;
 
-  if (targetPlayerName) {
-    let courtPlayers = roster[team].court;
-    courtPlayers.forEach(p => {
-      if (p.name !== targetPlayerName) {
+  if (targetPlayer) {
+    roster[team].court.forEach(p => {
+      if (p.name !== targetPlayer.name) {
         assistSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
       }
     });
   }
 }
 
-// ================= チームの左右入れ替え機能 =================
-function swapTeams() {
-  // チーム名の入れ替え
-  let tempTeamName = document.getElementById('teamNameA').value;
-  document.getElementById('teamNameA').value = document.getElementById('teamNameB').value;
-  document.getElementById('teamNameB').value = tempTeamName;
-
-  // 1〜16番の選手データ（背番号、名前、チェックボックス）を入れ替え
-  for (let i = 1; i <= 16; i++) {
-    // Team Aの現在の値を取得
-    let numA = document.getElementById(`numA_${i}`).value;
-    let nameA = document.getElementById(`nameA_${i}`).value;
-    let checkA = document.querySelector(`.starter-check-A[value="${i}"]`).checked;
-    let excludeA = document.querySelector(`.exclude-check-A[value="${i}"]`).checked;
-
-    // Team Bの現在の値を取得
-    let numB = document.getElementById(`numB_${i}`).value;
-    let nameB = document.getElementById(`nameB_${i}`).value;
-    let checkB = document.querySelector(`.starter-check-B[value="${i}"]`).checked;
-    let excludeB = document.querySelector(`.exclude-check-B[value="${i}"]`).checked;
-
-    // Bの値をAに代入（右から左へ）
-    document.getElementById(`numA_${i}`).value = numB;
-    document.getElementById(`nameA_${i}`).value = nameB;
-    document.querySelector(`.starter-check-A[value="${i}"]`).checked = checkB;
-    document.querySelector(`.exclude-check-A[value="${i}"]`).checked = excludeB;
-
-    // Aの値をBに代入（左から右へ）
-    document.getElementById(`numB_${i}`).value = numA;
-    document.getElementById(`nameB_${i}`).value = nameA;
-    document.querySelector(`.starter-check-B[value="${i}"]`).checked = checkA;
-    document.querySelector(`.exclude-check-B[value="${i}"]`).checked = excludeA;
-  }
-
-  // 両チームのGKドロップダウンリストを再構築
-  updateGkDropdown('A');
-  updateGkDropdown('B');
-}
-
-// ================= タイマー機能 =================
+// ================= タイマー管理 =================
 function formatTime(totalSeconds) {
   let m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
   let s = (totalSeconds % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 }
+
 function startTimer() {
-  if (isEnded) return;
-  if (!isRunning) {
-    timerInterval = setInterval(() => {
-      elapsedSeconds++;
-      document.getElementById('timer').innerText = formatTime(elapsedSeconds);
-    }, 1000);
-    isRunning = true;
-    document.getElementById('btnStart').disabled = true;
-    document.getElementById('btnStop').disabled = false;
-  }
-}
-function stopTimer() {
-  if (isRunning) {
-    clearInterval(timerInterval);
-    isRunning = false;
-    document.getElementById('btnStart').disabled = false;
-    document.getElementById('btnStop').disabled = true;
-  }
+  if (isEnded || isRunning) return;
+  timerInterval = setInterval(() => {
+    elapsedSeconds++;
+    document.getElementById('timer').innerText = formatTime(elapsedSeconds);
+  }, 1000);
+  isRunning = true;
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('btnStop').disabled = false;
 }
 
-// 前半終了ボタンの処理
+function stopTimer() {
+  if (!isRunning) return;
+  clearInterval(timerInterval);
+  isRunning = false;
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnStop').disabled = true;
+}
+
 function halfTime() {
   if (!confirm("前半を終了し、タイマーをリセットして後半に移りますか？")) return;
-  
-  stopTimer(); // タイマーを止める
-  
-  // ログに記録を残す（システムメッセージとして記録）
-  let recordTime = formatTime(elapsedSeconds);
-  addLog(recordTime, 'System', "", "前半終了／後半開始", 0);
-  
-  // タイマーを00:00に戻す
+  stopTimer(); 
+  addLog(formatTime(elapsedSeconds), 'System', "", "前半終了／後半開始", 0);
   elapsedSeconds = 0;
-  currentPeriod = 2; //後半と記録
+  currentPeriod = 2; 
   document.getElementById('timer').innerText = formatTime(elapsedSeconds);
 }
 
@@ -489,125 +445,71 @@ function endTimer() {
 
 function getRecordTime(actionName, isSub = false) {
   const manualTimeInput = document.getElementById('manualTime');
-  if (manualTimeInput.value.trim() !== '') {
-    return manualTimeInput.value.trim();
-  }
+  if (manualTimeInput.value.trim() !== '') return manualTimeInput.value.trim();
   
-    const noAlertActions = []; 
-  
-  if (!isRunning && (!isSub && !noAlertActions.includes(actionName))) {
-    if (!confirm('タイマーが停止中または開始前ですが、現在の表示時間で記録しますか？')) {
-      return null;
-    }
+  const noAlertActions = []; 
+  if (!isRunning && !isSub && !noAlertActions.includes(actionName)) {
+    if (!confirm('タイマーが停止中または開始前ですが、現在の表示時間で記録しますか？')) return null;
   }
   return formatTime(elapsedSeconds);
 }
 
-// ================= ログの記録・描画 =================
+// ================= アクション記録・ログ管理 =================
 function addLog(time, teamCode, playerName, actionText, points, playerId = null) {
-  // ★「MM:SS」を秒数に変換（ソート用）
   let parts = time.split(':');
-  let timeSec = 0;
-  if (parts.length === 2) {
-    timeSec = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-  }
-
-  // ★ログが前半か後半かを判定
+  let timeSec = parts.length === 2 ? parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) : 0;
   let logPeriod = currentPeriod;
   
-  // 賢い判定：後半(2)なのに、現在のタイマーより2分以上未来の時間（例: 15:00）を手動入力した場合、
-  // それは「前半の入力漏れ」だと判断して自動的に前半(1)の適切な位置に挿入します。
-  if (logPeriod === 2 && timeSec > elapsedSeconds + 120) {
-      logPeriod = 1;
-  }
+  if (logPeriod === 2 && timeSec > elapsedSeconds + 120) logPeriod = 1;
 
-  // ★先頭ではなく配列に追加し、その後全体を並び替える
   matchLogs.push({
     id: Date.now() + Math.random(),
-    time: time,
-    timeSec: timeSec,         // ソート用の秒数
-    period: logPeriod,        // ソート用のピリオド
-    team: teamCode,
-    playerId: playerId,       // 誰がアクションを起こしたかを記憶
-    player: playerName,
-    action: actionText,
-    points: points,
-    gkIdA: roster.A.gkId,     // アクション当時のTeam AのGK
-    gkIdB: roster.B.gkId,     // アクション当時のTeam BのGK
+    time, timeSec, period: logPeriod,
+    team: teamCode, playerId, player: playerName,
+    action: actionText, points,
+    gkIdA: roster.A.gkId, gkIdB: roster.B.gkId,
     bookmarked: false
   });
 
-  // ★時系列順（新しいものが上＝降順）にソート
   matchLogs.sort((a, b) => {
-    // 1. まずピリオドを比較（後半=2 が 前半=1 より上に来る）
-    if (a.period !== b.period) {
-      return b.period - a.period;
-    }
-    // 2. 同じピリオドなら、時間が大きい（進んでいる）方が上
-    if (b.timeSec !== a.timeSec) {
-        return b.timeSec - a.timeSec;
-    }
-    // 3. 全く同じ時間なら、新しく入力された方（idが大きい方）を上
+    if (a.period !== b.period) return b.period - a.period;
+    if (b.timeSec !== a.timeSec) return b.timeSec - a.timeSec;
     return b.id - a.id;
   });
 
   renderLogs();
-  renderStats(); // ログ追加時にスタッツ再計算
+  renderStats(); 
 }
 
 function renderLogs() {
-  let currentScoreA = 0;
-  let currentScoreB = 0;
-  
-  // ★追加：前半の点数を記憶する変数
-  let firstHalfA = 0;
-  let firstHalfB = 0;
+  let currentScoreA = 0, currentScoreB = 0;
+  let firstHalfA = 0, firstHalfB = 0;
   let isFirstHalf = true;
   
-  // 古い記録から順に累計得点と表示用のスコアを計算
   for (let i = matchLogs.length - 1; i >= 0; i--) {
     let log = matchLogs[i];
-
-    // ★追加：前半終了のログを検知したら、そこまでの得点を前半スコアとして確定
     if (log.team === 'System' && log.action === '前半終了／後半開始') {
       isFirstHalf = false;
       firstHalfA = currentScoreA;
       firstHalfB = currentScoreB;
     }
 
-    let scoreChangedA = false;
-    let scoreChangedB = false;
-
+    let scoreChangedA = false, scoreChangedB = false;
     if (log.points > 0) {
-      if (log.team === 'A') {
-        currentScoreA += log.points;
-        scoreChangedA = true;
-      }
-      if (log.team === 'B') {
-        currentScoreB += log.points;
-        scoreChangedB = true;
-      }
+      if (log.team === 'A') { currentScoreA += log.points; scoreChangedA = true; }
+      if (log.team === 'B') { currentScoreB += log.points; scoreChangedB = true; }
     }
     
-    // 累計得点は保持しつつ、画面表示用は変更があった時のみ数字にする
-    log.cumScoreA = currentScoreA;
-    log.cumScoreB = currentScoreB;
     log.displayScoreA = scoreChangedA ? currentScoreA : '-';
     log.displayScoreB = scoreChangedB ? currentScoreB : '-';
   }
 
-  // ★追加：まだ前半（ハーフタイム前）の場合は、現在の点数をそのまま前半スコアにする
-  if (isFirstHalf) {
-    firstHalfA = currentScoreA;
-    firstHalfB = currentScoreB;
-  }
-
-  scoreA = currentScoreA;
-  scoreB = currentScoreB;
+  if (isFirstHalf) { firstHalfA = currentScoreA; firstHalfB = currentScoreB; }
+  
+  scoreA = currentScoreA; scoreB = currentScoreB;
   document.getElementById('scoreA').innerText = scoreA;
   document.getElementById('scoreB').innerText = scoreB;
 
-  // ★追加：ヘッダーの対戦カード下部にスコアと前半スコアを表示
   const headerScoreDisplay = document.getElementById('headerScoreDisplay');
   if (headerScoreDisplay) {
     headerScoreDisplay.innerHTML = `
@@ -627,25 +529,16 @@ function renderLogs() {
   const bookmarkSvg = `<svg class="bm-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`;
   const trashSvg = `<svg class="trash-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
 
-  let tableHTML = '';
-  for (let i = 0; i < matchLogs.length; i++) {
-    let log = matchLogs[i];
-    
+  let tableHTML = matchLogs.map(log => {
     let aPlayer = log.team === 'A' ? log.player : '';
-    let aAction = log.team === 'A' ? log.action : (log.team === 'System' ? log.action : '');
+    let aAction = log.team === 'A' || log.team === 'System' ? log.action : '';
     let bPlayer = log.team === 'B' ? log.player : '';
-    let bAction = log.team === 'B' ? log.action : (log.team === 'System' ? log.action : '');
+    let bAction = log.team === 'B' || log.team === 'System' ? log.action : '';
 
-    let bgA = (log.bookmarked && log.team === 'A') ? 'background-color: #fff9e6;' : '';
-    let bgB = (log.bookmarked && log.team === 'B') ? 'background-color: #fff9e6;' : '';
-    
-    // ※システム（前半終了など）をブックマークした場合は両サイドを薄黄色にする
-    if (log.bookmarked && log.team === 'System') {
-      bgA = 'background-color: #fff9e6;';
-      bgB = 'background-color: #fff9e6;';
-    }
+    let bgA = log.bookmarked && (log.team === 'A' || log.team === 'System') ? 'background-color: #fff9e6;' : '';
+    let bgB = log.bookmarked && (log.team === 'B' || log.team === 'System') ? 'background-color: #fff9e6;' : '';
 
-    tableHTML += `
+    return `
     <tr>
       <td style="${bgA}">${aPlayer}</td>
       <td style="${bgA}">${aAction}</td>
@@ -656,27 +549,23 @@ function renderLogs() {
       <td style="${bgB}">${bPlayer}</td>
       <td class="noprint" style="display: flex; gap: 4px; justify-content: center; align-items: center; background: transparent;">
         <button class="toggle-bm-btn ${log.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${log.id})">${bookmarkSvg}</button>
-        <!-- ▼ 「削除」の文字を trashSvg に置き換え -->
         ${log.team === 'System' ? '' : `<button class="delete-btn" onclick="deleteLog(${log.id})">${trashSvg}</button>`}
       </td>
-    </tr>
-    `;
-  }
+    </tr>`;
+  }).join('');
+  
   document.getElementById('logTableBody').innerHTML = tableHTML;
   
   const latestLogText = document.getElementById('latestLogText');
   if (latestLogText) {
     if (matchLogs.length > 0) {
       let latest = matchLogs[0];
-      
       let bmBtn = `<button class="latest-bm-btn ${latest.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${latest.id})">${bookmarkSvg}</button>`;
+      let playerStr = latest.player && latest.player !== "-" ? ` ${latest.player}` : "";
       
-      if (latest.team === 'System') {
-        latestLogText.innerHTML = `${bmBtn} <span style="vertical-align:middle;">${latest.time} ｜ ${latest.action}</span>`;
-      } else {
-        let playerStr = latest.player && latest.player !== "-" ? ` ${latest.player}` : "";
-        latestLogText.innerHTML = `${bmBtn} <span style="vertical-align:middle;">${latest.time}   ${playerStr}</span> <span class="latest-log-action" style="vertical-align:middle;">  ${latest.action}</span>`;
-      }
+      latestLogText.innerHTML = latest.team === 'System' 
+        ? `${bmBtn} <span style="vertical-align:middle;">${latest.time} ｜ ${latest.action}</span>`
+        : `${bmBtn} <span style="vertical-align:middle;">${latest.time}   ${playerStr}</span> <span class="latest-log-action" style="vertical-align:middle;">  ${latest.action}</span>`;
     } else {
       latestLogText.innerText = "最新のログなし";
     }
@@ -690,19 +579,26 @@ function deleteLog(id) {
   renderStats(); 
 }
 
-// ================= アクションの記録 =================
-function recordAction(actionName, points) {
-  let team = activeSelection.A.court || activeSelection.A.bench ? 'A' : 
-    activeSelection.B.court || activeSelection.B.bench ? 'B' : null;
-
-  if (!team) {
-    alert('先に左右のチームから選手を選択してください！');
-    return;
+function toggleBookmark(id) {
+  let log = matchLogs.find(l => l.id === id);
+  if (log) {
+    log.bookmarked = !log.bookmarked;
+    renderLogs(); 
   }
+}
+
+// ================= アクションの登録 =================
+function getSelectedTeam() {
+  return (activeSelection.A.court || activeSelection.A.bench) ? 'A' : 
+         (activeSelection.B.court || activeSelection.B.bench) ? 'B' : null;
+}
+
+function recordAction(actionName, points) {
+  let team = getSelectedTeam();
+  if (!team) return alert('先に左右のチームから選手を選択してください！');
 
   let targetId = activeSelection[team].court || activeSelection[team].bench;
-  let isCourt = !!activeSelection[team].court;
-  let targetList = isCourt ? roster[team].court : roster[team].bench;
+  let targetList = activeSelection[team].court ? roster[team].court : roster[team].bench;
   let targetPlayer = targetList.find(p => p.id === targetId).name;
 
   const recordTime = getRecordTime(actionName, false);
@@ -714,85 +610,53 @@ function recordAction(actionName, points) {
     assistText = `<br><small>Ast: ${assistSelect.value}</small>`;
   }
 
-  // GKの記録を判別
   const isGk = (roster[team].gkId === targetId) ? " [GK]" : "";
-
-  // 最後に targetId を追加で渡す
   addLog(recordTime, team, targetPlayer + isGk, `${actionName}${assistText}`, points, targetId);
 
-  activeSelection[team].court = null;
-  activeSelection[team].bench = null;
+  activeSelection[team].court = activeSelection[team].bench = null;
   document.getElementById('manualTime').value = '';
   assistSelect.innerHTML = '<option value="">-- なし --</option>';
   renderButtons();
 }
 
-// ================= 交代の記録と処理 =================
 function recordSubstitution() {
   let team = (activeSelection.A.court && activeSelection.A.bench) ? 'A' : 
-    (activeSelection.B.court && activeSelection.B.bench) ? 'B' : null;
+             (activeSelection.B.court && activeSelection.B.bench) ? 'B' : null;
 
-  if (!team) {
-    alert("交代するチームの「コート上の選手」と「ベンチの選手」を両方（1名ずつ）選択してから押してください。");
-    return;
-  }
+  if (!team) return alert("交代するチームの「コート上の選手」と「ベンチの選手」を両方（1名ずつ）選択してから押してください。");
 
   const recordTime = getRecordTime("交代", true);
   if (recordTime === null) return;
 
-  let cId = activeSelection[team].court;
-  let bId = activeSelection[team].bench;
-
+  let cId = activeSelection[team].court, bId = activeSelection[team].bench;
   let cIndex = roster[team].court.findIndex(p => p.id === cId);
   let bIndex = roster[team].bench.findIndex(p => p.id === bId);
+  let cPlayer = roster[team].court[cIndex], bPlayer = roster[team].bench[bIndex];
 
-  let cPlayer = roster[team].court[cIndex];
-  let bPlayer = roster[team].bench[bIndex];
-
-  // GKが退く(または入る)場合のラベル処理
   let outLabel = (roster[team].gkId === cId) ? `${cPlayer.name}(GK)` : cPlayer.name;
   let inLabel = (roster[team].gkId === cId) ? `${bPlayer.name}(GK)` : bPlayer.name;
 
   addLog(recordTime, team, "-", `交代 (OUT: ${outLabel} / IN: ${inLabel})`, 0);
 
-  // GKがベンチに下がる場合は、新しく入ってきた選手に自動でGKを引き継ぐ
-  if (roster[team].gkId === cId) {
-    roster[team].gkId = bId;
-  }
+  if (roster[team].gkId === cId) roster[team].gkId = bId;
 
   roster[team].court[cIndex] = bPlayer;
   roster[team].bench[bIndex] = cPlayer;
-
   roster[team].court.sort((a, b) => a.num - b.num);
   roster[team].bench.sort((a, b) => a.num - b.num);
 
-  activeSelection[team].court = null;
-  activeSelection[team].bench = null;
+  activeSelection[team].court = activeSelection[team].bench = null;
   document.getElementById('manualTime').value = '';
   document.getElementById('assistSelect').innerHTML = '<option value="">-- なし --</option>';
-  
   renderButtons();
 }
 
-// ================= GKの役割切り替え機能 =================
 function toggleGkRole() {
   let team = activeSelection.A.court ? 'A' : activeSelection.B.court ? 'B' : null;
-
-  if (!team) {
-    alert("コート上の選手から、新しくGKにする選手を1名選択してから押してください。");
-    return;
-  }
+  if (!team) return alert("コート上の選手から、新しくGKにする選手を1名選択してから押してください。");
 
   let targetId = activeSelection[team].court;
-  if (!targetId) {
-    alert("ベンチの選手をGKに指定することはできません。交代を行ってからGK指定してください。");
-    return;
-  }
-
-  if (roster[team].gkId === targetId) {
-    alert("選択された選手は既にGKです。");
-    return;
-  }
+  if (roster[team].gkId === targetId) return alert("選択された選手は既にGKです。");
 
   const recordTime = getRecordTime("GK交代", true);
   if (recordTime === null) return;
@@ -800,436 +664,32 @@ function toggleGkRole() {
   let oldGk = roster[team].court.find(p => p.id === roster[team].gkId);
   let newGk = roster[team].court.find(p => p.id === targetId);
 
-  let oldGkName = oldGk ? oldGk.name : "なし";
-  addLog(recordTime, team, "-", `GK変更 (前: ${oldGkName} → 新: ${newGk.name})`, 0);
-
+  addLog(recordTime, team, "-", `GK変更 (前: ${oldGk ? oldGk.name : "なし"} → 新: ${newGk.name})`, 0);
   roster[team].gkId = targetId;
 
-  activeSelection[team].court = null;
-  activeSelection[team].bench = null;
+  activeSelection[team].court = activeSelection[team].bench = null;
   document.getElementById('manualTime').value = '';
   renderButtons();
 }
 
-
-
-function loadMyTeam() {
-  document.getElementById('teamNameA').value = myTeamData.name;
-  
-  for (let i = 1; i <= 16; i++) {
-    document.getElementById(`numA_${i}`).value = '';
-    document.getElementById(`nameA_${i}`).value = '';
-    document.querySelector(`.starter-check-A[value="${i}"]`).checked = false;
-    document.querySelector(`.exclude-check-A[value="${i}"]`).checked = false;
-  }
-
-  myTeamData.players.forEach((p, index) => {
-    let i = index + 1;
-    if (i > 16) return;
-    
-    document.getElementById(`numA_${i}`).value = p.num;
-    document.getElementById(`nameA_${i}`).value = p.name;
-    document.querySelector(`.starter-check-A[value="${i}"]`).checked = p.isStarter;
-    
-    // ▼ 追加：除外データの反映（データが存在する場合のみ）
-    if (p.isExcluded !== undefined) {
-      document.querySelector(`.exclude-check-A[value="${i}"]`).checked = p.isExcluded;
-    }
-  });
-
-  updateGkDropdown('A');
-}
-
-function loadOpponentTeam(index) {
-  const teamData = allTeamData[index];
-  document.getElementById('teamNameB').value = teamData.name;
-  
-  // 一度Team Bのすべての入力をクリアする
-  for (let i = 1; i <= 16; i++) {
-    document.getElementById(`numB_${i}`).value = '';
-    document.getElementById(`nameB_${i}`).value = '';
-    document.querySelector(`.starter-check-B[value="${i}"]`).checked = false;
-    document.querySelector(`.exclude-check-B[value="${i}"]`).checked = false;
-  }
-
-  // データを順番にTeam Bの入力枠に埋める
-  teamData.players.forEach((p, idx) => {
-    let i = idx + 1;
-    if (i > 16) return; // 最大16人まで
-    
-    document.getElementById(`numB_${i}`).value = p.num;
-    document.getElementById(`nameB_${i}`).value = p.name;
-    document.querySelector(`.starter-check-B[value="${i}"]`).checked = p.isStarter;
-    
-    // ▼ 追加：除外データの反映（データが存在する場合のみ）
-    if (p.isExcluded !== undefined) {
-      document.querySelector(`.exclude-check-B[value="${i}"]`).checked = p.isExcluded;
-    }
-  });
-
-  // GKのドロップダウンを更新
-  updateGkDropdown('B');
-}
-
-
-
-function loadOpponentTeam(index) {
-  const teamData = allTeamData[index];
-  document.getElementById('teamNameB').value = teamData.name;
-  
-  // 一度Team Bのすべての入力をクリアする
-  for (let i = 1; i <= 16; i++) {
-    document.getElementById(`numB_${i}`).value = '';
-    document.getElementById(`nameB_${i}`).value = '';
-    document.querySelector(`.starter-check-B[value="${i}"]`).checked = false;
-    document.querySelector(`.exclude-check-B[value="${i}"]`).checked = false;
-  }
-
-  // データを順番にTeam Bの入力枠に埋める
-  teamData.players.forEach((p, idx) => {
-    let i = idx + 1;
-    if (i > 16) return; // 最大16人まで
-    
-    document.getElementById(`numB_${i}`).value = p.num;
-    document.getElementById(`nameB_${i}`).value = p.name;
-    document.querySelector(`.starter-check-B[value="${i}"]`).checked = p.isStarter;
-  });
-
-  // GKのドロップダウンを更新
-  updateGkDropdown('B');
-}
-
-// ================= 統計(スタッツ)の計算・描画 =================
-function renderStats() {
-  let stats = { A: {}, B: {} };
-  
-  // 初期化：アシスト（assists）を追加
-  let initStats = (team) => {
-    let allPlayers = [...roster[team].court, ...roster[team].bench];
-    allPlayers.forEach(p => {
-      stats[team][p.id] = { 
-        name: p.name, num: p.num, 
-        goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0, 
-        saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0,
-        ofMisses: 0, 
-        ofFouls: 0,  
-        dfFouls: 0,  
-        steals: 0,   
-        blocks: 0,   
-        warnings: 0, 
-        suspensions: 0, 
-        disqualifications: 0,
-        assists: 0,
-        gk_out: 0,
-        sevenM_gk_out: 0
-      };
-    });
-  };
-  
-  if (roster.A.court.length > 0 || roster.A.bench.length > 0) {
-    initStats('A');
-    initStats('B');
-  } else {
-    return;
-  }
-
-  // ログを全てなぞって集計する
-  matchLogs.forEach(log => {
-    if (!log.playerId) return; 
-    
-    let isGoal = log.action.startsWith('得点');
-    let is7mGoal = log.action.startsWith('7m得点');
-    let isMiss = log.action.startsWith('ノーゴール');
-    let is7mMiss = log.action.startsWith('7mノーゴール');
-    
-    let isOfMiss = log.action.startsWith('パスミス') || 
-                   log.action.startsWith('キャッチミス') || 
-                   log.action.startsWith('ドリブルミス');
-                   
-    let isOfFoul = log.action.startsWith('ダブルドリブル') || 
-                   log.action.startsWith('3sec') || 
-                   log.action.startsWith('ラインクロス') || 
-                   log.action.startsWith('キックボール') || 
-                   log.action.startsWith('チャージング');
-                   
-    let isDfFoul = log.action.startsWith('DFファウル');
-    let isSteal = log.action.startsWith('パスカット');
-    let isBlock = log.action.startsWith('ブロック');
-    let isWarning = log.action.startsWith('警告');
-    let isSuspension = log.action.startsWith('2分間退場');
-    let isDisqualification = log.action.startsWith('失格');
-
-    // ★アシストをした選手名をログのテキストから抽出
-    let assistPlayerName = null;
-    let assistMatch = log.action.match(/Ast: (.*?)<\/small>/);
-    if (assistMatch) {
-      assistPlayerName = assistMatch[1];
-    }
-    
-    if (isGoal || is7mGoal || isMiss || is7mMiss || isOfMiss || isOfFoul || isDfFoul || isSteal || isBlock || isWarning || isSuspension || isDisqualification || assistPlayerName) {
-      let team = log.team;
-      let oppTeam = team === 'A' ? 'B' : 'A';
-      
-      // シューター・プレイヤーのスタッツ加算
-      if (stats[team][log.playerId]) {
-        if (isGoal) stats[team][log.playerId].goals++;
-        if (is7mGoal) stats[team][log.playerId].sevenM_goals++;
-        if (isMiss) stats[team][log.playerId].misses++;
-        if (is7mMiss) stats[team][log.playerId].sevenM_misses++;
-        if (isOfMiss) stats[team][log.playerId].ofMisses++;
-        if (isOfFoul) stats[team][log.playerId].ofFouls++;
-        if (isDfFoul) stats[team][log.playerId].dfFouls++;
-        if (isSteal) stats[team][log.playerId].steals++;
-        if (isBlock) stats[team][log.playerId].blocks++;
-        if (isWarning) stats[team][log.playerId].warnings++;
-        if (isSuspension) stats[team][log.playerId].suspensions++;
-        if (isDisqualification) stats[team][log.playerId].disqualifications++;
-      }
-
-      // ★アシストを記録する処理（名前が一致する選手を探してカウント）
-      if (assistPlayerName) {
-        let allPlayers = [...roster[team].court, ...roster[team].bench];
-        let assistPlayer = allPlayers.find(p => p.name === assistPlayerName);
-        if (assistPlayer && stats[team][assistPlayer.id]) {
-            stats[team][assistPlayer.id].assists++;
-        }
-      }
-      
-      // 相手GKのスタッツ加算（ミス＝セーブとして扱う）
-      let oppGkId = oppTeam === 'A' ? log.gkIdA : log.gkIdB;
-      if (oppGkId && stats[oppTeam][oppGkId]) {
-        if (isGoal) stats[oppTeam][oppGkId].conceded++;
-        if (is7mGoal) stats[oppTeam][oppGkId].sevenM_conceded++;
-        
-        // ★修正：枠外と実セーブを分けて記録する
-        if (isMiss) {
-          if (log.action.includes('枠外')) {
-            stats[oppTeam][oppGkId].gk_out++; // 枠外
-          } else {
-            stats[oppTeam][oppGkId].saves++;  // 実セーブ
-          }
-        }
-        
-        if (is7mMiss) {
-          if (log.action.includes('枠外')) {
-          stats[oppTeam][oppGkId].sevenM_gk_out++; // 枠外
-          } else {
-            stats[oppTeam][oppGkId].sevenM_saves++;  // 実セーブ
-          }
-        }
-      }
-    }
-  });
-
-  // HTML構築
-  // HTML構築
-  function buildStatsHTML(team) {
-    let html = '';
-    let playerList = Object.values(stats[team]).sort((a, b) => a.num - b.num);
-    
-    let teamTotal = {
-      goals: 0, sevenM_goals: 0,
-      misses: 0, sevenM_misses: 0,
-      saves: 0, sevenM_saves: 0,
-      conceded: 0, sevenM_conceded: 0,
-      ofMisses: 0, ofFouls: 0, dfFouls: 0,
-      steals: 0, blocks: 0,
-      warnings: 0, suspensions: 0, disqualifications: 0,
-      assists: 0,
-      gk_out: 0,
-      sevenM_gk_out: 0
-    };
-
-    const formatStat = (success, attempt) => {
-      if (attempt === 0) return '-';
-      let pct = Math.round((success / attempt) * 100);
-      return `${success}/${attempt}（${pct}％）`;
-    };
-
-    playerList.forEach(p => {
-      let totalGoals = p.goals + p.sevenM_goals;
-      let regularShotsTotal = p.goals + p.misses;
-      let sevenMShotsTotal = p.sevenM_goals + p.sevenM_misses;
-      
-      let totalGkSuccess = p.saves + p.gk_out;
-      let regularGkFaced = totalGkSuccess + p.conceded;
-      let shotDisplay = formatStat(p.goals, regularShotsTotal);
-      let sevenMShotDisplay = formatStat(p.sevenM_goals, sevenMShotsTotal);
-      let sevenMGkFaced = p.sevenM_saves + p.sevenM_gk_out + p.sevenM_conceded;
-      let total7mGkSuccess = p.sevenM_saves + p.sevenM_gk_out;
-      let sevenMSaveDisplay = '-';
-      if (sevenMGkFaced > 0) {
-        let pct = Math.round((total7mGkSuccess / sevenMGkFaced) * 100);
-        sevenMSaveDisplay = `${total7mGkSuccess} <span style="font-size:11px; color:#555;">(${p.sevenM_gk_out})</span> / ${sevenMGkFaced}（${pct}％）`;
-      }
-      
-      //GKセーブの専用表示（総阻止数(外〇) / 被シュート数）
-      let saveDisplay = '-';
-      if (regularGkFaced > 0) {
-        let pct = Math.round((totalGkSuccess / regularGkFaced) * 100);
-        saveDisplay = `${totalGkSuccess} <span style="font-size:11px; color:#555;">(${p.gk_out})</span> / ${regularGkFaced}（${pct}％）`;
-      }
-            
-      html += `<tr>
-        <td style="text-align:left;">${p.name}</td>
-        <td>${totalGoals} <span style="font-size:13px; color:#555;">(${p.sevenM_goals})</span></td>
-        <td>${shotDisplay}</td>
-        <td>${sevenMShotDisplay}</td>
-        <td>${saveDisplay}</td>
-        <td>${sevenMSaveDisplay}</td>
-        <td>${p.assists}</td>
-        <td>${p.steals}</td>
-        <td>${p.blocks}</td>
-        <td>${p.ofMisses}</td>
-        <td>${p.ofFouls}</td>
-        <td>${p.dfFouls}</td>
-        <td>${p.warnings}</td>
-        <td>${p.suspensions}</td>
-        <td>${p.disqualifications}</td>
-      </tr>`;
-
-      // チーム合計用に加算
-      teamTotal.goals += p.goals;
-      teamTotal.sevenM_goals += p.sevenM_goals;
-      teamTotal.misses += p.misses;
-      teamTotal.sevenM_misses += p.sevenM_misses;
-      teamTotal.saves += p.saves;
-      teamTotal.sevenM_saves += p.sevenM_saves;
-      teamTotal.conceded += p.conceded;
-      teamTotal.sevenM_conceded += p.sevenM_conceded;
-      teamTotal.ofMisses += p.ofMisses;
-      teamTotal.ofFouls += p.ofFouls;
-      teamTotal.dfFouls += p.dfFouls;
-      teamTotal.steals += p.steals;
-      teamTotal.blocks += p.blocks;
-      teamTotal.warnings += p.warnings;
-      teamTotal.suspensions += p.suspensions;
-      teamTotal.disqualifications += p.disqualifications;
-      teamTotal.assists += p.assists;
-      teamTotal.sevenM_gk_out += p.sevenM_gk_out;
-      teamTotal.gk_out += p.gk_out;
-    });
-
-    // チーム合計行の計算と表示
-    let tTotalGoals = teamTotal.goals + teamTotal.sevenM_goals;
-    let tRegularShotsTotal = teamTotal.goals + teamTotal.misses;
-    let tSevenMShotsTotal = teamTotal.sevenM_goals + teamTotal.sevenM_misses;
-    
-    // ★修正：チーム合計のGK計算
-    let tTotalGkSuccess = teamTotal.saves + teamTotal.gk_out;
-    let tRegularGkFaced = tTotalGkSuccess + teamTotal.conceded;
-
-    let tShotDisplay = formatStat(teamTotal.goals, tRegularShotsTotal);
-    let tSevenMShotDisplay = formatStat(teamTotal.sevenM_goals, tSevenMShotsTotal);
-    let tSevenMGkFaced = teamTotal.sevenM_saves + teamTotal.sevenM_gk_out + teamTotal.sevenM_conceded;
-    let tTotal7mGkSuccess = teamTotal.sevenM_saves + teamTotal.sevenM_gk_out;
-    let tSevenMSaveDisplay = '-';
-    if (tSevenMGkFaced > 0) {
-      let pct = Math.round((tTotal7mGkSuccess / tSevenMGkFaced) * 100);
-      tSevenMSaveDisplay = `${tTotal7mGkSuccess} <span style="font-size:11px; color:#555;">(${teamTotal.sevenM_gk_out})</span> / ${tSevenMGkFaced}（${pct}％）`;
-    }
-
-    //チーム合計のGK専用表示
-    let tSaveDisplay = '-';
-    if (tRegularGkFaced > 0) {
-      let pct = Math.round((tTotalGkSuccess / tRegularGkFaced) * 100);
-      tSaveDisplay = `${tTotalGkSuccess} <span style="font-size:11px; color:#555;">(${teamTotal.gk_out})</span> / ${tRegularGkFaced}（${pct}％）`;
-    }
-
-    html += `<tr class="team-total-row">
-      <td style="text-align:left;">【チーム合計】</td>
-      <td>${tTotalGoals} <span style="font-size:13px; color:#555;">(${teamTotal.sevenM_goals})</span></td>
-      <td>${tShotDisplay}</td>
-      <td>${tSevenMShotDisplay}</td>
-      <td>${tSaveDisplay}</td>
-      <td>${tSevenMSaveDisplay}</td>
-      <td>${teamTotal.assists}</td>
-      <td>${teamTotal.steals}</td>
-      <td>${teamTotal.blocks}</td>
-      <td>${teamTotal.ofMisses}</td>
-      <td>${teamTotal.ofFouls}</td>
-      <td>${teamTotal.dfFouls}</td>
-      <td>${teamTotal.warnings}</td>
-      <td>${teamTotal.suspensions}</td>
-      <td>${teamTotal.disqualifications}</td>
-    </tr>`;
-
-    return html;
-  }
-
-  document.getElementById('statsTeamNameA').innerText = customTeamA;
-  document.getElementById('statsTeamNameB').innerText = customTeamB;
-  document.getElementById('statsBodyA').innerHTML = buildStatsHTML('A');
-  document.getElementById('statsBodyB').innerHTML = buildStatsHTML('B');
-
-  drawCharts('A', 'shootChartA', 'saveChartA');
-  drawCharts('B', 'shootChartB', 'saveChartB');
-}
-
-// ================= タイムアウトの記録と処理 =================
 function recordTimeout(team) {
-  // 時間を取得（引数にtrueを渡して停止警告をスキップ）
   const recordTime = getRecordTime("タイムアウト", true);
   if (recordTime === null) return;
-
-  // ★タイマーを自動的にストップ
   stopTimer();
-
-  // ログに追加（タイムアウトはチーム全体のアクションなので選手名は「-」）
   addLog(recordTime, team, "-", "タイムアウト", 0);
-
-  // 選手が選択状態だった場合は解除してリセット
-  activeSelection.A.court = null;
-  activeSelection.A.bench = null;
-  activeSelection.B.court = null;
-  activeSelection.B.bench = null;
+  
+  activeSelection.A.court = activeSelection.A.bench = null;
+  activeSelection.B.court = activeSelection.B.bench = null;
   document.getElementById('manualTime').value = '';
   renderButtons();
 }
 
-// ================= PDF変換時のファイル名変更機能（iPad Chrome最終対策） =================
-
-// 裏側で1秒ごとにチェックするが、タイトルを変更するのは「スタート」が押された後だけにする
-setInterval(function() {
-  // タイマーが動いている、または1秒でも進んでいる、または試合終了している場合のみ実行
-  if (isRunning || elapsedSeconds > 0 || isEnded) {
-    const matchTitle = document.querySelector('.match-info-title').value.trim() || "大会名未定";
-    // 画面のテキストではなく、変数から直接対戦カードを組み立てる
-    const matchUp = (customTeamA && customTeamB) ? `${customTeamA} vs. ${customTeamB}` : "対戦カード未定";
-
-    // ブラウザのタイトル（PDFの保存ファイル名）を「大会名 対戦カード」に更新（間に半角スペース）
-    document.title = `${matchTitle} ${matchUp}`;
-  }
-}, 1000);
-
-// ボタンが押されたときは、ただ印刷画面を呼び出すだけにする
-function printToPDF() {
-  window.print();
-}
-
-// ================= ブックマーク機能 =================
-function toggleBookmark(id) {
-  let log = matchLogs.find(l => l.id === id);
-  if (log) {
-    log.bookmarked = !log.bookmarked; // true/false を反転
-    renderLogs(); // 画面を再描画
-  }
-}
-
-// ================= シュートチャート機能 =================
+// ================= シュートチャート (Modal) =================
 let pendingActionName = "";
 let pendingActionPoints = 0;
 
 function openCourtPopup(actionName, points) {
-  let team = activeSelection.A.court || activeSelection.A.bench ? 'A' : 
-             activeSelection.B.court || activeSelection.B.bench ? 'B' : null;
-
-  if (!team) {
-    alert('先に左右のチームから選手を選択してください！');
-    return;
-  }
-  
-  // アクション名と点数を一時保存してモーダルを表示
+  if (!getSelectedTeam()) return alert('先に左右のチームから選手を選択してください！');
   pendingActionName = actionName;
   pendingActionPoints = points;
   document.getElementById('courtModal').style.display = 'flex';
@@ -1241,76 +701,165 @@ function closeCourtPopup() {
 
 function recordShotWithZone(zoneName) {
   closeCourtPopup();
-  // 「得点 [左45度]」のような形式で記録を渡す
-  let combinedActionName = `${pendingActionName} [${zoneName}]`;
-  recordAction(combinedActionName, pendingActionPoints);
+  recordAction(`${pendingActionName} [${zoneName}]`, pendingActionPoints);
 }
 
-// ================= 埋め込みシュートチャート集計・描画 =================
-function drawCharts(team, shootContainerId, saveContainerId) {
-    const zones = [
-        "左サイド", "左45度", "センター", "右45度", "右サイド",
-        "左サイドミドル", "左45度ミドル", "センターミドル", "右45度ミドル", "右サイドミドル"
-    ];
+// ================= 統計 (Stats & Charts) =================
+function renderStats() {
+  let stats = { A: {}, B: {} };
+  
+  const initStats = (team) => {
+    [...roster[team].court, ...roster[team].bench].forEach(p => {
+      stats[team][p.id] = { 
+        name: p.name, num: p.num, goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0, 
+        saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0, ofMisses: 0, ofFouls: 0,  
+        dfFouls: 0, steals: 0, blocks: 0, warnings: 0, suspensions: 0, disqualifications: 0,
+        assists: 0, gk_out: 0, sevenM_gk_out: 0
+      };
+    });
+  };
+  
+  if (roster.A.court.length > 0 || roster.A.bench.length > 0) {
+    initStats('A');
+    initStats('B');
+  } else return;
+
+  matchLogs.forEach(log => {
+    if (!log.playerId) return; 
     
-    let shootStats = {};
-    let saveStats = {};
-    zones.forEach(z => {
-        shootStats[z] = { attempts: 0, success: 0 };
-        saveStats[z] = { faced: 0, success: 0 }; 
-    });
-
+    let isGoal = log.action.startsWith('得点');
+    let is7mGoal = log.action.startsWith('7m得点');
+    let isMiss = log.action.startsWith('ノーゴール');
+    let is7mMiss = log.action.startsWith('7mノーゴール');
+    let isOfMiss = /パスミス|キャッチミス|ドリブルミス/.test(log.action);
+    let isOfFoul = /ダブルドリブル|3sec|ラインクロス|キックボール|チャージング/.test(log.action);
+    
+    let team = log.team;
     let oppTeam = team === 'A' ? 'B' : 'A';
-
-    matchLogs.forEach(log => {
-        let match = log.action.match(/\[(.*?)\]/);
-        if (match) {
-            let zoneName = match[1];
-            
-            // チームのシュート（オフェンス）の集計
-            if (log.team === team && shootStats[zoneName]) {
-                shootStats[zoneName].attempts++;
-                if (log.action.includes("得点")) {
-                    shootStats[zoneName].success++;
-                }
-            }
-            
-            // 相手チームのシュート（自チームのディフェンス/GKセーブ）の集計
-            if (log.team === oppTeam && saveStats[zoneName]) {
-                saveStats[zoneName].faced++;
-                // 枠外やセーブなど、ノーゴールになったものは阻止(success)としてカウント
-                if (log.action.includes("ノーゴール")) {
-                    saveStats[zoneName].success++;
-                }
-            }
-        }
-    });
-
-    function buildHtml(statsObj, isSave) {
-        let html = '';
-        zones.forEach(zone => {
-            let stats = statsObj[zone];
-            let attempts = isSave ? stats.faced : stats.attempts;
-            let success = stats.success;
-            
-            let pct = attempts > 0 ? Math.round((success / attempts) * 100) : 0;
-            let displayStr = attempts > 0 ? `${success}/${attempts}` : "";
-            let pctStr = attempts > 0 ? `${pct}%` : "";
-            let extraClass = isSave ? "save-stat" : ""; // セーブ時は文字を青くするクラスを追加
-
-            html += `
-                <div class="stat-box ${extraClass}">
-                    <span class="zone-name">${zone}</span>
-                    <span>${displayStr}</span>
-                    <span class="pct">${pctStr}</span>
-                </div>
-            `;
-        });
-        return html;
+    
+    // アシスト計算
+    let assistMatch = log.action.match(/Ast: (.*?)<\/small>/);
+    if (assistMatch) {
+      let assistPlayer = [...roster[team].court, ...roster[team].bench].find(p => p.name === assistMatch[1]);
+      if (assistPlayer && stats[team][assistPlayer.id]) stats[team][assistPlayer.id].assists++;
     }
 
-    let shootContainer = document.getElementById(shootContainerId);
-    let saveContainer = document.getElementById(saveContainerId);
-    if (shootContainer) shootContainer.innerHTML = buildHtml(shootStats, false);
-    if (saveContainer) saveContainer.innerHTML = buildHtml(saveStats, true);
+    if (stats[team][log.playerId]) {
+      if (isGoal) stats[team][log.playerId].goals++;
+      if (is7mGoal) stats[team][log.playerId].sevenM_goals++;
+      if (isMiss) stats[team][log.playerId].misses++;
+      if (is7mMiss) stats[team][log.playerId].sevenM_misses++;
+      if (isOfMiss) stats[team][log.playerId].ofMisses++;
+      if (isOfFoul) stats[team][log.playerId].ofFouls++;
+      if (log.action.startsWith('DFファウル')) stats[team][log.playerId].dfFouls++;
+      if (log.action.startsWith('パスカット')) stats[team][log.playerId].steals++;
+      if (log.action.startsWith('ブロック')) stats[team][log.playerId].blocks++;
+      if (log.action.startsWith('警告')) stats[team][log.playerId].warnings++;
+      if (log.action.startsWith('2分間退場')) stats[team][log.playerId].suspensions++;
+      if (log.action.startsWith('失格')) stats[team][log.playerId].disqualifications++;
+    }
+
+    // 相手GKの処理
+    let oppGkId = oppTeam === 'A' ? log.gkIdA : log.gkIdB;
+    if (oppGkId && stats[oppTeam][oppGkId]) {
+      if (isGoal) stats[oppTeam][oppGkId].conceded++;
+      if (is7mGoal) stats[oppTeam][oppGkId].sevenM_conceded++;
+      if (isMiss) log.action.includes('枠外') ? stats[oppTeam][oppGkId].gk_out++ : stats[oppTeam][oppGkId].saves++;
+      if (is7mMiss) log.action.includes('枠外') ? stats[oppTeam][oppGkId].sevenM_gk_out++ : stats[oppTeam][oppGkId].sevenM_saves++;
+    }
+  });
+
+  const buildStatsHTML = (team) => {
+    let html = '';
+    let playerList = Object.values(stats[team]).sort((a, b) => a.num - b.num);
+    let tt = { goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0, saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0, ofMisses: 0, ofFouls: 0, dfFouls: 0, steals: 0, blocks: 0, warnings: 0, suspensions: 0, disqualifications: 0, assists: 0, gk_out: 0, sevenM_gk_out: 0 };
+    const formatStat = (success, attempt) => attempt === 0 ? '-' : `${success}/${attempt}（${Math.round((success / attempt) * 100)}％）`;
+
+    playerList.forEach(p => {
+      let regularShots = p.goals + p.misses, sevenMShots = p.sevenM_goals + p.sevenM_misses;
+      let regularGk = p.saves + p.gk_out + p.conceded, sevenMGk = p.sevenM_saves + p.sevenM_gk_out + p.sevenM_conceded;
+      
+      let saveDisp = regularGk > 0 ? `${p.saves + p.gk_out} <span style="font-size:11px; color:#555;">(${p.gk_out})</span> / ${regularGk}（${Math.round(((p.saves + p.gk_out) / regularGk) * 100)}％）` : '-';
+      let save7mDisp = sevenMGk > 0 ? `${p.sevenM_saves + p.sevenM_gk_out} <span style="font-size:11px; color:#555;">(${p.sevenM_gk_out})</span> / ${sevenMGk}（${Math.round(((p.sevenM_saves + p.sevenM_gk_out) / sevenMGk) * 100)}％）` : '-';
+      
+      html += `<tr>
+        <td style="text-align:left;">${p.name}</td>
+        <td>${p.goals + p.sevenM_goals} <span style="font-size:13px; color:#555;">(${p.sevenM_goals})</span></td>
+        <td>${formatStat(p.goals, regularShots)}</td><td>${formatStat(p.sevenM_goals, sevenMShots)}</td>
+        <td>${saveDisp}</td><td>${save7mDisp}</td>
+        <td>${p.assists}</td><td>${p.steals}</td><td>${p.blocks}</td><td>${p.ofMisses}</td>
+        <td>${p.ofFouls}</td><td>${p.dfFouls}</td><td>${p.warnings}</td><td>${p.suspensions}</td><td>${p.disqualifications}</td>
+      </tr>`;
+      
+      Object.keys(tt).forEach(k => tt[k] += p[k]);
+    });
+
+    let ttRegShots = tt.goals + tt.misses, tt7mShots = tt.sevenM_goals + tt.sevenM_misses;
+    let ttRegGk = tt.saves + tt.gk_out + tt.conceded, tt7mGk = tt.sevenM_saves + tt.sevenM_gk_out + tt.sevenM_conceded;
+    
+    let ttSaveDisp = ttRegGk > 0 ? `${tt.saves + tt.gk_out} <span style="font-size:11px; color:#555;">(${tt.gk_out})</span> / ${ttRegGk}（${Math.round(((tt.saves + tt.gk_out) / ttRegGk) * 100)}％）` : '-';
+    let ttSave7mDisp = tt7mGk > 0 ? `${tt.sevenM_saves + tt.sevenM_gk_out} <span style="font-size:11px; color:#555;">(${tt.sevenM_gk_out})</span> / ${tt7mGk}（${Math.round(((tt.sevenM_saves + tt.sevenM_gk_out) / tt7mGk) * 100)}％）` : '-';
+
+    html += `<tr class="team-total-row">
+      <td style="text-align:left;">【チーム合計】</td>
+      <td>${tt.goals + tt.sevenM_goals} <span style="font-size:13px; color:#555;">(${tt.sevenM_goals})</span></td>
+      <td>${formatStat(tt.goals, ttRegShots)}</td><td>${formatStat(tt.sevenM_goals, tt7mShots)}</td>
+      <td>${ttSaveDisp}</td><td>${ttSave7mDisp}</td>
+      <td>${tt.assists}</td><td>${tt.steals}</td><td>${tt.blocks}</td><td>${tt.ofMisses}</td>
+      <td>${tt.ofFouls}</td><td>${tt.dfFouls}</td><td>${tt.warnings}</td><td>${tt.suspensions}</td><td>${tt.disqualifications}</td>
+    </tr>`;
+    return html;
+  };
+
+  document.getElementById('statsTeamNameA').innerText = customTeamA;
+  document.getElementById('statsTeamNameB').innerText = customTeamB;
+  document.getElementById('statsBodyA').innerHTML = buildStatsHTML('A');
+  document.getElementById('statsBodyB').innerHTML = buildStatsHTML('B');
+
+  drawCharts('A', 'shootChartA', 'saveChartA');
+  drawCharts('B', 'shootChartB', 'saveChartB');
 }
+
+function drawCharts(team, shootId, saveId) {
+  const zones = ["左サイド", "左45度", "センター", "右45度", "右サイド", "左サイドミドル", "左45度ミドル", "センターミドル", "右45度ミドル", "右サイドミドル"];
+  let shootStats = {}, saveStats = {};
+  zones.forEach(z => { shootStats[z] = { attempts: 0, success: 0 }; saveStats[z] = { faced: 0, success: 0 }; });
+
+  let oppTeam = team === 'A' ? 'B' : 'A';
+  matchLogs.forEach(log => {
+    let match = log.action.match(/\[(.*?)\]/);
+    if (match) {
+      let z = match[1];
+      if (log.team === team && shootStats[z]) {
+        shootStats[z].attempts++;
+        if (log.action.includes("得点")) shootStats[z].success++;
+      }
+      if (log.team === oppTeam && saveStats[z]) {
+        saveStats[z].faced++;
+        if (log.action.includes("ノーゴール")) saveStats[z].success++;
+      }
+    }
+  });
+
+  const buildHtml = (stats, isSave) => zones.map(z => {
+    let attempts = isSave ? stats[z].faced : stats[z].attempts, success = stats[z].success;
+    let pctStr = attempts > 0 ? `${Math.round((success / attempts) * 100)}%` : "";
+    let dispStr = attempts > 0 ? `${success}/${attempts}` : "";
+    return `<div class="stat-box ${isSave ? "save-stat" : ""}"><span class="zone-name">${z}</span><span>${dispStr}</span><span class="pct">${pctStr}</span></div>`;
+  }).join('');
+
+  const sCont = document.getElementById(shootId), vCont = document.getElementById(saveId);
+  if (sCont) sCont.innerHTML = buildHtml(shootStats, false);
+  if (vCont) vCont.innerHTML = buildHtml(saveStats, true);
+}
+
+// ================= PDFタイトル監視・印刷 =================
+setInterval(() => {
+  if (isRunning || elapsedSeconds > 0 || isEnded) {
+    const title = document.querySelector('.match-info-title').value.trim() || "大会名未定";
+    const matchUp = (customTeamA && customTeamB) ? `${customTeamA} vs. ${customTeamB}` : "対戦カード未定";
+    document.title = `${title} ${matchUp}`;
+  }
+}, 1000);
+
+function printToPDF() { window.print(); }
