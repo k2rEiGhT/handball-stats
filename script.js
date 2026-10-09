@@ -804,7 +804,7 @@ function renderStats() {
       
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
-        <td>${p.goals + p.sevenM_goals} (${p.sevenM_goals})</td>
+        <td>${p.goals + p.sevenM_goals}(${p.sevenM_goals})</td>
         <td>${formatStat(p.goals, regularShots)}</td><td>${formatStat(p.sevenM_goals, sevenMShots)}</td>
         <td>${saveDisp}</td><td>${save7mDisp}</td>
         <td>${p.assists}</td><td>${p.steals}</td><td>${p.blocks}</td><td>${p.ofMisses}</td>

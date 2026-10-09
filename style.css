@@ -615,4 +615,24 @@ td small { color: #555; font-weight: bold; }
     .match-info-title::-webkit-input-placeholder, .match-info-text::-webkit-input-placeholder { color: transparent; }
     .match-info-title::-moz-placeholder, .match-info-text::-moz-placeholder { color: transparent; }
     .match-info-title:-ms-input-placeholder, .match-info-text:-ms-input-placeholder { color: transparent; }
+
+    /* ▼ iPadでのログ見切れ・ページ分割エラーを防ぐための追加設定 ▼ */
+    .log-container, .stats-container {
+        overflow: visible !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+        display: block !important;
+    }
+    table {
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+    }
+    tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+    thead {
+        display: table-header-group !important;
+    }
 }
