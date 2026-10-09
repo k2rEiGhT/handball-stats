@@ -804,7 +804,7 @@ function renderStats() {
       
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
-        <td>${p.goals + p.sevenM_goals} <span style="font-size:13px; color:#555;">(${p.sevenM_goals})</span></td>
+        <td>${p.goals + p.sevenM_goals} (${p.sevenM_goals})</td>
         <td>${formatStat(p.goals, regularShots)}</td><td>${formatStat(p.sevenM_goals, sevenMShots)}</td>
         <td>${saveDisp}</td><td>${save7mDisp}</td>
         <td>${p.assists}</td><td>${p.steals}</td><td>${p.blocks}</td><td>${p.ofMisses}</td>
@@ -822,7 +822,7 @@ function renderStats() {
 
     html += `<tr class="team-total-row">
       <td style="text-align:left;">【チーム合計】</td>
-      <td>${tt.goals + tt.sevenM_goals} <span style="font-size:13px; color:#555;">(${tt.sevenM_goals})</span></td>
+      <td>${tt.goals + tt.sevenM_goals}(${tt.sevenM_goals})</td>
       <td>${formatStat(tt.goals, ttRegShots)}</td><td>${formatStat(tt.sevenM_goals, tt7mShots)}</td>
       <td>${ttSaveDisp}</td><td>${ttSave7mDisp}</td>
       <td>${tt.assists}</td><td>${tt.steals}</td><td>${tt.blocks}</td><td>${tt.ofMisses}</td>
