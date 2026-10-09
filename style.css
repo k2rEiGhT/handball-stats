@@ -5,7 +5,7 @@
     /* メインカラー */
     --color-team-a: #00053a;
     --color-team-b: #198754;
-    
+
     /* アクション・状態カラー */
     --color-danger: #dc3545;
     --color-danger-hover: #c82333;
@@ -18,7 +18,7 @@
     --color-light-gray: #f8f9fa;
     --color-border: #ccc;
     --color-white: #ffffff;
-    
+
     /* コート（UI）カラー */
     --color-court-bg: #0d5ca6;
 
@@ -31,24 +31,29 @@
 /* =========================================
    2. ベース設定
 ========================================= */
-body { 
-    font-family: sans-serif; 
-    padding: 20px; 
+body {
+    font-family: sans-serif;
+    padding: 20px;
     max-width: 1050px;
-    margin: auto; 
+    margin: auto;
     color: var(--color-dark);
 }
-button, .starter-label, select {
+
+button,
+.starter-label,
+select {
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
 }
-hr.divider { 
-    width: 90%; 
-    border: 0; 
-    border-top: 1px solid var(--color-border); 
-    margin: 15px 0; 
+
+hr.divider {
+    width: 90%;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 15px 0;
 }
+
 .placeholder-text {
     font-size: 12px;
     color: #777;
@@ -78,15 +83,26 @@ body.modal-open {
     background: #fafafa;
     text-align: center;
 }
-.left-team { border-color: var(--color-team-a); }
-.right-team { border-color: var(--color-team-b); }
 
-.team-column h2 { margin: 0 0 10px 0; font-size: 22px; }
+.left-team {
+    border-color: var(--color-team-a);
+}
+
+.right-team {
+    border-color: var(--color-team-b);
+}
+
+.team-column h2 {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+}
+
 .score {
     font-size: 48px;
     font-weight: bold;
     margin-bottom: 10px;
 }
+
 .area-title {
     margin: 15px 0 5px 0;
     font-size: 14px;
@@ -95,7 +111,10 @@ body.modal-open {
     padding: 4px 0;
     border-radius: var(--radius-sm);
 }
-.bench-title { background: #777; }
+
+.bench-title {
+    background: #777;
+}
 
 /* 中央カラム：操作パネル */
 .center-column {
@@ -119,29 +138,36 @@ body.modal-open {
     padding: 15px;
     margin-bottom: 20px;
 }
+
 .setup-section summary {
     font-weight: bold;
     cursor: pointer;
     font-size: 18px;
     outline: none;
 }
+
 .setup-container {
     display: flex;
     gap: 10px;
     margin-top: 15px;
 }
-.team-setup { 
+
+.team-setup {
     flex: 1;
-    min-width: 0; 
+    min-width: 0;
     background: var(--color-white);
     border: 1px solid var(--color-border);
     padding: 15px;
     border-radius: var(--radius-md);
     box-sizing: border-box;
     display: grid;
-    grid-template-rows: auto auto 1fr auto; 
+    grid-template-rows: auto auto 1fr auto;
 }
-.team-setup h3 { margin-top: 0; }
+
+.team-setup h3 {
+    margin-top: 0;
+}
+
 .team-setup h3 input {
     width: 100%;
     font-size: 18px;
@@ -160,10 +186,31 @@ body.modal-open {
     color: #555;
     margin-bottom: 4px;
 }
-.setup-header-col { width: 48%; display: flex; justify-content: flex-end; padding-right: 5px; }
-.input-grid { display: flex; justify-content: space-between; }
-.input-col { width: 48%; display: flex; flex-direction: column; gap: 5px; }
-.player-input-row { display: flex; align-items: center; width: 100%; }
+
+.setup-header-col {
+    width: 48%;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 5px;
+}
+
+.input-grid {
+    display: flex;
+    justify-content: space-between;
+}
+
+.input-col {
+    width: 48%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.player-input-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
 
 /* 入力欄（背番号・名前） */
 .player-num-input {
@@ -177,9 +224,10 @@ body.modal-open {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
 }
+
 .player-name-input {
     flex: 1;
-    min-width: 0; 
+    min-width: 0;
     width: 0;
     padding: 5px;
     box-sizing: border-box;
@@ -187,19 +235,24 @@ body.modal-open {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
 }
-.gk-setup-row { margin-top: 10px; }
+
+.gk-setup-row {
+    margin-top: 10px;
+}
+
 .gk-setup-row select {
-    font-size: var(--font-base); 
-    padding: 6px 12px; 
+    font-size: var(--font-base);
+    padding: 6px 12px;
     margin-top: 5px;
-    border: 1px solid #aaa; 
+    border: 1px solid #aaa;
     border-radius: var(--radius-sm);
     background-color: var(--color-white);
     cursor: pointer;
 }
 
 /* チェックボックス */
-.starter-label, .exclude-label {
+.starter-label,
+.exclude-label {
     flex: 0 0 24px;
     margin-left: 2px;
     display: flex;
@@ -207,17 +260,26 @@ body.modal-open {
     align-items: center;
     cursor: pointer;
 }
-.starter-label { margin-left: 5px; }
-.starter-label input, .exclude-label input {
+
+.starter-label {
+    margin-left: 5px;
+}
+
+.starter-label input,
+.exclude-label input {
     width: 16px;
     height: 16px;
     margin: 0;
     cursor: pointer;
 }
-.exclude-label input { accent-color: var(--color-danger); }
+
+.exclude-label input {
+    accent-color: var(--color-danger);
+}
 
 /* 手動時間・アシスト */
-.manual-time-container, .assist-container {
+.manual-time-container,
+.assist-container {
     margin-bottom: 8px;
     font-size: var(--font-base);
     background: var(--color-white);
@@ -228,8 +290,14 @@ body.modal-open {
     justify-content: center;
     align-items: center;
 }
-.assist-container { border: 1px solid #aaa; background: var(--color-light-gray); }
-#manualTime, #assistSelect {
+
+.assist-container {
+    border: 1px solid #aaa;
+    background: var(--color-light-gray);
+}
+
+#manualTime,
+#assistSelect {
     width: 100px;
     padding: 4px;
     font-size: var(--font-base);
@@ -237,7 +305,11 @@ body.modal-open {
     border-radius: var(--radius-sm);
     margin-left: 5px;
 }
-#manualTime { font-family: monospace; text-align: center; }
+
+#manualTime {
+    font-family: monospace;
+    text-align: center;
+}
 
 /* =========================================
    5. ボタンスタイル
@@ -256,6 +328,7 @@ body.modal-open {
     font-weight: bold;
     align-self: start;
 }
+
 .opponent-buttons-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -263,10 +336,11 @@ body.modal-open {
     margin-bottom: 10px;
     align-self: start;
 }
+
 .load-opponent-btn {
     width: 100%;
     padding: 8px 4px;
-    background-color: var(--color-team-b); 
+    background-color: var(--color-team-b);
     color: var(--color-white);
     border: none;
     border-radius: var(--radius-sm);
@@ -282,23 +356,51 @@ body.modal-open {
     gap: 5px;
     justify-content: center;
 }
-.bench-grid { opacity: 0.8; }
-button.player-btn { 
-    padding: 8px 4px; 
-    cursor: pointer; 
-    border: 1px solid #999; 
-    border-radius: var(--radius-sm); 
-    background: var(--color-white); 
-    width: 48%; 
+
+.bench-grid {
+    opacity: 0.8;
+}
+
+button.player-btn {
+    padding: 8px 4px;
+    cursor: pointer;
+    border: 1px solid #999;
+    border-radius: var(--radius-sm);
+    background: var(--color-white);
+    width: 48%;
     font-size: 13px;
     word-break: break-all;
     min-height: 44px;
 }
-.left-team button.player-btn.selected { background: var(--color-team-a); color: var(--color-white); border-color: var(--color-team-a); }
-.right-team button.player-btn.selected { background: var(--color-team-b); color: var(--color-white); border-color: var(--color-team-b); }
-.left-team .gk-label { color: var(--color-team-a); font-weight: bold; }
-.right-team .gk-label { color: var(--color-team-b); font-weight: bold; }
-.player-num-display { font-size: 1.1em; font-weight: 700; margin-right: 4px; font-family: Arial, sans-serif; }
+
+.left-team button.player-btn.selected {
+    background: var(--color-team-a);
+    color: var(--color-white);
+    border-color: var(--color-team-a);
+}
+
+.right-team button.player-btn.selected {
+    background: var(--color-team-b);
+    color: var(--color-white);
+    border-color: var(--color-team-b);
+}
+
+.left-team .gk-label {
+    color: var(--color-team-a);
+    font-weight: bold;
+}
+
+.right-team .gk-label {
+    color: var(--color-team-b);
+    font-weight: bold;
+}
+
+.player-num-display {
+    font-size: 1.1em;
+    font-weight: 700;
+    margin-right: 4px;
+    font-family: Arial, sans-serif;
+}
 
 /* 中央アクションボタン */
 .action-buttons {
@@ -308,282 +410,875 @@ button.player-btn {
     gap: 5px;
     width: 100%;
 }
-.action-section button { 
+
+.action-section button {
     width: calc((100% - 10px) / 3);
-    padding: 10px 2px; 
+    padding: 10px 2px;
     margin: 0;
-    background: var(--color-white); 
+    background: var(--color-white);
     border: 2px solid var(--color-dark);
     border-radius: 6px;
-    font-weight: bold; 
+    font-weight: bold;
     cursor: pointer;
     font-size: 13px;
     min-height: 44px;
 }
-.action-section button:hover { background: #e2e6ea; }
-.action-section button:disabled { background-color: transparent; border-color: transparent; }
-.action-section button.penalty-btn { border-color: var(--color-danger); color: var(--color-danger); }
-.action-section button.neutral-btn { border-color: var(--color-neutral); color: var(--color-neutral); }
-.action-section button.yellow-btn { border-color: var(--color-yellow); color: var(--color-yellow); }
-.action-section button.black-btn { background-color: #777; border-color: var(--color-dark); color: var(--color-white); }
-.action-section button.red-btn { background: var(--color-danger); color: var(--color-white); border-color: #bd2130; }
-.action-section button.red-btn:hover { background: var(--color-danger-hover); }
-.action-section button.sub-btn { background: var(--color-warning); color: var(--color-dark); border-color: var(--color-yellow); margin-bottom: 10px; }
-.action-section button.sub-btn:hover { background: var(--color-warning-hover); }
+
+.action-section button:hover {
+    background: #e2e6ea;
+}
+
+.action-section button:disabled {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.action-section button.penalty-btn {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.action-section button.neutral-btn {
+    border-color: var(--color-neutral);
+    color: var(--color-neutral);
+}
+
+.action-section button.yellow-btn {
+    border-color: var(--color-yellow);
+    color: var(--color-yellow);
+}
+
+.action-section button.black-btn {
+    background-color: #777;
+    border-color: var(--color-dark);
+    color: var(--color-white);
+}
+
+.action-section button.red-btn {
+    background: var(--color-danger);
+    color: var(--color-white);
+    border-color: #bd2130;
+}
+
+.action-section button.red-btn:hover {
+    background: var(--color-danger-hover);
+}
+
+.action-section button.sub-btn {
+    background: var(--color-warning);
+    color: var(--color-dark);
+    border-color: var(--color-yellow);
+    margin-bottom: 10px;
+}
+
+.action-section button.sub-btn:hover {
+    background: var(--color-warning-hover);
+}
 
 /* その他機能ボタン */
-.swap-container { display: flex; align-items: center; justify-content: center; }
-.swap-btn {
-    background-color: var(--color-gray); color: var(--color-white);
-    border: none; border-radius: var(--radius-md);
-    padding: 15px 10px; font-size: var(--font-base); font-weight: bold;
-    cursor: pointer; line-height: 1.5; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+.swap-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.swap-btn:hover { background-color: #5a6268; }
+
+.swap-btn {
+    background-color: var(--color-gray);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 15px 10px;
+    font-size: var(--font-base);
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1.5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.swap-btn:hover {
+    background-color: #5a6268;
+}
+
 .update-btn {
-    display: block; width: 100%; background: #343a40; color: var(--color-white);
-    padding: 10px; font-size: 16px; border: none; border-radius: var(--radius-sm);
-    margin-top: 15px; cursor: pointer;
+    display: block;
+    width: 100%;
+    background: #343a40;
+    color: var(--color-white);
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    margin-top: 15px;
+    cursor: pointer;
 }
 
 /* =========================================
    6. タイマー関連
 ========================================= */
-.timer-container { text-align: center; width: 100%; }
-#timer { font-size: 40px; font-weight: bold; margin-bottom: 10px; font-family: monospace; }
-#timer:hover { opacity: 0.6; text-decoration: underline; }
-.timer-controls { display: flex; justify-content: center; gap: 5px; }
-.timer-btn { font-size: var(--font-base); padding: 8px 12px; border: none; border-radius: var(--radius-sm); color: var(--color-white); cursor: pointer; min-height: 44px; }
-.timer-btn.start { background: #28a745; }
-.timer-btn.stop { background: var(--color-warning); color: black; }
-.timer-btn.halftime { background: #17a2b8; }
-.timer-btn.end { background: var(--color-gray); }
-.timer-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.timer-container {
+    text-align: center;
+    width: 100%;
+}
+
+#timer {
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-family: monospace;
+}
+
+#timer:hover {
+    opacity: 0.6;
+    text-decoration: underline;
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.timer-btn {
+    font-size: var(--font-base);
+    padding: 8px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-white);
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.timer-btn.start {
+    background: #28a745;
+}
+
+.timer-btn.stop {
+    background: var(--color-warning);
+    color: black;
+}
+
+.timer-btn.halftime {
+    background: #17a2b8;
+}
+
+.timer-btn.end {
+    background: var(--color-gray);
+}
+
+.timer-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 /* =========================================
    7. 試合情報 (ヘッダー部分)
 ========================================= */
 .match-info-container {
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-    margin-bottom: 25px; padding: 15px; background: var(--color-light-gray);
-    border: 1px solid #dee2e6; border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: var(--color-light-gray);
+    border: 1px solid #dee2e6;
+    border-radius: var(--radius-md);
 }
-.match-info-inputs { display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 600px; }
-.match-info-title, .match-info-text {
-    font-size: 16px; font-weight: bold; padding: 8px;
-    border: 1px solid var(--color-border); border-radius: var(--radius-sm); text-align: center;
-}
-.match-info-title { flex: 2; }
-.match-info-text { flex: 1; }
-.match-up-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; }
-.match-up-text { font-size: 18px; font-weight: bold; color: var(--color-dark); }
-.header-score-text { font-size: 28px; font-weight: bold; margin-top: 5px; line-height: 1.2; }
-.header-score-sub { font-size: 16px; color: #555; font-weight: normal; }
 
-.match-row { display: flex; justify-content: center; align-items: center; width: 100%; max-width: 300px; }
-.match-row .align-left { flex: 1; text-align: center; white-space: nowrap; }
-.match-row .align-center { width: 30px; text-align: center; flex-shrink: 0; }
-.match-row .align-right { flex: 1; text-align: center; white-space: nowrap; }
+.match-info-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.match-info-title,
+.match-info-text {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+.match-info-title {
+    flex: 2;
+}
+
+.match-info-text {
+    flex: 1;
+}
+
+.match-up-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.match-up-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-dark);
+}
+
+.header-score-text {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 5px;
+    line-height: 1.2;
+}
+
+.header-score-sub {
+    font-size: 16px;
+    color: #555;
+    font-weight: normal;
+}
+
+.match-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+}
+
+.match-row .align-left {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.match-row .align-center {
+    width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.match-row .align-right {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
 
 /* =========================================
    8. テーブル (ログ＆スタッツ)
 ========================================= */
-.log-container { margin-top: 20px; }
-table { width: 100%; border-collapse: collapse; font-size: var(--font-base); }
-th, td { border: 1px solid var(--color-border); padding: 6px; text-align: center; }
-th { background: #e2e8f0; font-weight: bold; }
-td small { color: #555; font-weight: bold; }
-.score-col { font-weight: bold; font-size: 15px; background: #fdfdfd; }
-.stats-table td:first-child, #logTableBody td:first-child, #logTableBody td:nth-child(7) {
-    white-space: nowrap; word-break: keep-all; min-width: 110px;
+.log-container {
+    margin-top: 20px;
 }
 
-.stats-team-a .stats-table th { background: var(--color-team-a); color: var(--color-white); border-color: var(--color-team-a); font-size: 12px; padding: 8px 4px; white-space: nowrap; }
-.stats-team-b .stats-table th { background: var(--color-team-b); color: var(--color-white); border-color: var(--color-team-b); font-size: 12px; padding: 8px 4px; white-space: nowrap; }
-.stats-team-a h4 { color: var(--color-team-a); border-bottom: 2px solid var(--color-team-a); padding: 4px 8px; margin-bottom: 10px; font-size: 18px; }
-.stats-team-b h4 { color: var(--color-team-b); border-bottom: 2px solid var(--color-team-b); padding: 4px 8px; margin-bottom: 10px; font-size: 18px; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-base);
+}
+
+th,
+td {
+    border: 1px solid var(--color-border);
+    padding: 6px;
+    text-align: center;
+}
+
+th {
+    background: #e2e8f0;
+    font-weight: bold;
+}
+
+td small {
+    color: #555;
+    font-weight: bold;
+}
+
+.score-col {
+    font-weight: bold;
+    font-size: 15px;
+    background: #fdfdfd;
+}
+
+.stats-table td:first-child,
+#logTableBody td:first-child,
+#logTableBody td:nth-child(7) {
+    white-space: nowrap;
+    word-break: keep-all;
+    min-width: 110px;
+}
+
+.stats-team-a .stats-table th {
+    background: var(--color-team-a);
+    color: var(--color-white);
+    border-color: var(--color-team-a);
+    font-size: 12px;
+    padding: 8px 4px;
+    white-space: nowrap;
+}
+
+.stats-team-b .stats-table th {
+    background: var(--color-team-b);
+    color: var(--color-white);
+    border-color: var(--color-team-b);
+    font-size: 12px;
+    padding: 8px 4px;
+    white-space: nowrap;
+}
+
+.stats-team-a h4 {
+    color: var(--color-team-a);
+    border-bottom: 2px solid var(--color-team-a);
+    padding: 4px 8px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.stats-team-b h4 {
+    color: var(--color-team-b);
+    border-bottom: 2px solid var(--color-team-b);
+    padding: 4px 8px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
 
 .section-main-title {
-    text-align: center; background: #f1f5f9; font-size: 16px; font-weight: bold;
-    padding: 8px; border-left: 5px solid #343a40; border-right: 5px solid #343a40; 
-    margin-top: 10px; margin-bottom: 15px;
+    text-align: center;
+    background: #f1f5f9;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px;
+    border-left: 5px solid #343a40;
+    border-right: 5px solid #343a40;
+    margin-top: 10px;
+    margin-bottom: 15px;
 }
-.team-total-row { background-color: var(--color-light-gray); font-weight: bold; border-top: 2px solid var(--color-dark); }
-.team-total-row td { border-bottom: 2px solid var(--color-dark); }
+
+.team-total-row {
+    background-color: var(--color-light-gray);
+    font-weight: bold;
+    border-top: 2px solid var(--color-dark);
+}
+
+.team-total-row td {
+    border-bottom: 2px solid var(--color-dark);
+}
 
 /* 最新ログバー */
 .latest-log-bar {
-    background-color: var(--color-white); padding: 10px 15px; margin-bottom: 15px;
-    border-top: 1px solid #343a40; border-bottom: 1px solid #343a40;
-    text-align: center; font-size: 16px;
+    background-color: var(--color-white);
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-top: 1px solid #343a40;
+    border-bottom: 1px solid #343a40;
+    text-align: center;
+    font-size: 16px;
 }
-.latest-log-bar strong { margin-right: 10px; }
-.latest-log-action { font-weight: bold; }
+
+.latest-log-bar strong {
+    margin-right: 10px;
+}
+
+.latest-log-action {
+    font-weight: bold;
+}
 
 /* ログ操作アイコン (SVG) */
-.bm-icon, .trash-icon {
-    width: 1em; height: 1em; fill: none; stroke: currentColor; 
-    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block;
+.bm-icon,
+.trash-icon {
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
 }
-.active .bm-icon { fill: currentColor; }
-.trash-icon { width: 1.1em; height: 1.1em; }
-.toggle-bm-btn, .delete-btn, .latest-bm-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    background: transparent; border: none; cursor: pointer; transition: all 0.2s;
+
+.active .bm-icon {
+    fill: currentColor;
 }
-.latest-bm-btn { font-size: 26px; color: #999; margin-right: 15px; vertical-align: middle; }
-.latest-bm-btn.active { color: var(--color-warning); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
-.latest-bm-btn:active { transform: scale(0.9); }
-.toggle-bm-btn, .delete-btn { width: 30px; height: 30px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 16px; background: var(--color-white); }
-.toggle-bm-btn { color: #999; }
-.toggle-bm-btn:hover { background: var(--color-light-gray); }
-.toggle-bm-btn.active { background: #ffeeba; border-color: var(--color-warning); color: var(--color-warning); }
-.delete-btn { color: var(--color-danger); height: 28px; }
-.delete-btn:hover { background: #f8d7da; border-color: var(--color-danger); }
+
+.trash-icon {
+    width: 1.1em;
+    height: 1.1em;
+}
+
+.toggle-bm-btn,
+.delete-btn,
+.latest-bm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.latest-bm-btn {
+    font-size: 26px;
+    color: #999;
+    margin-right: 15px;
+    vertical-align: middle;
+}
+
+.latest-bm-btn.active {
+    color: var(--color-warning);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+}
+
+.latest-bm-btn:active {
+    transform: scale(0.9);
+}
+
+.toggle-bm-btn,
+.delete-btn {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    background: var(--color-white);
+}
+
+.toggle-bm-btn {
+    color: #999;
+}
+
+.toggle-bm-btn:hover {
+    background: var(--color-light-gray);
+}
+
+.toggle-bm-btn.active {
+    background: #ffeeba;
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+.delete-btn {
+    color: var(--color-danger);
+    height: 28px;
+}
+
+.delete-btn:hover {
+    background: #f8d7da;
+    border-color: var(--color-danger);
+}
 
 /* =========================================
    9. シュートチャート・コートUI (Modal / Inline)
 ========================================= */
 .court-modal {
-    position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 .court-modal-content {
-    background-color: var(--color-white); padding: 15px; border-radius: var(--radius-md);
-    width: 95%; max-width: 500px; position: relative; text-align: center;
+    background-color: var(--color-white);
+    padding: 15px;
+    border-radius: var(--radius-md);
+    width: 95%;
+    max-width: 500px;
+    position: relative;
+    text-align: center;
 }
-.court-modal-close { position: absolute; top: 0px; right: 15px; font-size: 32px; cursor: pointer; color: #555; z-index: 100; }
+
+.court-modal-close {
+    position: absolute;
+    top: 0px;
+    right: 15px;
+    font-size: 32px;
+    cursor: pointer;
+    color: #555;
+    z-index: 100;
+}
 
 .court-grid-container {
-    background-color: var(--color-court-bg); border: 4px solid var(--color-white); border-top: none; 
-    padding: 130px 10px 30px 10px; position: relative; overflow: hidden; border-radius: 0 0 4px 4px; 
+    background-color: var(--color-court-bg);
+    border: 4px solid var(--color-white);
+    border-top: none;
+    padding: 130px 10px 30px 10px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 4px 4px;
 }
+
 .court-grid-container::before {
-    content: ""; position: absolute; top: 0; left: 15%; width: 70%; height: 110px; 
-    border: 3px solid var(--color-white); border-top: none; border-radius: 0 0 200px 200px; 
-    pointer-events: none; z-index: 1;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 15%;
+    width: 70%;
+    height: 110px;
+    border: 3px solid var(--color-white);
+    border-top: none;
+    border-radius: 0 0 200px 200px;
+    pointer-events: none;
+    z-index: 1;
 }
+
 .court-grid-container::after {
-    content: ""; position: absolute; top: 0; left: 2%; width: 96%; height: 195px; 
-    border: 3px dashed var(--color-white); border-top: none; border-radius: 0 0 300px 300px; 
-    pointer-events: none; z-index: 1;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 2%;
+    width: 96%;
+    height: 195px;
+    border: 3px dashed var(--color-white);
+    border-top: none;
+    border-radius: 0 0 300px 300px;
+    pointer-events: none;
+    z-index: 1;
 }
 
-.seven-meter-line { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); width: 12%; height: 3px; background-color: var(--color-white); z-index: 1; }
+.seven-meter-line {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12%;
+    height: 3px;
+    background-color: var(--color-white);
+    z-index: 1;
+}
+
 .court-goal {
-    position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 15%; height: 18px; 
-    border-left: 3px solid var(--color-white); border-right: 3px solid var(--color-white); border-bottom: 3px solid var(--color-white);
-    background-color: rgba(255, 255, 255, 0.15); 
-    background-image: linear-gradient(45deg, rgba(255,255,255,0.5) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.5)),
-                      linear-gradient(45deg, rgba(255,255,255,0.5) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.5));
-    background-size: 6px 6px; background-position: 0 0, 3px 3px; z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15%;
+    height: 18px;
+    border-left: 3px solid var(--color-white);
+    border-right: 3px solid var(--color-white);
+    border-bottom: 3px solid var(--color-white);
+    background-color: rgba(255, 255, 255, 0.15);
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.5) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.5) 75%, rgba(255, 255, 255, 0.5)),
+        linear-gradient(45deg, rgba(255, 255, 255, 0.5) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.5) 75%, rgba(255, 255, 255, 0.5));
+    background-size: 6px 6px;
+    background-position: 0 0, 3px 3px;
+    z-index: 1;
 }
 
-.court-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 70px); gap: 5px; position: relative; z-index: 10; }
+.court-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 70px);
+    gap: 5px;
+    position: relative;
+    z-index: 10;
+}
+
 .zone-btn {
-    background: rgba(255, 255, 255, 0.85); border: 2px solid var(--color-white); border-radius: 6px;
-    cursor: pointer; font-size: 11px; font-weight: bold; color: var(--color-dark);
-    display: flex; align-items: center; justify-content: center; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid var(--color-white);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--color-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-.zone-btn:hover { background: #ffeb3b; border-color: var(--color-dark); color: #000; }
 
-.court-grid .zone-btn:nth-child(1), .court-grid .zone-btn:nth-child(6) { transform: translate(-8px, -45px); } 
-.court-grid .zone-btn:nth-child(2), .court-grid .zone-btn:nth-child(7) { transform: translate(-4px, -8px); }    
-.court-grid .zone-btn:nth-child(3), .court-grid .zone-btn:nth-child(8) { transform: translate(0px, 0px); }     
-.court-grid .zone-btn:nth-child(4), .court-grid .zone-btn:nth-child(9) { transform: translate(4px, -8px); }     
-.court-grid .zone-btn:nth-child(5), .court-grid .zone-btn:nth-child(10){ transform: translate(8px, -45px); }  
+.zone-btn:hover {
+    background: #ffeb3b;
+    border-color: var(--color-dark);
+    color: #000;
+}
+
+.court-grid .zone-btn:nth-child(1),
+.court-grid .zone-btn:nth-child(6) {
+    transform: translate(-8px, -45px);
+}
+
+.court-grid .zone-btn:nth-child(2),
+.court-grid .zone-btn:nth-child(7) {
+    transform: translate(-4px, -8px);
+}
+
+.court-grid .zone-btn:nth-child(3),
+.court-grid .zone-btn:nth-child(8) {
+    transform: translate(0px, 0px);
+}
+
+.court-grid .zone-btn:nth-child(4),
+.court-grid .zone-btn:nth-child(9) {
+    transform: translate(4px, -8px);
+}
+
+.court-grid .zone-btn:nth-child(5),
+.court-grid .zone-btn:nth-child(10) {
+    transform: translate(8px, -45px);
+}
 
 /* 埋め込み用チャート */
-.chart-wrapper { display: flex; justify-content: center; gap: 80px; margin-top: 20px; page-break-inside: avoid; }
-.chart-box { text-align: center; }
-.chart-box h5 { margin: 0 0 10px 0; font-size: var(--font-base); }
-.inline-court {
-    background-color: var(--color-court-bg); border: 3px solid var(--color-white); border-top: none; 
-    padding: 110px 15px 20px 15px; position: relative; overflow: hidden; border-radius: 0 0 4px 4px;
-    width: 350px; margin: 0 auto; box-sizing: border-box;
+.chart-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+    margin-top: 20px;
+    page-break-inside: avoid;
 }
-.inline-court::before { content: ""; position: absolute; top: 0; left: 15%; width: 70%; height: 90px; border: 3px solid var(--color-white); border-top: none; border-radius: 0 0 150px 150px; pointer-events: none; z-index: 1; }
-.inline-court::after { content: ""; position: absolute; top: 0; left: 2%; width: 96%; height: 165px; border: 3px dashed var(--color-white); border-top: none; border-radius: 0 0 250px 250px; pointer-events: none; z-index: 1; }
-.inline-court .seven-meter-line { top: 100px; }
-.inline-court .court-goal { height: 14px; }
-.inline-court .court-grid { grid-template-rows: repeat(2, 60px); gap: 4px; }
+
+.chart-box {
+    text-align: center;
+}
+
+.chart-box h5 {
+    margin: 0 0 10px 0;
+    font-size: var(--font-base);
+}
+
+.inline-court {
+    background-color: var(--color-court-bg);
+    border: 3px solid var(--color-white);
+    border-top: none;
+    padding: 110px 15px 20px 15px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 4px 4px;
+    width: 350px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.inline-court::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 15%;
+    width: 70%;
+    height: 90px;
+    border: 3px solid var(--color-white);
+    border-top: none;
+    border-radius: 0 0 150px 150px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.inline-court::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 2%;
+    width: 96%;
+    height: 165px;
+    border: 3px dashed var(--color-white);
+    border-top: none;
+    border-radius: 0 0 250px 250px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.inline-court .seven-meter-line {
+    top: 100px;
+}
+
+.inline-court .court-goal {
+    height: 14px;
+}
+
+.inline-court .court-grid {
+    grid-template-rows: repeat(2, 60px);
+    gap: 4px;
+}
 
 .stat-box {
-    background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-dark); border-radius: var(--radius-sm);
-    font-size: 10px; font-weight: bold; color: var(--color-dark);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3); padding: 2px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--color-dark);
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--color-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    padding: 2px;
 }
-.stat-box span.zone-name { font-size: 8px; margin-bottom: 1px; }
-.stat-box span.pct { font-size: 13px; }
-.stats-team-a .stat-box span.pct { color: var(--color-team-a); }
-.stats-team-b .stat-box span.pct { color: var(--color-team-b); }
 
-.inline-court .court-grid .stat-box:nth-child(1), .inline-court .court-grid .stat-box:nth-child(6) { transform: translate(-6px, -40px); } 
-.inline-court .court-grid .stat-box:nth-child(2), .inline-court .court-grid .stat-box:nth-child(7) { transform: translate(-3px, -8px); }    
-.inline-court .court-grid .stat-box:nth-child(3), .inline-court .court-grid .stat-box:nth-child(8) { transform: translate(0px, 0px); }     
-.inline-court .court-grid .stat-box:nth-child(4), .inline-court .court-grid .stat-box:nth-child(9) { transform: translate(3px, -8px); }     
-.inline-court .court-grid .stat-box:nth-child(5), .inline-court .court-grid .stat-box:nth-child(10){ transform: translate(6px, -40px); }  
+.stat-box span.zone-name {
+    font-size: 8px;
+    margin-bottom: 1px;
+}
+
+.stat-box span.pct {
+    font-size: 13px;
+}
+
+.stats-team-a .stat-box span.pct {
+    color: var(--color-team-a);
+}
+
+.stats-team-b .stat-box span.pct {
+    color: var(--color-team-b);
+}
+
+.inline-court .court-grid .stat-box:nth-child(1),
+.inline-court .court-grid .stat-box:nth-child(6) {
+    transform: translate(-6px, -40px);
+}
+
+.inline-court .court-grid .stat-box:nth-child(2),
+.inline-court .court-grid .stat-box:nth-child(7) {
+    transform: translate(-3px, -8px);
+}
+
+.inline-court .court-grid .stat-box:nth-child(3),
+.inline-court .court-grid .stat-box:nth-child(8) {
+    transform: translate(0px, 0px);
+}
+
+.inline-court .court-grid .stat-box:nth-child(4),
+.inline-court .court-grid .stat-box:nth-child(9) {
+    transform: translate(3px, -8px);
+}
+
+.inline-court .court-grid .stat-box:nth-child(5),
+.inline-court .court-grid .stat-box:nth-child(10) {
+    transform: translate(6px, -40px);
+}
 
 /* PDFボタン */
-.footer-buttons { display: flex; margin-top: 20px; margin-bottom: 20px; width: 100%; }
-.print-btn { flex: 0.2; padding: 15px; color: var(--color-white); font-size: 18px; font-weight: bold; border: none; border-radius: var(--radius-md); cursor: pointer; background: var(--color-danger); }
+.footer-buttons {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.print-btn {
+    flex: 0.2;
+    padding: 15px;
+    color: var(--color-white);
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--color-danger);
+}
 
 /* =========================================
    10. メディアクエリ (レスポンシブ・スマホ対応)
 ========================================= */
 @media screen {
-    .print-layout { display: flex; flex-direction: column; }
-    .log-container { order: 1; }
-    .stats-container { order: 2; }
+    .print-layout {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .log-container {
+        order: 1;
+    }
+
+    .stats-container {
+        order: 2;
+    }
 }
 
 @media (max-width: 850px) {
-    .swap-btn { padding: 10px; line-height: normal; }
-    .swap-btn br { display: none; }
-    .setup-container { flex-direction: column; }
-    .main-layout { gap: 5px; }
-    .team-column, .center-column { padding: 10px 5px; }
-    .score { font-size: 36px; }
-    .action-section button { font-size: 11px; padding: 10px 2px; }
-    .log-container, .stats-container { overflow-x: auto; }
-    table { min-width: 650px; }
-    .footer-buttons { flex-direction: column; gap: 10px; }
+    .swap-btn {
+        padding: 10px;
+        line-height: normal;
+    }
+
+    .swap-btn br {
+        display: none;
+    }
+
+    .setup-container {
+        flex-direction: column;
+    }
+
+    .main-layout {
+        gap: 5px;
+    }
+
+    .team-column,
+    .center-column {
+        padding: 10px 5px;
+    }
+
+    .score {
+        font-size: 36px;
+    }
+
+    .action-section button {
+        font-size: 11px;
+        padding: 10px 2px;
+    }
+
+    .log-container,
+    .stats-container {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 650px;
+    }
+
+    .footer-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
 
 /* =========================================
    11. メディアクエリ (印刷・PDF用)
 ========================================= */
 @media print {
-    /* ▼ 縦向き（portrait）と横向き（landscape）の両方に対応する柔軟なマージン設定 */
-    @page { 
-        size: auto; 
-        margin: 8mm; 
+
+    /* ▼ 縦横対応の柔軟なマージン（上下の余白を極限まで減らす） */
+    @page {
+        size: auto;
+        margin: 5mm 8mm;
     }
-    
-    body { 
-        box-sizing: border-box; 
-        padding: 0; 
-        margin: 0; 
-        max-width: 100%; 
+
+    body {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
         width: 100%;
-        /* ▼ コンテンツが紙の幅を超えないようにする */
-        overflow-x: hidden !important; 
+        overflow-x: hidden !important;
     }
-    
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    
-    .setup-section, .main-layout, .footer-buttons, .noprint, .latest-log-bar { display: none !important; }
-    
-    /* ▼ プリントレイアウト全体を画面幅に収める */
-    .print-layout { 
-        display: block; 
-        width: 100%; 
+
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .setup-section,
+    .main-layout,
+    .footer-buttons,
+    .noprint,
+    .latest-log-bar {
+        display: none !important;
+    }
+
+    .print-layout {
+        display: block;
+        width: 100%;
         max-width: 100vw;
     }
-    
-    /* ▼ テーブルの幅が紙面を超えないよう強制（縦向き時の見切れ対策） */
-    .stats-container, .log-container {
+
+    .stats-container,
+    .log-container {
         width: 100%;
         max-width: 100%;
         overflow: visible !important;
@@ -595,83 +1290,172 @@ td small { color: #555; font-weight: bold; }
     table {
         width: 100%;
         max-width: 100%;
-        table-layout: auto; /* コンテンツに合わせて列幅を自動調整 */
+        table-layout: auto;
         page-break-inside: auto !important;
         break-inside: auto !important;
     }
 
-    /* ▼ セル内の文字サイズと余白をさらに詰めて、縦向きでも入りきるようにする */
-    .stats-table th, 
+    /* ▼ テーブルの文字サイズと余白をさらに詰め、1ページに多く入れる */
+    .stats-table th,
     .stats-table td,
     #logTableBody th,
-    #logTableBody td { 
-        white-space: normal !important; /* 長いテキストは折り返しを許可（はみ出し防止） */
+    #logTableBody td {
+        white-space: normal !important;
         word-wrap: break-word;
-        padding: 3px 2px !important;  
-        font-size: 10px !important;  /* 少し小さめに調整 */
+        padding: 2px 1px !important;
+        /* 余白をさらに縮小 */
+        font-size: 9px !important;
+        /* 文字サイズをさらに縮小 */
+        line-height: 1.1 !important;
+        /* 行間を詰める */
     }
 
-    /* 第1列（名前）だけは折り返さないようにする */
-    .stats-table td:first-child, #logTableBody td:first-child, #logTableBody td:nth-child(7) {
+    .stats-table td:first-child,
+    #logTableBody td:first-child,
+    #logTableBody td:nth-child(7) {
         white-space: nowrap !important;
         min-width: auto;
     }
 
-    /* チームBとログの前でそれぞれ改ページする */
-    .stats-team-b { page-break-before: always; break-before: page; }
-    .log-container { 
-        page-break-before: always; 
-        break-before: page; 
-        padding-top: 15px !important;
+    /* ▼ チームタイトル（すわろ〜ず 等）の余白を削る */
+    .stats-team-a h4,
+    .stats-team-b h4 {
+        margin: 2px 0 4px 0 !important;
+        padding: 2px 4px !important;
+        font-size: 14px !important;
     }
-    
-    /* スタッツ表と画像が別のページに分断されるのを防ぐ */
-    .stats-team-a, .stats-team-b { page-break-inside: avoid; }
-    
+
+    /* チームBとログの前でそれぞれ改ページ */
+    .stats-team-b {
+        page-break-before: always;
+        break-before: page;
+    }
+
+    .log-container {
+        page-break-before: always;
+        break-before: page;
+        padding-top: 10px !important;
+    }
+
+    .stats-team-a,
+    .stats-team-b {
+        page-break-inside: avoid;
+    }
+
     tr {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         page-break-after: auto !important;
     }
-    
-    thead { display: table-header-group !important; }
 
-    /* ▼ チャート（画像）の並びと縮小（縦・横どちらでも収まるように） */
-    .chart-wrapper { 
-        display: flex !important; 
-        flex-direction: row !important; /* 横並び維持 */
-        justify-content: center !important; 
-        align-items: center !important;
-        margin-top: 10px !important;
-        gap: 15px !important; /* 隙間を狭くする */
-        width: 100%;
-        transform: scale(0.85); /* 全体を85%に縮小して確実に収める */
-        transform-origin: top center;    
+    thead {
+        display: table-header-group !important;
     }
 
-    /* ▼ 試合情報（ヘッダー部分）の印刷レイアウト調整（右上の得点見切れ対策） */
+    /* ▼ チャートをさらに縮小し、余白をなくす */
+    .chart-wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
+        margin-top: 5px !important;
+        /* 上の余白を縮小 */
+        gap: 10px !important;
+        width: 100%;
+        transform: scale(0.75);
+        /* 85% -> 75% に縮小してスペース確保 */
+        transform-origin: top center;
+    }
+
+    /* ▼ 試合情報（ヘッダー）を極限まで小さくする */
     .match-info-container {
-        display: flex; flex-direction: row; justify-content: space-between; align-items: flex-end;
-        margin-bottom: 10px; padding-bottom: 5px; border-bottom: 4px double var(--color-dark);
-        background: transparent; border-top: none; border-left: none; border-right: none; border-radius: 0;
-        width: 100%; /* コンテナ幅を100%に */
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2px !important;
+        /* テーブルとの距離を最小に */
+        padding-bottom: 2px !important;
+        border-bottom: 2px solid var(--color-dark) !important;
+        /* 二重線を一本線にしてスッキリ */
+        background: transparent;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
+        width: 100%;
         box-sizing: border-box;
     }
-    .match-info-inputs { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; max-width: 60%; }
-    .match-info-title, .match-info-text { font-size: 16px; font-weight: bold; text-align: left; border: none; background: transparent; padding: 0; width: 100%; }
-    .match-info-title { max-width: 100%; white-space: normal; } /* タイトルが長ければ折り返す */
-    
-    .match-up-wrapper { 
-        align-items: flex-end; 
-        max-width: 40%; /* 右側のスコアエリアの最大幅を制限 */
-        padding-right: 5px; /* 右端の余白を少し持たせる */
+
+    .match-info-inputs {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        align-items: center;
+        max-width: 60%;
     }
-    .match-up-text { font-size: 16px; font-weight: bold; margin: 0; text-align: right; }
-    .match-row { max-width: 100%; justify-content: flex-end; } /* スコアを右寄せで安全に配置 */
-    .header-score-text { font-size: 18px; margin-top: 2px; }
-    .header-score-sub { font-size: 12px; }
-    
-    .match-info-title::-webkit-input-placeholder, .match-info-text::-webkit-input-placeholder { color: transparent; }
-    .match-info-title::-moz-placeholder, .match-info-text::-moz-placeholder { color: transparent; }
-    .match-info-title:-ms-input-placeholder, .match-info-text:-ms-input-placeholder { color: transparent; }
+
+    .match-info-title,
+    .match-info-text {
+        font-size: 12px !important;
+        font-weight: bold;
+        text-align: left;
+        border: none;
+        background: transparent;
+        padding: 0;
+        width: auto;
+        margin: 0;
+    }
+
+    .match-info-title {
+        max-width: 100%;
+        white-space: nowrap;
+    }
+
+    .match-up-wrapper {
+        align-items: center;
+        max-width: 40%;
+        padding-right: 0px;
+    }
+
+    .match-up-text {
+        font-size: 12px !important;
+        font-weight: bold;
+        margin: 0 10px 0 0;
+        text-align: right;
+        display: inline-block;
+    }
+
+    .match-row {
+        max-width: 100%;
+        justify-content: flex-end;
+        align-items: baseline;
+    }
+
+    .header-score-text {
+        font-size: 14px !important;
+        margin: 0;
+        display: inline-block;
+    }
+
+    .header-score-sub {
+        display: none !important;
+    }
+
+    /* 前半スコアはスペースを取るため印刷時は非表示 */
+
+    .match-info-title::-webkit-input-placeholder,
+    .match-info-text::-webkit-input-placeholder {
+        color: transparent;
+    }
+
+    .match-info-title::-moz-placeholder,
+    .match-info-text::-moz-placeholder {
+        color: transparent;
+    }
+
+    .match-info-title:-ms-input-placeholder,
+    .match-info-text:-ms-input-placeholder {
+        color: transparent;
+    }
 }
