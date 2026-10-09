@@ -139,7 +139,6 @@ body.modal-open {
     border-radius: var(--radius-md);
     box-sizing: border-box;
     display: grid;
-    /* ★修正: ボタンが重ならないよう 80px -> auto に変更 */
     grid-template-rows: auto auto 1fr auto; 
 }
 .team-setup h3 { margin-top: 0; }
@@ -556,83 +555,123 @@ td small { color: #555; font-weight: bold; }
    11. メディアクエリ (印刷・PDF用)
 ========================================= */
 @media print {
-    @page { size: A4 landscape; margin: 10mm; }
-    body { box-sizing: border-box; padding: 0; margin: 0; max-width: none; }
+    /* ▼ 縦向き（portrait）と横向き（landscape）の両方に対応する柔軟なマージン設定 */
+    @page { 
+        size: auto; 
+        margin: 8mm; 
+    }
+    
+    body { 
+        box-sizing: border-box; 
+        padding: 0; 
+        margin: 0; 
+        max-width: 100%; 
+        width: 100%;
+        /* ▼ コンテンツが紙の幅を超えないようにする */
+        overflow-x: hidden !important; 
+    }
     
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     
     .setup-section, .main-layout, .footer-buttons, .noprint, .latest-log-bar { display: none !important; }
-    .print-layout { display: block; }
     
-    /* ▼ チームBとログの前でそれぞれ改ページする */
-    .stats-team-b { page-break-before: always; break-before: page; }
-    .log-container { 
-        overflow: visible !important; 
-        page-break-before: always; 
-        break-before: page; 
-        padding-top: 15px !important; /* iPadでの見切れ対策バッファ */
+    /* ▼ プリントレイアウト全体を画面幅に収める */
+    .print-layout { 
+        display: block; 
+        width: 100%; 
+        max-width: 100vw;
     }
     
-    /* ▼ スタッツ表と画像が泣き別れる（別のページに分断される）のを防ぐ */
-    .stats-team-a,
-    .stats-team-b {
-        page-break-inside: avoid;
+    /* ▼ テーブルの幅が紙面を超えないよう強制（縦向き時の見切れ対策） */
+    .stats-container, .log-container {
+        width: 100%;
+        max-width: 100%;
+        overflow: visible !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+        display: block !important;
     }
 
-    /* テーブルの高さ（上下の余白）と文字サイズを少しだけ詰める */
+    table {
+        width: 100%;
+        max-width: 100%;
+        table-layout: auto; /* コンテンツに合わせて列幅を自動調整 */
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+    }
+
+    /* ▼ セル内の文字サイズと余白をさらに詰めて、縦向きでも入りきるようにする */
     .stats-table th, 
-    .stats-table td { 
-        white-space: nowrap !important; 
-        padding: 4px 2px !important;  
-        font-size: 11px !important;  
+    .stats-table td,
+    #logTableBody th,
+    #logTableBody td { 
+        white-space: normal !important; /* 長いテキストは折り返しを許可（はみ出し防止） */
+        word-wrap: break-word;
+        padding: 3px 2px !important;  
+        font-size: 10px !important;  /* 少し小さめに調整 */
+    }
+
+    /* 第1列（名前）だけは折り返さないようにする */
+    .stats-table td:first-child, #logTableBody td:first-child, #logTableBody td:nth-child(7) {
+        white-space: nowrap !important;
+        min-width: auto;
+    }
+
+    /* チームBとログの前でそれぞれ改ページする */
+    .stats-team-b { page-break-before: always; break-before: page; }
+    .log-container { 
+        page-break-before: always; 
+        break-before: page; 
+        padding-top: 15px !important;
     }
     
-    /* チャート（画像）の並びと縮小 */
+    /* スタッツ表と画像が別のページに分断されるのを防ぐ */
+    .stats-team-a, .stats-team-b { page-break-inside: avoid; }
+    
+    tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+    
+    thead { display: table-header-group !important; }
+
+    /* ▼ チャート（画像）の並びと縮小（縦・横どちらでも収まるように） */
     .chart-wrapper { 
         display: flex !important; 
+        flex-direction: row !important; /* 横並び維持 */
         justify-content: center !important; 
+        align-items: center !important;
         margin-top: 10px !important;
-        gap: 40px !important;            /* 2枚の画像の隙間 */
-        transform: scale(0.9);           /* 画像を少し縮小して確実に1ページに収める */
+        gap: 15px !important; /* 隙間を狭くする */
+        width: 100%;
+        transform: scale(0.85); /* 全体を85%に縮小して確実に収める */
         transform-origin: top center;    
     }
 
-    /* 試合情報（ヘッダー部分）の印刷レイアウト */
+    /* ▼ 試合情報（ヘッダー部分）の印刷レイアウト調整（右上の得点見切れ対策） */
     .match-info-container {
         display: flex; flex-direction: row; justify-content: space-between; align-items: flex-end;
         margin-bottom: 10px; padding-bottom: 5px; border-bottom: 4px double var(--color-dark);
         background: transparent; border-top: none; border-left: none; border-right: none; border-radius: 0;
+        width: 100%; /* コンテナ幅を100%に */
+        box-sizing: border-box;
     }
-    .match-info-inputs { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
-    .match-info-title, .match-info-text { font-size: 16px; font-weight: bold; text-align: left; border: none; background: transparent; padding: 0; width: auto; }
-    .match-info-title { width: 600px; }
+    .match-info-inputs { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; max-width: 60%; }
+    .match-info-title, .match-info-text { font-size: 16px; font-weight: bold; text-align: left; border: none; background: transparent; padding: 0; width: 100%; }
+    .match-info-title { max-width: 100%; white-space: normal; } /* タイトルが長ければ折り返す */
+    
+    .match-up-wrapper { 
+        align-items: flex-end; 
+        max-width: 40%; /* 右側のスコアエリアの最大幅を制限 */
+        padding-right: 5px; /* 右端の余白を少し持たせる */
+    }
     .match-up-text { font-size: 16px; font-weight: bold; margin: 0; text-align: right; }
-    .match-up-wrapper { align-items: flex-end; }
-    .match-row { max-width: 300px; }
+    .match-row { max-width: 100%; justify-content: flex-end; } /* スコアを右寄せで安全に配置 */
     .header-score-text { font-size: 18px; margin-top: 2px; }
     .header-score-sub { font-size: 12px; }
     
     .match-info-title::-webkit-input-placeholder, .match-info-text::-webkit-input-placeholder { color: transparent; }
     .match-info-title::-moz-placeholder, .match-info-text::-moz-placeholder { color: transparent; }
     .match-info-title:-ms-input-placeholder, .match-info-text:-ms-input-placeholder { color: transparent; }
-
-    /* ▼ iPadでのログ見切れ・ページ分割エラーを防ぐための追加設定 ▼ */
-    .log-container, .stats-container {
-        overflow: visible !important;
-        overflow-x: visible !important;
-        overflow-y: visible !important;
-        display: block !important;
-    }
-    table {
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-    }
-    tr {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        page-break-after: auto !important;
-    }
-    thead {
-        display: table-header-group !important;
-    }
 }
