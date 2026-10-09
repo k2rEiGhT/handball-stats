@@ -28,22 +28,22 @@ let isRunning = false;
 let isEnded = false;
 let currentPeriod = 1;
 
-let allTeamData = []; 
+let allTeamData = [];
 let myTeamData = { name: "未設定", players: [] };
 
 const API_URL = "https://script.google.com/macros/s/AKfycbzU3AOoiPm-XiY8Zf1DU58VK6ylfKudFO_ReJ9hJtCnD7vEVmIn1r5jNFIVxLAQQgUQ/exec";
 
 // ================= 初期化・セットアップ (Initialization) =================
-window.onload = async function() {
+window.onload = async function () {
   const setupA = document.getElementById('setupA');
   const setupB = document.getElementById('setupB');
-  
+
   // 入力欄の構築
   setupA.innerHTML = buildInputs('A');
   setupB.innerHTML = buildInputs('B');
 
   setupTimerEdit();
-  
+
   // PDFタイトル用のイベントリスナー設定
   document.querySelector('.match-info-title').addEventListener('input', updateDocumentTitle);
 
@@ -66,7 +66,7 @@ function buildInputs(teamPrefix) {
   </div>
   <div class="input-grid">
     <div class="input-col">`;
-  
+
   // ★ 16ではなく定数を使用
   for (let i = 1; i <= CONFIG.MAX_PLAYERS_TOTAL; i++) {
     if (i === 9) html += `</div><div class="input-col">`;
@@ -92,11 +92,11 @@ function setupTimerEdit() {
 
   timerElement.title = "クリックして時間を直接修正";
   timerElement.style.cursor = "pointer";
-  
-  timerElement.addEventListener('click', function() {
+
+  timerElement.addEventListener('click', function () {
     if (isEnded) return;
-    if (isRunning) stopTimer(); 
-    this.contentEditable = true; 
+    if (isRunning) stopTimer();
+    this.contentEditable = true;
     this.focus();
     const range = document.createRange();
     range.selectNodeContents(this);
@@ -104,21 +104,21 @@ function setupTimerEdit() {
     sel.removeAllRanges();
     sel.addRange(range);
   });
-  
-  timerElement.addEventListener('keydown', function(e) {
-    if (e.isComposing) return; 
+
+  timerElement.addEventListener('keydown', function (e) {
+    if (e.isComposing) return;
     if (e.key === 'Enter') {
       e.preventDefault();
-      this.blur(); 
+      this.blur();
     }
   });
-  
-  timerElement.addEventListener('blur', function() {
-    this.contentEditable = false; 
+
+  timerElement.addEventListener('blur', function () {
+    this.contentEditable = false;
     let inputTime = this.innerText.trim();
     inputTime = inputTime.replace(/[０-９：]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
     let parts = inputTime.split(':');
-    
+
     if (parts.length === 2) {
       let m = parseInt(parts[0], 10);
       let s = parseInt(parts[1], 10);
@@ -136,8 +136,8 @@ function setupTimerEdit() {
 
 function generateTeamButtons() {
   const container = document.getElementById('opponentButtons');
-  container.innerHTML = ''; 
-  
+  container.innerHTML = '';
+
   allTeamData.forEach((team, index) => {
     if (index === 0) {
       myTeamData = team;
@@ -147,7 +147,7 @@ function generateTeamButtons() {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'load-opponent-btn';
-      btn.textContent = team.name.length > 6 ? team.name.substring(0, 5) + '…' : team.name; 
+      btn.textContent = team.name.length > 6 ? team.name.substring(0, 5) + '…' : team.name;
       btn.onclick = () => loadOpponentTeam(index);
       container.appendChild(btn);
     }
@@ -157,7 +157,7 @@ function generateTeamButtons() {
 // ================= データ読み込み・UIヘルパー =================
 function applyTeamDataToInputs(team, teamData) {
   document.getElementById(`teamName${team}`).value = teamData.name;
-  
+
   for (let i = 1; i <= CONFIG.MAX_PLAYERS_TOTAL; i++) {
     document.getElementById(`num${team}_${i}`).value = '';
     document.getElementById(`name${team}_${i}`).value = '';
@@ -218,7 +218,7 @@ function handleExcludeCheck(checkbox, team) {
 function updateGkDropdown(team) {
   const gkSelect = document.getElementById(`gkSelect${team}`);
   const checkedCheckboxes = document.querySelectorAll(`.starter-check-${team}:checked`);
-  
+
   if (checkedCheckboxes.length === 0) {
     gkSelect.innerHTML = '<option value="">選択してください</option>';
     return;
@@ -235,26 +235,26 @@ function updateGkDropdown(team) {
 }
 
 // ================= キーボード操作 =================
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter') {
     const active = document.activeElement;
     const match = active.id ? active.id.match(/^(num|name)(A|B)_(\d+)$/) : null;
     if (match) {
       if (e.isComposing) return;
-      e.preventDefault(); 
-      
+      e.preventDefault();
+
       const type = match[1];
       const team = match[2];
       let idx = parseInt(match[3], 10);
-      
+
       if (e.key === 'ArrowDown' || e.key === 'Enter') idx++;
       else if (e.key === 'ArrowUp') idx--;
-      
+
       if (idx >= 1 && idx <= CONFIG.MAX_PLAYERS_TOTAL) {
         const nextInput = document.getElementById(`${type}${team}_${idx}`);
         if (nextInput) {
           nextInput.focus();
-          nextInput.select(); 
+          nextInput.select();
         }
       }
     }
@@ -287,7 +287,7 @@ function updateRoster() {
 
   document.getElementById('displayTeamNameA').innerText = customTeamA;
   document.getElementById('displayTeamNameB').innerText = customTeamB;
-  
+
   const btnToA = document.getElementById('btnTimeoutA');
   const btnToB = document.getElementById('btnTimeoutB');
   if (btnToA) btnToA.innerText = customTeamA + ' T.O.';
@@ -306,7 +306,7 @@ function updateRoster() {
 
   renderButtons();
   renderLogs();
-  
+
   document.getElementById('statsContainer').style.display = 'block';
   renderStats();
   document.querySelector('.setup-section').removeAttribute('open');
@@ -324,7 +324,7 @@ function processTeamRoster(team, gkVal) {
     let numVal = document.getElementById(`num${team}_${i}`).value.trim();
     let isCourt = document.querySelector(`.starter-check-${team}[value="${i}"]`).checked;
     let isExcluded = document.querySelector(`.exclude-check-${team}[value="${i}"]`).checked;
-    
+
     if (!nameInput && (numVal !== "" || isCourt)) {
       nameInput = "-";
       nameElem.value = "-";
@@ -352,7 +352,7 @@ function swapTeams() {
   for (let i = 1; i <= CONFIG.MAX_PLAYERS_TOTAL; i++) {
     let fields = ['num', 'name'];
     let checks = ['starter-check-', 'exclude-check-'];
-    
+
     // 入力欄の入れ替え
     fields.forEach(f => {
       let a = document.getElementById(`${f}A_${i}`);
@@ -404,7 +404,7 @@ function selectPlayer(team, type, id, name) {
 
   const assistSelect = document.getElementById('assistSelect');
   assistSelect.innerHTML = '<option value="">-- なし --</option>';
-  
+
   const targetId = activeSelection[team].court || activeSelection[team].bench;
   const targetPlayer = targetId ? [...roster[team].court, ...roster[team].bench].find(p => p.id === targetId) : null;
 
@@ -445,23 +445,28 @@ function stopTimer() {
 
 function halfTime() {
   if (!confirm("前半を終了し、タイマーをリセットして後半に移りますか？")) return;
-  stopTimer(); 
+  stopTimer();
   addLog(formatTime(elapsedSeconds), 'System', "", "前半終了／後半開始", 0);
   elapsedSeconds = 0;
-  currentPeriod = 2; 
+  currentPeriod = 2;
   document.getElementById('timer').innerText = formatTime(elapsedSeconds);
 }
 
 function endTimer() {
+  if (!confirm("試合を終了しますか？")) return;
   stopTimer();
   isEnded = true;
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('btnStop').disabled = true;
+  document.getElementById('btnHalfTime').disabled = true;
+  document.getElementById('btnEnd').disabled = true;
 }
 
 function getRecordTime(actionName, isSub = false) {
   const manualTimeInput = document.getElementById('manualTime');
   if (manualTimeInput.value.trim() !== '') return manualTimeInput.value.trim();
-  
-  const noAlertActions = []; 
+
+  const noAlertActions = [];
   if (!isRunning && !isSub && !noAlertActions.includes(actionName)) {
     if (!confirm('タイマーが停止中または開始前ですが、現在の表示時間で記録しますか？')) return null;
   }
@@ -473,7 +478,7 @@ function addLog(time, teamCode, playerName, actionText, points, playerId = null)
   let parts = time.split(':');
   let timeSec = parts.length === 2 ? parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) : 0;
   let logPeriod = currentPeriod;
-  
+
   if (logPeriod === 2 && timeSec > elapsedSeconds + 120) logPeriod = 1;
 
   matchLogs.push({
@@ -492,14 +497,14 @@ function addLog(time, teamCode, playerName, actionText, points, playerId = null)
   });
 
   renderLogs();
-  renderStats(); 
+  renderStats();
 }
 
 function renderLogs() {
   let currentScoreA = 0, currentScoreB = 0;
   let firstHalfA = 0, firstHalfB = 0;
   let isFirstHalf = true;
-  
+
   for (let i = matchLogs.length - 1; i >= 0; i--) {
     let log = matchLogs[i];
     if (log.team === 'System' && log.action === '前半終了／後半開始') {
@@ -513,13 +518,13 @@ function renderLogs() {
       if (log.team === 'A') { currentScoreA += log.points; scoreChangedA = true; }
       if (log.team === 'B') { currentScoreB += log.points; scoreChangedB = true; }
     }
-    
+
     log.displayScoreA = scoreChangedA ? currentScoreA : '-';
     log.displayScoreB = scoreChangedB ? currentScoreB : '-';
   }
 
   if (isFirstHalf) { firstHalfA = currentScoreA; firstHalfB = currentScoreB; }
-  
+
   scoreA = currentScoreA; scoreB = currentScoreB;
   document.getElementById('scoreA').innerText = scoreA;
   document.getElementById('scoreB').innerText = scoreB;
@@ -567,17 +572,17 @@ function renderLogs() {
       </td>
     </tr>`;
   }).join('');
-  
+
   document.getElementById('logTableBody').innerHTML = tableHTML;
-  
+
   const latestLogText = document.getElementById('latestLogText');
   if (latestLogText) {
     if (matchLogs.length > 0) {
       let latest = matchLogs[0];
       let bmBtn = `<button class="latest-bm-btn ${latest.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${latest.id})">${bookmarkSvg}</button>`;
       let playerStr = latest.player && latest.player !== "-" ? ` ${latest.player}` : "";
-      
-      latestLogText.innerHTML = latest.team === 'System' 
+
+      latestLogText.innerHTML = latest.team === 'System'
         ? `${bmBtn} <span style="vertical-align:middle;">${latest.time} ｜ ${latest.action}</span>`
         : `${bmBtn} <span style="vertical-align:middle;">${latest.time}   ${playerStr}</span> <span class="latest-log-action" style="vertical-align:middle;">  ${latest.action}</span>`;
     } else {
@@ -590,21 +595,21 @@ function deleteLog(id) {
   if (!confirm('この記録を削除しますか？\n※以降の累計得点も自動的に修正されます。')) return;
   matchLogs = matchLogs.filter(log => log.id !== id);
   renderLogs();
-  renderStats(); 
+  renderStats();
 }
 
 function toggleBookmark(id) {
   let log = matchLogs.find(l => l.id === id);
   if (log) {
     log.bookmarked = !log.bookmarked;
-    renderLogs(); 
+    renderLogs();
   }
 }
 
 // ================= アクションの登録 =================
 function getSelectedTeam() {
-  return (activeSelection.A.court || activeSelection.A.bench) ? 'A' : 
-         (activeSelection.B.court || activeSelection.B.bench) ? 'B' : null;
+  return (activeSelection.A.court || activeSelection.A.bench) ? 'A' :
+    (activeSelection.B.court || activeSelection.B.bench) ? 'B' : null;
 }
 
 function recordAction(actionName, points) {
@@ -634,8 +639,8 @@ function recordAction(actionName, points) {
 }
 
 function recordSubstitution() {
-  let team = (activeSelection.A.court && activeSelection.A.bench) ? 'A' : 
-             (activeSelection.B.court && activeSelection.B.bench) ? 'B' : null;
+  let team = (activeSelection.A.court && activeSelection.A.bench) ? 'A' :
+    (activeSelection.B.court && activeSelection.B.bench) ? 'B' : null;
 
   if (!team) return alert("交代するチームの「コート上の選手」と「ベンチの選手」を両方（1名ずつ）選択してから押してください。");
 
@@ -691,7 +696,7 @@ function recordTimeout(team) {
   if (recordTime === null) return;
   stopTimer();
   addLog(recordTime, team, "-", "タイムアウト", 0);
-  
+
   activeSelection.A.court = activeSelection.A.bench = null;
   activeSelection.B.court = activeSelection.B.bench = null;
   document.getElementById('manualTime').value = '';
@@ -707,14 +712,14 @@ function openCourtPopup(actionName, points) {
   pendingActionName = actionName;
   pendingActionPoints = points;
   document.getElementById('courtModal').style.display = 'flex';
-  
+
   // ★ モーダル展開時に背景のスクロールを止める
   document.body.classList.add('modal-open');
 }
 
 function closeCourtPopup() {
   document.getElementById('courtModal').style.display = 'none';
-  
+
   // ★ モーダルを閉じたら背景のスクロールを復旧
   document.body.classList.remove('modal-open');
 }
@@ -727,36 +732,36 @@ function recordShotWithZone(zoneName) {
 // ================= 統計 (Stats & Charts) =================
 function renderStats() {
   let stats = { A: {}, B: {} };
-  
+
   const initStats = (team) => {
     [...roster[team].court, ...roster[team].bench].forEach(p => {
-      stats[team][p.id] = { 
-        name: p.name, num: p.num, goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0, 
-        saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0, ofMisses: 0, ofFouls: 0,  
+      stats[team][p.id] = {
+        name: p.name, num: p.num, goals: 0, sevenM_goals: 0, misses: 0, sevenM_misses: 0,
+        saves: 0, sevenM_saves: 0, conceded: 0, sevenM_conceded: 0, ofMisses: 0, ofFouls: 0,
         dfFouls: 0, steals: 0, blocks: 0, warnings: 0, suspensions: 0, disqualifications: 0,
         assists: 0, gk_out: 0, sevenM_gk_out: 0
       };
     });
   };
-  
+
   if (roster.A.court.length > 0 || roster.A.bench.length > 0) {
     initStats('A');
     initStats('B');
   } else return;
 
   matchLogs.forEach(log => {
-    if (!log.playerId) return; 
-    
+    if (!log.playerId) return;
+
     let isGoal = log.action.startsWith('得点');
     let is7mGoal = log.action.startsWith('7m得点');
     let isMiss = log.action.startsWith('ノーゴール');
     let is7mMiss = log.action.startsWith('7mノーゴール');
     let isOfMiss = /パスミス|キャッチミス|ドリブルミス/.test(log.action);
     let isOfFoul = /ダブルドリブル|3sec|ラインクロス|キックボール|チャージング/.test(log.action);
-    
+
     let team = log.team;
     let oppTeam = team === 'A' ? 'B' : 'A';
-    
+
     // アシスト計算
     let assistMatch = log.action.match(/Ast: (.*?)<\/small>/);
     if (assistMatch) {
@@ -798,31 +803,31 @@ function renderStats() {
     playerList.forEach(p => {
       let regularShots = p.goals + p.misses, sevenMShots = p.sevenM_goals + p.sevenM_misses;
       let regularGk = p.saves + p.gk_out + p.conceded, sevenMGk = p.sevenM_saves + p.sevenM_gk_out + p.sevenM_conceded;
-      
+
       let saveDisp = regularGk > 0 ? `${p.saves + p.gk_out} <span style="font-size:11px; color:#555;">(${p.gk_out})</span> / ${regularGk}（${Math.round(((p.saves + p.gk_out) / regularGk) * 100)}％）` : '-';
       let save7mDisp = sevenMGk > 0 ? `${p.sevenM_saves + p.sevenM_gk_out} <span style="font-size:11px; color:#555;">(${p.sevenM_gk_out})</span> / ${sevenMGk}（${Math.round(((p.sevenM_saves + p.sevenM_gk_out) / sevenMGk) * 100)}％）` : '-';
-      
+
       html += `<tr>
         <td style="text-align:left;">${p.name}</td>
-        <td>${p.goals + p.sevenM_goals}(${p.sevenM_goals})</td>
+        <td>${p.goals + p.sevenM_goals} <span style="font-size:11px; color:#555;">(${p.sevenM_goals})</span></td>
         <td>${formatStat(p.goals, regularShots)}</td><td>${formatStat(p.sevenM_goals, sevenMShots)}</td>
         <td>${saveDisp}</td><td>${save7mDisp}</td>
         <td>${p.assists}</td><td>${p.steals}</td><td>${p.blocks}</td><td>${p.ofMisses}</td>
         <td>${p.ofFouls}</td><td>${p.dfFouls}</td><td>${p.warnings}</td><td>${p.suspensions}</td><td>${p.disqualifications}</td>
       </tr>`;
-      
+
       Object.keys(tt).forEach(k => tt[k] += p[k]);
     });
 
     let ttRegShots = tt.goals + tt.misses, tt7mShots = tt.sevenM_goals + tt.sevenM_misses;
     let ttRegGk = tt.saves + tt.gk_out + tt.conceded, tt7mGk = tt.sevenM_saves + tt.sevenM_gk_out + tt.sevenM_conceded;
-    
+
     let ttSaveDisp = ttRegGk > 0 ? `${tt.saves + tt.gk_out} <span style="font-size:11px; color:#555;">(${tt.gk_out})</span> / ${ttRegGk}（${Math.round(((tt.saves + tt.gk_out) / ttRegGk) * 100)}％）` : '-';
     let ttSave7mDisp = tt7mGk > 0 ? `${tt.sevenM_saves + tt.sevenM_gk_out} <span style="font-size:11px; color:#555;">(${tt.sevenM_gk_out})</span> / ${tt7mGk}（${Math.round(((tt.sevenM_saves + tt.sevenM_gk_out) / tt7mGk) * 100)}％）` : '-';
 
     html += `<tr class="team-total-row">
       <td style="text-align:left;">【チーム合計】</td>
-      <td>${tt.goals + tt.sevenM_goals}(${tt.sevenM_goals})</td>
+      <td>${tt.goals + tt.sevenM_goals} <span style="font-size:11px; color:#555;">(${tt.sevenM_goals})</span></td>
       <td>${formatStat(tt.goals, ttRegShots)}</td><td>${formatStat(tt.sevenM_goals, tt7mShots)}</td>
       <td>${ttSaveDisp}</td><td>${ttSave7mDisp}</td>
       <td>${tt.assists}</td><td>${tt.steals}</td><td>${tt.blocks}</td><td>${tt.ofMisses}</td>
